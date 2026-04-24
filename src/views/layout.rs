@@ -23,7 +23,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
             head {
                 meta charset="utf-8";
                 meta name="viewport" content="width=device-width, initial-scale=1";
-                meta name="color-scheme" content="dark light";
+                meta name="color-scheme" content="light";
                 meta name="robots" content="index, follow";
                 title { (title) " — PlausiDen" }
                 link rel="icon" type="image/svg+xml" href="/static/favicon.svg";
@@ -34,18 +34,23 @@ pub fn page(title: &str, body: Markup) -> Markup {
             }
             body {
                 header class="site-header" {
-                    a href="/" class="brand" { "PlausiDen" }
-                    nav {
-                        a href="/services" { "Services" }
-                        a href="/contact" { "Encrypted Inquiry" }
+                    div class="inner" {
+                        a href="/" class="brand" { "PlausiDen" }
+                        nav {
+                            a href="/" { "Home" }
+                            a href="/services" { "Services" }
+                            a href="/contact" { "Encrypted Inquiry" }
+                        }
                     }
                 }
                 main { (body) }
                 footer class="site-footer" {
-                    p {
-                        "© PlausiDen. No cookies, no tracking, no logs. "
-                        a href="/contact" { "Encrypted Inquiry" }
-                        "."
+                    div class="inner" {
+                        p {
+                            "© PlausiDen. No cookies, no tracking, no logs. "
+                            a href="/contact" { "Encrypted Inquiry" }
+                            "."
+                        }
                     }
                 }
             }

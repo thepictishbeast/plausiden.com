@@ -13,9 +13,11 @@ use super::layout::page;
 pub fn render() -> Markup {
     let body = html! {
         section class="notfound" {
-            h1 { "Nothing here." }
-            p { "No redirect. No tracking pixel. Just nothing." }
-            p { a href="/" { "Return home" } }
+            div class="inner" {
+                h1 { "Nothing here." }
+                p { "No redirect. No tracking pixel. Just nothing." }
+                p { a href="/" class="btn btn-primary" { "Return home" } }
+            }
         }
     };
     page("Not Found", body)

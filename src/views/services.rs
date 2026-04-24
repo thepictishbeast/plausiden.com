@@ -12,75 +12,77 @@ use super::layout::page;
 pub fn render() -> Markup {
     let body = html! {
         section class="services" {
-            h1 { "Services" }
-            p class="lede" {
-                "Six practice areas. Each engagement is scoped to a concrete outcome, "
-                "with a fixed deliverable and no vendor lock."
-            }
+            div class="inner" {
+                h1 { "Services" }
+                p class="lede" {
+                    "Six practice areas. Each engagement is scoped to a concrete outcome, "
+                    "with a fixed deliverable and no vendor lock."
+                }
 
-            ul class="service-list" {
-                li {
-                    h3 { "IT Operations" }
-                    p {
-                        "Complete infrastructure management designed to keep your business running smoothly. "
-                        "Monitoring, maintenance, and support so you can focus on growth."
+                ul class="service-list" {
+                    li {
+                        h3 { "IT Operations" }
+                        p {
+                            "Complete infrastructure management designed to keep your business running smoothly. "
+                            "Monitoring, maintenance, and support so you can focus on growth."
+                        }
+                        ul class="sub" {
+                            li { "Cloud Management" }
+                            li { "Help Desk Support" }
+                            li { "Hardware Solutions" }
+                        }
                     }
-                    ul class="sub" {
-                        li { "Cloud Management" }
-                        li { "Help Desk Support" }
-                        li { "Hardware Solutions" }
+                    li {
+                        h3 { "Cyber Security" }
+                        p {
+                            "Defense-in-depth strategies to protect your critical assets. "
+                            "From compliance audits to real-time threat detection, we secure your digital perimeter."
+                        }
+                        ul class="sub" {
+                            li { "Endpoint Protection" }
+                            li { "Security Training" }
+                            li { "Security Protocol Review" }
+                        }
+                    }
+                    li {
+                        h3 { "Software Development" }
+                        p {
+                            "Custom software solutions tailored to your unique workflows. "
+                            "Scalable, secure, maintainable — and auditable by you."
+                        }
+                    }
+                    li {
+                        h3 { "Network Solutions" }
+                        p {
+                            "Robust network architecture and operational excellence."
+                        }
+                        ul class="sub" {
+                            li { "Network Architecture" }
+                            li { "Network Design" }
+                            li { "Connectivity Audit" }
+                        }
+                    }
+                    li {
+                        h3 { "AI Strategy Consulting" }
+                        p {
+                            "Pragmatic guidance for where AI actually earns its keep in your stack — "
+                            "and where it doesn't. Includes NLP solutions and integration planning."
+                        }
+                    }
+                    li {
+                        h3 { "Compliance & Audits" }
+                        p {
+                            "Evidence-based attestation for the regulatory regimes your clients expect. "
+                            "Engagements are delivered with reproducible artifacts you can hand to an auditor."
+                        }
                     }
                 }
-                li {
-                    h3 { "Cyber Security" }
-                    p {
-                        "Defense-in-depth strategies to protect your critical assets. "
-                        "From compliance audits to real-time threat detection, we secure your digital perimeter."
-                    }
-                    ul class="sub" {
-                        li { "Endpoint Protection" }
-                        li { "Security Training" }
-                        li { "Security Protocol Review" }
-                    }
-                }
-                li {
-                    h3 { "Software Development" }
-                    p {
-                        "Custom software solutions tailored to your unique workflows. "
-                        "Scalable, secure, maintainable — and auditable by you."
-                    }
-                }
-                li {
-                    h3 { "Network Solutions" }
-                    p {
-                        "Robust network architecture and operational excellence."
-                    }
-                    ul class="sub" {
-                        li { "Network Architecture" }
-                        li { "Network Design" }
-                        li { "Connectivity Audit" }
-                    }
-                }
-                li {
-                    h3 { "AI Strategy Consulting" }
-                    p {
-                        "Pragmatic guidance for where AI actually earns its keep in your stack — "
-                        "and where it doesn't. Includes NLP solutions and integration planning."
-                    }
-                }
-                li {
-                    h3 { "Compliance & Audits" }
-                    p {
-                        "Evidence-based attestation for the regulatory regimes your clients expect. "
-                        "Engagements are delivered with reproducible artifacts you can hand to an auditor."
-                    }
-                }
-            }
 
-            p class="note" {
-                "Not sure what you need? "
-                a href="/contact" { "Send an encrypted inquiry" }
-                " and describe the problem in plain language."
+                p class="note" {
+                    "Not sure what you need? "
+                    a href="/contact" { "Send an encrypted inquiry" }
+                    " and describe the problem in plain language."
+                }
             }
         }
     };

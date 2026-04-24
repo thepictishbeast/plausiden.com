@@ -2,7 +2,7 @@
 //! the `SecureDrop` (whistleblower platform) name collision.
 //!
 //! v1 renders a plain HTML form as a no-JS fallback. v1.1 will layer
-//! client-side age encryption via WASM so the server only ever sees
+//! client-side `age` encryption via WASM so the server only ever sees
 //! ciphertext.
 
 use maud::{Markup, PreEscaped, html};
@@ -23,31 +23,33 @@ use super::layout::page;
 pub fn render() -> Markup {
     let body = html! {
         section class="inquiry" {
-            h1 { "Encrypted Inquiry" }
-            p {
-                "Send a message. No account required. No cookies set. \
-                 No identifying metadata recorded."
-            }
+            div class="inner" {
+                h1 { "Encrypted Inquiry" }
+                p class="lede" {
+                    "Send a message. No account required. No cookies set. "
+                    "No identifying metadata recorded."
+                }
 
-            // v1: plain HTML form, works with JavaScript disabled (Tor Browser
-            // Safest mode is first-class). v1.1 progressively enhances with
-            // client-side `age` encryption before POST.
-            form method="post" action="/contact" autocomplete="off" {
-                label for="name" { "Name (optional)" }
-                input id="name" name="name" type="text" maxlength="100";
+                // v1: plain HTML form, works with JavaScript disabled (Tor Browser
+                // Safest mode is first-class). v1.1 progressively enhances with
+                // client-side `age` encryption before POST.
+                form method="post" action="/contact" autocomplete="off" {
+                    label for="name" { "Name (optional)" }
+                    input id="name" name="name" type="text" maxlength="100";
 
-                label for="reply_to" { "How should we reach you?" }
-                input id="reply_to" name="reply_to" type="text" maxlength="200";
+                    label for="reply_to" { "How should we reach you?" }
+                    input id="reply_to" name="reply_to" type="text" maxlength="200";
 
-                label for="message" { "Message" }
-                textarea id="message" name="message" rows="8" maxlength="5000" required {}
+                    label for="message" { "Message" }
+                    textarea id="message" name="message" rows="8" maxlength="5000" required {}
 
-                button type="submit" { "Send" }
-            }
+                    button type="submit" { "Send" }
+                }
 
-            p class="note" {
-                "Prefer Tor? This site is also reachable as a v3 onion service "
-                "(configured in v1.1)."
+                p class="note" {
+                    "Prefer Tor? This site is also reachable as a v3 onion service "
+                    "(configured in v1.1)."
+                }
             }
         }
 
@@ -83,10 +85,6 @@ mod tests {
 
     #[test]
     fn contact_does_not_set_cookies_at_render() {
-        // The render function is pure Markup; it cannot set cookies.
-        // This test is a tripwire: if render() ever starts returning a
-        // response type that can carry cookies, this assertion will guide
-        // the author to re-evaluate the site's zero-cookie posture.
         let s = render().into_string();
         assert!(!s.to_ascii_lowercase().contains("set-cookie"));
     }
