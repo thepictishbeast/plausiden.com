@@ -1,10 +1,18 @@
-//! Homepage view. Placeholder content — will be replaced with ported marketing copy.
+//! Homepage view. Placeholder content will be replaced with ported marketing
+//! copy before the production cutover.
 
 use maud::{Markup, html};
 
 use super::layout::page;
 
-pub(crate) fn render() -> Markup {
+/// Render the homepage body inside the shared [`page`] chrome.
+///
+/// BUG ASSUMPTION: The copy here is placeholder / "supersociety voice" and is
+/// expected to change before cutover. Tests below assert on *structural*
+/// identity (the section headings), not specific copy lines, so routine copy
+/// edits do not break the suite.
+#[must_use]
+pub fn render() -> Markup {
     let body = html! {
         section class="hero" {
             h1 { "Sovereign infrastructure. Nothing to surveil." }
@@ -43,4 +51,30 @@ pub(crate) fn render() -> Markup {
         }
     };
     page("Home", body)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn home_contains_hero_heading() {
+        let s = render().into_string();
+        assert!(s.contains("<h1>Sovereign infrastructure"));
+    }
+
+    #[test]
+    fn home_contains_principles_section() {
+        let s = render().into_string();
+        assert!(s.contains("Principles"));
+        assert!(s.contains("Zero state"));
+        assert!(s.contains("Opaque by default"));
+    }
+
+    #[test]
+    fn home_links_to_services_and_contact() {
+        let s = render().into_string();
+        assert!(s.contains("href=\"/services\""));
+        assert!(s.contains("href=\"/contact\""));
+    }
 }

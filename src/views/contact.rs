@@ -1,14 +1,26 @@
-//! Encrypted Inquiry page. Renamed from the old site's "Secure Drop" to avoid the
-//! SecureDrop (whistleblower platform) name collision.
+//! Encrypted Inquiry page. Renamed from the old site's "Secure Drop" to avoid
+//! the `SecureDrop` (whistleblower platform) name collision.
 //!
-//! v1 renders a plain HTML form as a no-JS fallback. v1.1 will layer client-side age
-//! encryption via WASM so the server only ever sees ciphertext.
+//! v1 renders a plain HTML form as a no-JS fallback. v1.1 will layer
+//! client-side age encryption via WASM so the server only ever sees
+//! ciphertext.
 
 use maud::{Markup, PreEscaped, html};
 
 use super::layout::page;
 
-pub(crate) fn render() -> Markup {
+/// Render the Encrypted Inquiry page body.
+///
+/// BUG ASSUMPTION: The form POSTs to `/contact`; the POST handler is not yet
+/// implemented. Submitting today will return 405 Method Not Allowed from the
+/// `GET`-only route, by design — the form is rendered for shape review only.
+///
+/// SECURITY: `autocomplete="off"` discourages browsers from saving draft
+/// inputs to autofill. The message field has a 5000-char cap (minor
+/// resource-exhaustion mitigation). v1.1 will add WASM-side age encryption
+/// so the server never sees plaintext.
+#[must_use]
+pub fn render() -> Markup {
     let body = html! {
         section class="inquiry" {
             h1 { "Encrypted Inquiry" }
@@ -17,8 +29,9 @@ pub(crate) fn render() -> Markup {
                  No identifying metadata recorded."
             }
 
-            // Plain HTML form. Works with JavaScript disabled (Tor Browser safest mode).
-            // v1.1 will progressively enhance this to encrypt client-side before POST.
+            // v1: plain HTML form, works with JavaScript disabled (Tor Browser
+            // Safest mode is first-class). v1.1 progressively enhances with
+            // client-side `age` encryption before POST.
             form method="post" action="/contact" autocomplete="off" {
                 label for="name" { "Name (optional)" }
                 input id="name" name="name" type="text" maxlength="100";
@@ -38,9 +51,43 @@ pub(crate) fn render() -> Markup {
             }
         }
 
-        // Tiny, no-trackers-required stub for future WASM encryption hook.
-        // Loaded locally from /static, satisfies strict CSP (script-src 'self').
+        // Placeholder for the v1.1 WASM encryption hook. Kept as a comment so
+        // a grep for "age" / "encrypt" in the code surfaces this site.
         (PreEscaped("<!-- v1.1: <script src=\"/static/inquiry.js\"></script> -->"))
     };
     page("Encrypted Inquiry", body)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn contact_shows_encrypted_inquiry_heading() {
+        let s = render().into_string();
+        assert!(s.contains("<h1>Encrypted Inquiry</h1>"));
+    }
+
+    #[test]
+    fn contact_has_form_posting_to_self() {
+        let s = render().into_string();
+        assert!(s.contains("method=\"post\""));
+        assert!(s.contains("action=\"/contact\""));
+    }
+
+    #[test]
+    fn contact_form_disables_autocomplete() {
+        let s = render().into_string();
+        assert!(s.contains("autocomplete=\"off\""));
+    }
+
+    #[test]
+    fn contact_does_not_set_cookies_at_render() {
+        // The render function is pure Markup; it cannot set cookies.
+        // This test is a tripwire: if render() ever starts returning a
+        // response type that can carry cookies, this assertion will guide
+        // the author to re-evaluate the site's zero-cookie posture.
+        let s = render().into_string();
+        assert!(!s.to_ascii_lowercase().contains("set-cookie"));
+    }
 }

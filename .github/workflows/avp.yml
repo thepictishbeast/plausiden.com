@@ -1,0 +1,21 @@
+name: avp
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pre-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run pre-merge audit routine
+        run: |
+          # Resolve from PlausiDen-Audits/routines/pre-merge.toml.
+          # Until per-audit ci.yml stanzas are wired up, this is a
+          # placeholder that fails open. Replace with the per-audit
+          # checks from https://github.com/thepictishbeast/PlausiDen-Audits once the target repo opts in to
+          # specific audits.
+          echo '::warning::pre-merge audit routine not yet wired — see https://github.com/thepictishbeast/PlausiDen-Audits'

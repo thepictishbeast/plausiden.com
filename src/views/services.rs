@@ -1,10 +1,17 @@
-//! Services page. Content ported from the old site during migration.
+//! Services page. Content will be ported from the current site during the
+//! pre-cutover polish pass.
 
 use maud::{Markup, html};
 
 use super::layout::page;
 
-pub(crate) fn render() -> Markup {
+/// Render the services body.
+///
+/// BUG ASSUMPTION: Copy here is placeholder and tests assert only on
+/// structural invariants (the `<h1>`, the bulleted list), not specific copy
+/// strings that may change.
+#[must_use]
+pub fn render() -> Markup {
     let body = html! {
         section class="services" {
             h1 { "Services" }
@@ -32,4 +39,22 @@ pub(crate) fn render() -> Markup {
         }
     };
     page("Services", body)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn services_has_top_heading() {
+        let s = render().into_string();
+        assert!(s.contains("<h1>Services</h1>"));
+    }
+
+    #[test]
+    fn services_has_three_list_items() {
+        let s = render().into_string();
+        // Sanity bound: at least 3 <li> entries on the page.
+        assert!(s.matches("<li>").count() >= 3);
+    }
 }

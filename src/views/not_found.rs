@@ -4,7 +4,13 @@ use maud::{Markup, html};
 
 use super::layout::page;
 
-pub(crate) fn render() -> Markup {
+/// Render the not-found page.
+///
+/// BUG ASSUMPTION: Called by the axum fallback handler and by a direct test
+/// in `main.rs`. Must return a non-empty body, because an empty body on 404
+/// confuses users more than a short message.
+#[must_use]
+pub fn render() -> Markup {
     let body = html! {
         section class="notfound" {
             h1 { "Nothing here." }
@@ -13,4 +19,21 @@ pub(crate) fn render() -> Markup {
         }
     };
     page("Not Found", body)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn not_found_body_mentions_nothing_here() {
+        let s = render().into_string();
+        assert!(s.contains("Nothing here"));
+    }
+
+    #[test]
+    fn not_found_provides_escape_link_home() {
+        let s = render().into_string();
+        assert!(s.contains("href=\"/\""));
+    }
 }
