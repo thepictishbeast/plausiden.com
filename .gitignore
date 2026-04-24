@@ -1,0 +1,18 @@
+/target
+/dist
+**/*.rs.bk
+*.pdb
+
+# Editor / OS noise
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Local env (never committed — secrets live in systemd EnvironmentFile on the host)
+.env
+.env.*
+
+# Backup artifacts
+*.bak
+*.tar.gz

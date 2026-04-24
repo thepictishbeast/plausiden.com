@@ -1,0 +1,54 @@
+[package]
+name = "plausiden-site"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+description = "PlausiDen — Rust rewrite. Zero-state, privacy-first, Axum + Maud."
+license = "UNLICENSED"
+publish = false
+
+[dependencies]
+axum = { version = "0.8", default-features = false, features = ["http1", "http2", "tokio", "tracing"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
+tower = "0.5"
+tower-http = { version = "0.6", default-features = false, features = [
+    "compression-br",
+    "compression-gzip",
+    "set-header",
+    "trace",
+    "limit",
+    "timeout",
+    "fs",
+] }
+maud = { version = "0.27", features = ["axum"] }
+serde = { version = "1", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
+thiserror = "2"
+# Leave stubbed for v1; activate in v1.1
+# governor = "0.8"     # rate limiting
+# lettre  = "0.11"     # SMTP
+# landlock = "0.4"     # FS sandbox
+# seccompiler = "0.5"  # syscall filter
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+debug = false
+
+[profile.release-min]
+inherits = "release"
+opt-level = "z"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
