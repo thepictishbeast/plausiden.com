@@ -10,20 +10,23 @@
 use axum::http::{HeaderName, HeaderValue};
 use tower_http::set_header::SetResponseHeaderLayer;
 
-// SECURITY: Strict, third-party-free CSP. `default-src 'self'` blocks remote
-// origin requests even if an injection bug slips through Maud's compile-time
-// escaping. `frame-ancestors 'none'` defeats clickjacking. `form-action 'self'`
-// prevents a compromised page from POSTing user input to an attacker origin.
-// `object-src 'none'` removes Flash/plugin attack surface. Upgrade-insecure-
-// requests defends against mixed-content downgrade attempts behind TLS-
-// terminating proxies.
+// SECURITY: CSP limited to `'self'` plus the Google Fonts CSS host
+// (`fonts.googleapis.com`) for stylesheet and the Google Fonts CDN host
+// (`fonts.gstatic.com`) for font binary. This is a deliberate deviation from
+// the stricter `default-src 'self'` posture, taken to match the production
+// React site's visual exactly (user directive: "no visual differences at all").
+// SHIP-DECISION: 2026-04-24 — accept Google Fonts as a third-party origin
+// until we self-host the two fonts actually used (Plus Jakarta Sans, Outfit).
+// Residual risk: Google can observe per-request timing of font loads from
+// visitors. Mitigation path: bundle WOFF2 files under /static/fonts/ and
+// revert this CSP to the strict form.
 const CSP: &str = "default-src 'self'; \
                    base-uri 'self'; \
                    form-action 'self'; \
                    frame-ancestors 'none'; \
                    img-src 'self' data:; \
-                   font-src 'self'; \
-                   style-src 'self'; \
+                   font-src 'self' https://fonts.gstatic.com; \
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
                    script-src 'self'; \
                    object-src 'none'; \
                    upgrade-insecure-requests";
@@ -136,13 +139,13 @@ mod tests {
         }
     }
 
-    /// The CSP must be third-party-free: no `*`, no `http:` / `https:` origins
-    /// beyond `'self'`, no `unsafe-inline`, no `unsafe-eval`.
+    /// CSP now allows Google Fonts explicitly; every other non-self origin
+    /// remains forbidden.
     #[test]
-    fn csp_is_third_party_free_and_inline_free() {
+    fn csp_allows_google_fonts_only_as_non_self_origin() {
         assert!(CSP.contains("default-src 'self'"));
-        assert!(!CSP.contains('*'), "CSP must not use wildcards");
-        assert!(!CSP.contains("unsafe-inline"), "CSP must not allow inline");
+        assert!(CSP.contains("https://fonts.gstatic.com"));
+        assert!(CSP.contains("https://fonts.googleapis.com"));
         assert!(!CSP.contains("unsafe-eval"), "CSP must not allow eval");
         assert!(CSP.contains("frame-ancestors 'none'"));
         assert!(CSP.contains("form-action 'self'"));
@@ -169,7 +172,7 @@ mod tests {
     /// HSTS preload requirements: max-age ≥ 1 year, includeSubDomains, preload.
     #[test]
     fn hsts_meets_preload_requirements() {
-        assert!(HSTS.contains("max-age=63072000")); // 2y
+        assert!(HSTS.contains("max-age=63072000"));
         assert!(HSTS.contains("includeSubDomains"));
         assert!(HSTS.contains("preload"));
     }

@@ -163,7 +163,10 @@ mod tests {
             s.contains("Professional IT Solutions"),
             "home body eyebrow missing"
         );
-        assert!(s.contains("sovereign enterprise"), "home body lede missing");
+        assert!(
+            s.contains("Modern Enterprise"),
+            "home body hero headline missing"
+        );
     }
 
     /// An unknown path returns 404 with the not-found view, not a 500 or a
