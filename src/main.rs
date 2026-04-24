@@ -17,6 +17,7 @@ use tokio::signal;
 use tracing_subscriber::{EnvFilter, fmt};
 
 mod handlers;
+mod sandbox;
 mod security;
 mod views;
 
@@ -54,6 +55,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let listener = tokio::net::TcpListener::bind(bind).await?;
     tracing::info!(%bind, "plausiden-site listening");
+
+    // SECURITY: in-process Landlock sandbox. Applied AFTER the listener is
+    // bound (so the process still had permission to access the syscall) and
+    // BEFORE accepting traffic (so any handler runs inside the restricted
+    // filesystem view). Static dir is the only allowed read path; writes are
+    // forbidden entirely.
+    let _ = sandbox::apply("static");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

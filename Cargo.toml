@@ -25,11 +25,15 @@ serde = { version = "1", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
 thiserror = "2"
-# Leave stubbed for v1; activate in v1.1
+# Platform-conditional in-binary sandboxing. Layered on top of the
+# systemd hardening unit (belt + suspenders).
+[target.'cfg(target_os = "linux")'.dependencies]
+landlock = "0.4"
+
+# Leave stubbed; activate as the form + auth surfaces come online:
 # governor = "0.8"     # rate limiting
 # lettre  = "0.11"     # SMTP
-# landlock = "0.4"     # FS sandbox
-# seccompiler = "0.5"  # syscall filter
+# seccompiler = "0.5"  # syscall filter — v1.1 after landlock has baked
 
 [profile.release]
 opt-level = 3
