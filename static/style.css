@@ -72,8 +72,23 @@ h2 { font-size: 1.4rem; margin-top: 2.5rem; }
 .btn-primary { background: var(--accent); color: var(--accent-fg); }
 .btn-ghost { border: 1px solid var(--border); color: var(--fg); }
 
-.principles ul, .service-list { list-style: none; padding: 0; }
-.principles li, .service-list li { margin-bottom: 1.25rem; }
+.principles ul, .service-list, .service-grid { list-style: none; padding: 0; }
+.principles li, .service-list > li { margin-bottom: 1.25rem; }
+.service-list .sub { list-style: disc; padding-left: 1.25rem; margin-top: 0.4rem; color: var(--muted); font-size: 0.95rem; }
+.service-list .sub li { margin-bottom: 0.15rem; }
+
+/* 2-column services grid on the homepage preview */
+.service-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+@media (min-width: 640px) { .service-grid { grid-template-columns: 1fr 1fr; } }
+.service-grid li { border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.15rem; }
+.service-grid h3 { margin: 0 0 0.4rem; font-size: 1.1rem; }
+.service-grid p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+.eyebrow { text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-size: 0.8rem; margin-bottom: 0.5rem; }
+.accent { color: var(--accent); }
+.link-forward { font-weight: 500; }
+.cta-final { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; }
+.services-preview { margin-top: 3rem; }
 
 label { display: block; margin-top: 1rem; font-weight: 500; }
 input, textarea {
