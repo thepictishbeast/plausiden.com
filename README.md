@@ -1,7 +1,15 @@
 <!-- repo-label: product -->
 <!-- repo-class: plausiden-marketing-website -->
-<!-- repo-consumes: PlausiDen-AVP-Doctrine (tier definitions), PlausiDen-Obs (inline until crate publishes) -->
+<!-- repo-consumes: PlausiDen-AVP-Doctrine, PlausiDen-Obs (inline until crate publishes) -->
 <!-- repo-consumed-by: leaf -->
+<!-- repo-tier: tbd -->
+<!-- repo-doctrine-version: n/a -->
+<!-- repo-engine-version: 0.1.0 -->
+<!-- repo-status: experimental -->
+<!-- repo-avp-subject: yes -->
+<!-- repo-harvest-candidates: no -->
+<!-- repo-reference-impl-language: rust -->
+<!-- repo-target-stack-scope: linux-x86_64 -->
 
 # plausiden-site
 

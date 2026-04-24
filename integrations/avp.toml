@@ -19,8 +19,9 @@ tier_4_cross_platform       = "n/a"            # single-target Linux musl binary
 tier_5_visual_drift         = "not_started"    # visual regression deferred to v1.1
 tier_6_formal               = "not_started"
 doctrine_conformance        = "passing"
-generality                  = "n/a"            # site content is project-specific
-harvest_readiness           = "n/a"            # marketing copy has no upstream candidates
+generality                  = "n/a"            # consumer repo (marketing site), explicitly project-specific per SCOPE.md
+harvest_readiness           = "n/a"            # this is a consumer, not an upstream candidate source
+harvest_integration         = "n/a"            # no upstreamed artifacts from this repo
 
 [graduation]
 next_gate = "production-cutover-replacing-react-spa"
