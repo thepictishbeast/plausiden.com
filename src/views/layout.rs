@@ -174,7 +174,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
                 div id="root" {
                     div class="flex flex-col min-h-screen font-body text-slate-900" {
                         (nav())
-                        main class="flex-grow pt-20" {
+                        main class="flex-grow" {
                             (body)
                         }
                         (footer())
