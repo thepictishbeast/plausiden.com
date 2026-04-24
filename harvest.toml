@@ -1,0 +1,26 @@
+# plausiden-site ↔ PlausiDen-Harvest — upstream-candidates feed.
+#
+# Declares the repo participates in the harvest convention even when there
+# are no candidates to propose. A marketing-website repo is unlikely ever
+# to produce doctrine-generalizable artifacts (its content is project-
+# specific), but the file's presence makes the repo scannable by the
+# harvest tooling when it activates.
+#
+# Submission status flow (per PlausiDen-Harvest/DOCTRINE.md):
+#   experimental → in-use-internal → in-use-production → upstream-proposed
+#     → upstream-accepted → upstream-retired-from-here
+
+[meta]
+project              = "plausiden-site"
+upstream_candidates  = false
+review_cadence       = "quarterly"
+rationale            = """
+v1 has no candidates. The site's content is specific to PlausiDen's marketing;
+its security-headers middleware is already conceptually covered by the
+OPERATING_PRINCIPLES defense-in-depth rules; its test patterns are specific to
+a tiny Axum+Maud shape and don't generalize.
+
+Re-evaluate if: (a) the form POST handler with age encryption ends up being
+a generic pattern worth elevating to a doctrine template, or (b) the
+systemd hardening unit is repeated across 2+ PlausiDen web services.
+"""

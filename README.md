@@ -1,6 +1,17 @@
+<!-- repo-label: product -->
+<!-- repo-class: plausiden-marketing-website -->
+<!-- repo-consumes: PlausiDen-AVP-Doctrine (tier definitions), PlausiDen-Obs (inline until crate publishes) -->
+<!-- repo-consumed-by: leaf -->
+
 # plausiden-site
 
 Rust rewrite of plausiden.com. Single-binary, zero-state, privacy-first.
+
+> Part of the [PlausiDen ecosystem](https://github.com/thepictishbeast/PlausiDen-Meta/blob/main/ECOSYSTEM_GUIDE.md).
+> Not on the [`PRIORITY.md`](https://github.com/thepictishbeast/PlausiDen-Meta/blob/main/PRIORITY.md)
+> tier list — this repo is object-level business work (the plausiden.com
+> marketing surface), not doctrine or product tooling. It still conforms to
+> the ecosystem guide: AVP-graded, Obs-doctrine inline, harvest-participating.
 
 ## Design principles
 
