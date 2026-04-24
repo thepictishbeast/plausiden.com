@@ -252,7 +252,7 @@ mod tests {
         // The "Services" link must contain text-primary and the full-width
         // underline bar.
         assert!(
-            s.contains(r#"text-primary cursor-pointer relative group"#)
+            s.contains("text-primary cursor-pointer relative group")
                 || s.contains("text-primary\">\n                Services")
                 || s.contains(">Services<"),
             "Services link structure changed"
