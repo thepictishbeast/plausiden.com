@@ -86,7 +86,7 @@ pub fn render() -> Markup {
             }
         }
     };
-    page("Services", body)
+    page("Services — PlausiDen", "/services", body)
 }
 
 #[cfg(test)]

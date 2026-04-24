@@ -57,7 +57,7 @@ pub fn render() -> Markup {
         // a grep for "age" / "encrypt" in the code surfaces this site.
         (PreEscaped("<!-- v1.1: <script src=\"/static/inquiry.js\"></script> -->"))
     };
-    page("Encrypted Inquiry", body)
+    page("Encrypted Inquiry — PlausiDen", "/contact", body)
 }
 
 #[cfg(test)]

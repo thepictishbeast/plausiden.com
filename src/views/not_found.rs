@@ -20,7 +20,7 @@ pub fn render() -> Markup {
             }
         }
     };
-    page("Not Found", body)
+    page("Not Found — PlausiDen", "", body)
 }
 
 #[cfg(test)]

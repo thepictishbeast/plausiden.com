@@ -178,6 +178,7 @@ pub fn render() -> Markup {
     };
     page(
         "PlausiDen — Comprehensive IT for the Modern Enterprise",
+        "/",
         body,
     )
 }
