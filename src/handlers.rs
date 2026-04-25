@@ -30,6 +30,16 @@ pub async fn about() -> Markup {
     crate::views::about::render()
 }
 
+/// Render the Sovereign Privacy Directive placeholder (`GET /privacy-directive`).
+pub async fn privacy() -> Markup {
+    crate::views::legal::privacy()
+}
+
+/// Render the Sovereign Terms of Service placeholder (`GET /terms-of-service`).
+pub async fn terms() -> Markup {
+    crate::views::legal::terms()
+}
+
 /// Render the Encrypted Inquiry form (`GET /contact`).
 ///
 /// BUG ASSUMPTION: v1 returns a plain HTML form. v1.1 will progressively enhance

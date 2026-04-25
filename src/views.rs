@@ -11,5 +11,6 @@ pub mod about;
 pub mod contact;
 pub mod home;
 pub mod layout;
+pub mod legal;
 pub mod not_found;
 pub mod services;
