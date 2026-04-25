@@ -16,7 +16,7 @@ use axum::Router;
 use tokio::signal;
 use tracing_subscriber::{EnvFilter, fmt};
 
-// mod components; // temporarily disabled — visual parity first, refactor after.
+mod components;
 mod handlers;
 mod sandbox;
 mod security;

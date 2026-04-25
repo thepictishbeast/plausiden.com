@@ -1,3 +1,10 @@
+// SUPERSOCIETY: this module is the typed-component scaffold. Some variants
+// (Outline / Md / Lg / Badge / service_card) are deliberately defined ahead
+// of the views that will adopt them — explicit `#[allow(dead_code)]` keeps
+// the architecture visible without forcing every call site to migrate
+// before parity is verified.
+#![allow(dead_code)]
+
 //! shadcn/ui-equivalent primitives in Rust.
 //!
 //! The production React site composes its UI from a small set of primitives
@@ -18,8 +25,11 @@ pub(crate) mod badge;
 pub(crate) mod button;
 pub(crate) mod card;
 
+#[allow(unused_imports)] // re-exports kept for callers that adopt these later
 pub(crate) use badge::{Badge, BadgeTone};
+#[allow(unused_imports)]
 pub(crate) use button::{Button, ButtonSize, ButtonVariant, IconPosition};
+#[allow(unused_imports)]
 pub(crate) use card::{ServiceCard, service_card};
 
 /// Every component that renders a `class="…"` string goes through this
