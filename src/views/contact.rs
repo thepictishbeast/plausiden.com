@@ -35,13 +35,13 @@ pub fn render() -> Markup {
                 // client-side `age` encryption before POST.
                 form method="post" action="/contact" autocomplete="off" {
                     label for="name" { "Name (optional)" }
-                    input id="name" name="name" type="text" maxlength="100";
+                    input id="name" name="name" type="text" maxlength="100" aria-label="Name (optional)";
 
                     label for="reply_to" { "How should we reach you?" }
-                    input id="reply_to" name="reply_to" type="text" maxlength="200";
+                    input id="reply_to" name="reply_to" type="text" maxlength="200" aria-label="Reply-to address";
 
                     label for="message" { "Message" }
-                    textarea id="message" name="message" rows="8" maxlength="5000" required {}
+                    textarea id="message" name="message" rows="8" maxlength="5000" required aria-label="Message body" {}
 
                     button type="submit" { "Send" }
                 }

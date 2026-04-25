@@ -90,7 +90,7 @@ pub fn render() -> Markup {
                                 }
                             }
                             a href="/services" {
-                                button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 border shadow-xs active:shadow-none min-h-10 text-lg px-8 py-6 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white border-slate-200" {
+                                button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 border [border-color:var(--button-outline)] shadow-xs active:shadow-none min-h-10 text-lg px-8 py-6 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white border-slate-200" {
                                     "Explore Services"
                                 }
                             }
@@ -141,7 +141,7 @@ pub fn render() -> Markup {
                         }
                         div class="mt-10" {
                             a href="/about" {
-                                button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 border shadow-xs active:shadow-none min-h-9 text-white border-white/20 hover:bg-white/10 hover:text-white rounded-xl px-8 py-6 text-lg" {
+                                button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 border [border-color:var(--button-outline)] shadow-xs active:shadow-none min-h-9 text-white border-white/20 hover:bg-white/10 hover:text-white rounded-xl px-8 py-6 text-lg" {
                                     "Learn About Our Mission"
                                 }
                             }

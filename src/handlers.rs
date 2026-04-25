@@ -23,6 +23,13 @@ pub async fn services() -> Markup {
     crate::views::services::render()
 }
 
+/// Render the about page (`GET /about`).
+///
+/// BUG ASSUMPTION: Same purity guarantee as [`home`].
+pub async fn about() -> Markup {
+    crate::views::about::render()
+}
+
 /// Render the Encrypted Inquiry form (`GET /contact`).
 ///
 /// BUG ASSUMPTION: v1 returns a plain HTML form. v1.1 will progressively enhance

@@ -7,6 +7,7 @@
 //! second-order escaping story. `PreEscaped` occurrences are audited sites
 //! (grep the crate for `PreEscaped(`).
 
+pub mod about;
 pub mod contact;
 pub mod home;
 pub mod layout;

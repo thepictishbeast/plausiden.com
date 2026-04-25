@@ -89,6 +89,7 @@ pub fn build_router() -> Router {
     Router::new()
         .route("/", get(handlers::home))
         .route("/services", get(handlers::services))
+        .route("/about", get(handlers::about))
         .route("/contact", get(handlers::contact))
         .route("/healthz", get(handlers::healthz))
         .nest_service("/static", tower_http::services::ServeDir::new("static"))

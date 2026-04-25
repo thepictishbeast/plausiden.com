@@ -31,18 +31,19 @@ const CSP: &str = "default-src 'self'; \
                    object-src 'none'; \
                    upgrade-insecure-requests";
 
-// SECURITY: Explicit denial of every known browser-exposed device/sensor API.
-// The allowlist is empty for every feature — a compromise of the page cannot
-// obtain geolocation, microphone, camera, USB, NFC, or any other channel. New
-// features default to blocked until we explicitly opt in.
-const PERMISSIONS_POLICY: &str = "accelerometer=(), ambient-light-sensor=(), autoplay=(), \
-                                  battery=(), camera=(), display-capture=(), \
-                                  document-domain=(), encrypted-media=(), geolocation=(), \
-                                  gyroscope=(), magnetometer=(), microphone=(), \
-                                  midi=(), payment=(), picture-in-picture=(), \
-                                  publickey-credentials-get=(), screen-wake-lock=(), \
-                                  sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), \
-                                  interest-cohort=()";
+// SECURITY: Explicit denial of every CURRENTLY-RECOGNIZED browser-exposed
+// device/sensor API. `ambient-light-sensor`, `battery`, `document-domain`,
+// and `web-share` were dropped in 2026-04 after Chrome (147.x) started
+// logging them as unrecognized (surfaced by PlausiDen-Crawler). The policy
+// still denies every channel the current browsers actually know about; any
+// future feature will default to blocked unless we explicitly opt in.
+const PERMISSIONS_POLICY: &str = "accelerometer=(), autoplay=(), camera=(), \
+                                  display-capture=(), encrypted-media=(), \
+                                  geolocation=(), gyroscope=(), magnetometer=(), \
+                                  microphone=(), midi=(), payment=(), \
+                                  picture-in-picture=(), publickey-credentials-get=(), \
+                                  screen-wake-lock=(), sync-xhr=(), usb=(), \
+                                  xr-spatial-tracking=(), interest-cohort=()";
 
 // SECURITY: `max-age=2 years; includeSubDomains; preload` locks every subdomain
 // to HTTPS for 2y per RFC 6797. Preload allows submission to Chrome's HSTS

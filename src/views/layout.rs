@@ -28,6 +28,7 @@ fn head_tag(title: &str) -> Markup {
             link rel="preconnect" href="https://fonts.gstatic.com" crossorigin;
             link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap";
             link rel="stylesheet" href="/static/index-CWVVhmVm.css";
+            script src="/static/menu.js" defer {}
         }
     }
 }
@@ -92,8 +93,18 @@ fn nav(current: &str) -> Markup {
                         }
                     }
                 }
-                button class="md:hidden p-2 text-slate-600" aria-label="Open menu" {
+                button id="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-menu" class="md:hidden p-2 text-slate-600" aria-label="Toggle menu" {
                     (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>"#))
+                }
+            }
+            div id="mobile-menu" class="md:hidden hidden border-t border-slate-200 bg-white" aria-hidden="true" {
+                div class="container mx-auto px-4 py-4 flex flex-col gap-3" {
+                    a href="/" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Home" }
+                    a href="/services" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Services" }
+                    a href="/about" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "About" }
+                    a href="/contact" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Contact" }
+                    a href="/contact" class="mt-2 inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium rounded-md border border-emerald-500/50 text-emerald-700 hover:bg-emerald-50 min-h-8 px-3 text-xs py-2" { "Encrypted Inquiry" }
+                    a href="/contact" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium rounded-md bg-primary text-primary-foreground min-h-8 px-3 text-xs py-2" { "Get a Quote" }
                 }
             }
         }
