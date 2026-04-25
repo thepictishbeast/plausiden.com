@@ -8,7 +8,7 @@ license = "UNLICENSED"
 publish = false
 
 [dependencies]
-axum = { version = "0.8", default-features = false, features = ["http1", "http2", "tokio", "tracing"] }
+axum = { version = "0.8", default-features = false, features = ["http1", "http2", "tokio", "tracing", "form", "matched-path"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
 tower = "0.5"
 tower-http = { version = "0.6", default-features = false, features = [
@@ -30,10 +30,11 @@ thiserror = "2"
 [target.'cfg(target_os = "linux")'.dependencies]
 landlock = "0.4"
 
-# Leave stubbed; activate as the form + auth surfaces come online:
-# governor = "0.8"     # rate limiting
-# lettre  = "0.11"     # SMTP
-# seccompiler = "0.5"  # syscall filter — v1.1 after landlock has baked
+lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1", "tokio1-rustls-tls", "builder"] }
+governor = "0.8"
+
+# Leave stubbed; activate after landlock has baked:
+# seccompiler = "0.5"
 
 [profile.release]
 opt-level = 3

@@ -18,6 +18,7 @@ use tracing_subscriber::{EnvFilter, fmt};
 
 mod components;
 mod handlers;
+mod inquiry;
 mod sandbox;
 mod security;
 mod views;
@@ -48,7 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .compact()
         .init();
 
-    let app = build_router();
+    let app = build_router(inquiry::InquiryState::new());
 
     let bind: SocketAddr = std::env::var("PLAUSIDEN_BIND")
         .unwrap_or_else(|_| DEFAULT_BIND.into())
@@ -64,9 +65,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // forbidden entirely.
     let _ = sandbox::apply("static");
 
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await?;
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
 
     Ok(())
 }
@@ -82,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// (including 404, 500, timeout, large-body-rejected) carries the lockdown
 /// headers. The static file service is nested under `/static` and cannot
 /// traverse outside that directory (see [`tower_http::services::ServeDir`]).
-pub fn build_router() -> Router {
+pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
     use axum::http::StatusCode;
     use axum::routing::get;
     use tower_http::{compression::CompressionLayer, timeout::TimeoutLayer, trace::TraceLayer};
@@ -91,11 +95,12 @@ pub fn build_router() -> Router {
         .route("/", get(handlers::home))
         .route("/services", get(handlers::services))
         .route("/about", get(handlers::about))
-        .route("/contact", get(handlers::contact))
+        .route("/contact", get(handlers::contact).post(inquiry::submit))
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/healthz", get(handlers::healthz))
         .nest_service("/static", tower_http::services::ServeDir::new("static"))
+        .with_state(inquiry_state)
         .layer(security::headers_layer())
         .layer(CompressionLayer::new())
         .layer(TimeoutLayer::with_status_code(
@@ -150,7 +155,7 @@ mod tests {
     /// homepage heading.
     #[tokio::test]
     async fn root_returns_home() {
-        let app = build_router();
+        let app = build_router(crate::inquiry::InquiryState::new());
         let resp = app
             .oneshot(
                 Request::builder()
@@ -177,7 +182,7 @@ mod tests {
     /// raw string.
     #[tokio::test]
     async fn unknown_path_returns_styled_404() {
-        let app = build_router();
+        let app = build_router(crate::inquiry::InquiryState::new());
         let resp = app
             .oneshot(
                 Request::builder()
@@ -196,7 +201,7 @@ mod tests {
     /// on a fresh request.
     #[tokio::test]
     async fn security_headers_are_stamped() {
-        let app = build_router();
+        let app = build_router(crate::inquiry::InquiryState::new());
         let resp = app
             .oneshot(
                 Request::builder()
@@ -215,7 +220,7 @@ mod tests {
     /// Health check is cheap, body-only, and does not set cookies.
     #[tokio::test]
     async fn healthz_is_cookie_free() {
-        let app = build_router();
+        let app = build_router(crate::inquiry::InquiryState::new());
         let resp = app
             .oneshot(
                 Request::builder()
