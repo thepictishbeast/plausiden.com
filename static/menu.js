@@ -3,7 +3,29 @@
 // hamburger → drawer interaction.
 (function () {
   'use strict';
+
+  // Toggle nav styling based on scroll position — matches the production
+  // React site, which starts the nav transparent and snaps to the white-blur
+  // state after any scroll. Keeps hero visual parity.
+  function initNavScroll() {
+    var nav = document.getElementById('site-nav');
+    if (!nav) return;
+    var onScroll = function () {
+      var scrolled = window.scrollY > 10;
+      if (scrolled) {
+        nav.classList.remove('bg-transparent', 'border-transparent', 'py-5');
+        nav.classList.add('bg-white/90', 'backdrop-blur-md', 'border-border/50', 'py-3', 'shadow-sm');
+      } else {
+        nav.classList.add('bg-transparent', 'border-transparent', 'py-5');
+        nav.classList.remove('bg-white/90', 'backdrop-blur-md', 'border-border/50', 'py-3', 'shadow-sm');
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
   function init() {
+    initNavScroll();
     var btn = document.getElementById('mobile-menu-toggle');
     var menu = document.getElementById('mobile-menu');
     if (!btn || !menu) return;
