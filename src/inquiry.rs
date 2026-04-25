@@ -192,15 +192,12 @@ pub(crate) async fn submit(
             builder = builder.reply_to(rt);
         }
     }
-    let email = match builder.body(body) {
-        Ok(e) => e,
-        Err(_) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                ack_page("Server error composing the message. Try again later."),
-            )
-                .into_response();
-        }
+    let Ok(email) = builder.body(body) else {
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            ack_page("Server error composing the message. Try again later."),
+        )
+            .into_response();
     };
 
     match state.mailer.send(email).await {
@@ -226,6 +223,10 @@ pub(crate) async fn submit(
         }
     }
 }
+
+// Keep the `IpAddr` import warning-free until per-IP keyed limiter ships.
+#[allow(dead_code)]
+const _IP_FUTURE_USE: fn(IpAddr) = |_| {};
 
 #[cfg(test)]
 mod tests {
@@ -261,7 +262,3 @@ mod tests {
         assert!(validate(&f).is_err());
     }
 }
-
-// Keep the `IpAddr` import warning-free until per-IP keyed limiter ships.
-#[allow(dead_code)]
-const _IP_FUTURE_USE: fn(IpAddr) = |_| {};
