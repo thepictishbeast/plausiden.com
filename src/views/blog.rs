@@ -6,7 +6,7 @@
 
 use maud::{Markup, html};
 
-use super::layout::page;
+use super::layout::{page, page_with_description};
 use super::posts::{POSTS, Post, by_slug};
 
 /// Render the blog index — list of published posts, newest first.
@@ -86,9 +86,10 @@ pub fn post(slug: &str) -> Option<Markup> {
             }
         }
     };
-    Some(page(
+    Some(page_with_description(
         &format!("{} — PlausiDen", post.title),
-        "/blog",
+        &format!("/blog/{}", post.slug),
+        post.excerpt,
         body,
     ))
 }

@@ -83,6 +83,54 @@ pub async fn not_found() -> (StatusCode, Markup) {
     (StatusCode::NOT_FOUND, crate::views::not_found::render())
 }
 
+/// Static list of public routes included in `/sitemap.xml`.
+/// `/healthz` is intentionally excluded — internal liveness probe.
+const SITEMAP_ROUTES: &[&str] = &[
+    "/",
+    "/services",
+    "/about",
+    "/blog",
+    "/contact",
+    "/solutions/legal",
+    "/privacy-directive",
+    "/terms-of-service",
+];
+
+/// `GET /sitemap.xml` — auto-generated from `SITEMAP_ROUTES` + every
+/// blog-post slug. Search engines fetch this; humans don't.
+pub async fn sitemap_xml() -> impl IntoResponse {
+    use std::fmt::Write as _;
+    let mut out = String::from(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+"#,
+    );
+    for path in SITEMAP_ROUTES {
+        let _ = writeln!(out, "  <url><loc>https://plausiden.com{path}</loc></url>");
+    }
+    for post in crate::views::posts::POSTS {
+        let _ = writeln!(
+            out,
+            "  <url><loc>https://plausiden.com/blog/{slug}</loc><lastmod>{date}</lastmod></url>",
+            slug = post.slug,
+            date = post.published,
+        );
+    }
+    out.push_str("</urlset>\n");
+    (
+        [(axum::http::header::CONTENT_TYPE, "application/xml")],
+        out,
+    )
+}
+
+/// `GET /robots.txt` — allow everything, point at the sitemap.
+pub async fn robots_txt() -> impl IntoResponse {
+    (
+        [(axum::http::header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+        "User-agent: *\nAllow: /\nSitemap: https://plausiden.com/sitemap.xml\n",
+    )
+}
+
 /// Liveness probe (`GET /healthz`). Used by local health-checks, not advertised
 /// in the page navigation.
 ///

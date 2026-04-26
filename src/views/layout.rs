@@ -10,21 +10,51 @@ const ICON_SHIELD_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="2
 
 const ICON_PHONE_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-4 h-4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>"#;
 
+/// Canonical site origin used for absolute URLs in metadata.
+const SITE_ORIGIN: &str = "https://plausiden.com";
+
+/// Default page description used when a caller doesn't supply one.
+/// Tuned for SEO + social previews — single sentence under 160 chars.
+pub const DEFAULT_DESCRIPTION: &str = "Comprehensive IT for the modern enterprise — cybersecurity, AI automation, cloud infrastructure, software development. Built for teams that take confidentiality seriously.";
+
+/// JSON-LD Organization schema. Helps search engines understand the
+/// site identity. Emitted once in every page head.
+const JSON_LD_ORGANIZATION: &str = r#"{"@context":"https://schema.org","@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com","email":"team@plausiden.com","telephone":"+1-978-351-6495","address":{"@type":"PostalAddress","addressRegion":"MA","addressCountry":"US"},"description":"Comprehensive IT solutions for the modern enterprise — cybersecurity, AI automation, cloud infrastructure, software development."}"#;
+
 /// Shared site <head>. Loads the production Tailwind/shadcn CSS and the two
 /// Google Fonts the CSS actually references (`Plus Jakarta Sans`, `Outfit`).
+/// Emits `OpenGraph` + Twitter card metadata and a canonical URL so links
+/// shared in Slack/email/social preview cleanly.
 ///
 /// SECURITY: `<link rel="preconnect" ...>` to the Google Fonts origins is
 /// deliberate — paired with the relaxed CSP in `crate::security`. SHIP-DECISION
 /// recorded there.
-fn head_tag(title: &str) -> Markup {
+fn head_tag(title: &str, current: &str, description: &str) -> Markup {
+    let canonical = format!("{SITE_ORIGIN}{current}");
     html! {
         head {
             meta charset="utf-8";
             meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1";
             meta name="color-scheme" content="light";
             meta name="robots" content="index, follow";
+            meta name="description" content=(description);
             meta name="apple-mobile-web-app-title" content="PlausiDen";
             title { (title) }
+
+            // Canonical + OpenGraph + Twitter card.
+            link rel="canonical" href=(canonical);
+            meta property="og:type" content="website";
+            meta property="og:site_name" content="PlausiDen LLC";
+            meta property="og:title" content=(title);
+            meta property="og:description" content=(description);
+            meta property="og:url" content=(canonical);
+            meta name="twitter:card" content="summary_large_image";
+            meta name="twitter:title" content=(title);
+            meta name="twitter:description" content=(description);
+
+            // JSON-LD: tells crawlers who we are without parsing the page body.
+            script type="application/ld+json" { (PreEscaped(JSON_LD_ORGANIZATION)) }
+
             link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96";
             link rel="icon" type="image/svg+xml" href="/static/favicon.svg";
             link rel="shortcut icon" href="/static/favicon.ico";
@@ -198,8 +228,9 @@ fn footer() -> Markup {
     }
 }
 
-/// Render a page with the site-wide chrome. `title` appears in the tab;
-/// `body` is the per-page `<main>` content.
+/// Render a page with the site-wide chrome and the default site
+/// description. Use [`page_with_description`] when a page wants a
+/// page-specific description for OG/Twitter.
 ///
 /// BUG ASSUMPTION: The nav + footer here mirror the production React site's
 /// rendered DOM. Classes are Tailwind + shadcn/ui; styling lives in
@@ -210,12 +241,25 @@ fn footer() -> Markup {
 /// site's font loading. Consider self-hosting both Plus Jakarta Sans and
 /// Outfit to revert the CSP relaxation.
 #[must_use]
-#[allow(clippy::needless_pass_by_value)] // Markup is PreEscaped<String>; consuming is idiomatic for a composition helper.
 pub fn page(title: &str, current: &str, body: Markup) -> Markup {
+    page_with_description(title, current, DEFAULT_DESCRIPTION, body)
+}
+
+/// Render a page with a per-page description. Used by views that
+/// want their meta-description to differ from the site default
+/// (vertical landing pages, individual blog posts, etc.).
+#[must_use]
+#[allow(clippy::needless_pass_by_value)] // Markup is PreEscaped<String>; consuming is idiomatic for a composition helper.
+pub fn page_with_description(
+    title: &str,
+    current: &str,
+    description: &str,
+    body: Markup,
+) -> Markup {
     html! {
         (DOCTYPE)
         html lang="en" {
-            (head_tag(title))
+            (head_tag(title, current, description))
             body {
                 div id="root" {
                     div class="flex flex-col min-h-screen font-body text-slate-900" {

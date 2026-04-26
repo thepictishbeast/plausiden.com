@@ -99,6 +99,8 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
         .route("/solutions/legal", get(handlers::solutions_legal))
+        .route("/sitemap.xml", get(handlers::sitemap_xml))
+        .route("/robots.txt", get(handlers::robots_txt))
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/healthz", get(handlers::healthz))
@@ -259,6 +261,79 @@ mod tests {
         assert!(s.contains("Federated rule learning"));
         // Excerpt's signature line should be in the body
         assert!(s.contains("compose, don't compromise"));
+    }
+
+    /// `/sitemap.xml` lists every public route + every published post.
+    #[tokio::test]
+    async fn sitemap_lists_routes_and_posts() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/sitemap.xml")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let ct = resp.headers().get("content-type").unwrap().to_str().unwrap();
+        assert!(ct.contains("xml"));
+        let body = to_bytes(resp.into_body(), 16 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains("<urlset"));
+        assert!(s.contains("https://plausiden.com/"));
+        assert!(s.contains("https://plausiden.com/solutions/legal"));
+        assert!(s.contains("https://plausiden.com/blog/federated-rule-learning"));
+        // Healthz must NOT be listed — internal liveness only.
+        assert!(!s.contains("/healthz"));
+    }
+
+    /// `/robots.txt` allows everything and points at the sitemap.
+    #[tokio::test]
+    async fn robots_txt_points_at_sitemap() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/robots.txt")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = to_bytes(resp.into_body(), 4 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains("User-agent: *"));
+        assert!(s.contains("Sitemap: https://plausiden.com/sitemap.xml"));
+    }
+
+    /// Every page emits OpenGraph + Twitter card metadata.
+    #[tokio::test]
+    async fn pages_emit_og_metadata() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/blog/federated-rule-learning")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let body = to_bytes(resp.into_body(), 128 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains(r#"property="og:title""#));
+        assert!(s.contains(r#"property="og:description""#));
+        assert!(s.contains(r#"property="og:url""#));
+        assert!(s.contains(r#"name="twitter:card""#));
+        // Per-page description must be the post's excerpt, not the
+        // site default — confirms page_with_description is wired.
+        assert!(s.contains("How sorting rules can get smarter"));
+        // JSON-LD Organization
+        assert!(s.contains("application/ld+json"));
+        assert!(s.contains("\"PlausiDen LLC\""));
     }
 
     /// `/blog/<unknown-slug>` returns 404 with the styled not-found.
