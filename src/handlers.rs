@@ -54,6 +54,11 @@ pub async fn blog_index() -> Markup {
     crate::views::blog::index()
 }
 
+/// Render the legal-vertical landing page (`GET /solutions/legal`).
+pub async fn solutions_legal() -> Markup {
+    crate::views::solutions::legal::render()
+}
+
 /// Render an individual blog post (`GET /blog/:slug`). Returns the
 /// styled 404 view for unknown slugs.
 ///

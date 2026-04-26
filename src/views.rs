@@ -16,3 +16,4 @@ pub mod legal;
 pub mod not_found;
 pub mod posts;
 pub mod services;
+pub mod solutions;
