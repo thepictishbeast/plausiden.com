@@ -75,14 +75,14 @@ pub fn render() -> Markup {
             div class="container relative mx-auto px-4 md:px-6 z-10" {
                 div class="max-w-3xl" {
                     div {
-                        span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" { "Professional IT Solutions" }
-                        h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6" {
+                        span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20 animate-fade-in-up" { "Professional IT Solutions" }
+                        h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" {
                             "Comprehensive IT for the " span class="text-primary" { "Modern Enterprise" }
                         }
-                        p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed" {
+                        p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed animate-fade-in-up delay-2" {
                             "PlausiDen LLC delivers general yet specific technology solutions. From cyber security to AI automation, we power your digital transformation."
                         }
-                        div class="flex flex-col sm:flex-row gap-4" {
+                        div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-3" {
                             a href="/contact" {
                                 button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-10 text-lg px-8 py-6 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all" {
                                     "Get a Free Consultation"
@@ -103,11 +103,11 @@ pub fn render() -> Markup {
         // ---------- Everything Your Business Needs ----------
         section class="py-24 bg-white" {
             div class="container mx-auto px-4 md:px-6" {
-                div class="text-center max-w-3xl mx-auto mb-16" {
+                div class="text-center max-w-3xl mx-auto mb-16 reveal" {
                     h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-4" { "Everything Your Business Needs" }
                     p class="text-slate-600 text-lg" { "We provide end-to-end solutions that cover every aspect of your technology stack." }
                 }
-                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" {
+                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal reveal-delay-1" {
                     (service_card(ICON_SERVER, "IT Operations", "Robust infrastructure management and operational excellence."))
                     (service_card(ICON_SHIELD, "Cyber Security", "Advanced threat protection and compliance assurance."))
                     (service_card(ICON_BRAIN, "Artificial Intelligence", "Intelligent systems and predictive analytics for your enterprise."))
@@ -124,7 +124,7 @@ pub fn render() -> Markup {
             div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" {}
             div class="container relative mx-auto px-4 md:px-6" {
                 div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center" {
-                    div {
+                    div class="reveal" {
                         div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" {
                             (PreEscaped(ICON_TERMINAL))
                             span { "Excellence in Execution" }
@@ -147,14 +147,17 @@ pub fn render() -> Markup {
                             }
                         }
                     }
-                    div class="relative" {
-                        div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-2xl transform rotate-3 scale-105" {}
+                    div class="relative reveal reveal-delay-2" {
+                        // Brand-tinted glow behind the image — was previously
+                        // a 3D-rotated card; kept the shape, lightened the tint.
+                        div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent rounded-2xl transform rotate-3 scale-105" {}
                         div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl" {
                             img src="/static/images/hero-team.jpg" alt="Team collaboration" class="w-full h-auto object-cover";
-                            div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" {}
-                            // Testimonial overlay intentionally omitted — empty per the
-                            // REGRESSION-GUARD below and per the production removal
-                            // (PlausiDen.com commit 95a57fb + gray-box-class scrub).
+                            // Lighter overlay so the image reads "the future is bright"
+                            // rather than dimming it into a dark slate. The previous
+                            // value (`from-slate-900/80`) was an over-correction left
+                            // behind when the testimonial card was removed.
+                            div class="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-slate-900/10 to-transparent" {}
                         }
                     }
                 }
@@ -163,7 +166,7 @@ pub fn render() -> Markup {
 
         // ---------- Final CTA band ----------
         section class="py-20 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 text-center" {
+            div class="container mx-auto px-4 md:px-6 text-center reveal" {
                 h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" { "Ready to elevate your IT strategy?" }
                 p class="text-slate-600 text-lg mb-8 max-w-2xl mx-auto" {
                     "Contact us today for a free consultation and discover how we can optimize your operations."

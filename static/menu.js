@@ -24,8 +24,32 @@
     onScroll();
   }
 
+  // Reveal-on-scroll: any element tagged `.reveal` in the markup
+  // becomes visible once the viewport crosses it. Honors reduced-motion
+  // through the CSS rule that strips the transition.
+  function initReveal() {
+    var nodes = document.querySelectorAll('.reveal');
+    if (!nodes.length) return;
+    if (!('IntersectionObserver' in window)) {
+      // Safety floor: stamp every reveal element visible if the browser
+      // is too old for IO. Better than leaving content invisible.
+      nodes.forEach(function (n) { n.classList.add('is-visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+    nodes.forEach(function (n) { io.observe(n); });
+  }
+
   function init() {
     initNavScroll();
+    initReveal();
     var btn = document.getElementById('mobile-menu-toggle');
     var menu = document.getElementById('mobile-menu');
     if (!btn || !menu) return;

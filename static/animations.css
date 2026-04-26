@@ -1,0 +1,68 @@
+/* PlausiDen reveal-on-scroll animations.
+ *
+ * The baseline state for `.reveal` is invisible + offset; once the
+ * IntersectionObserver in menu.js adds `.is-visible`, the element
+ * fades + slides into place. Honors `prefers-reduced-motion`.
+ *
+ * We also expose a couple of tiny named keyframes for content that
+ * should animate on load (hero) without waiting for scroll.
+ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger helpers: add `.reveal-delay-1` etc. for sequential reveals. */
+.reveal-delay-1 { transition-delay: 80ms; }
+.reveal-delay-2 { transition-delay: 160ms; }
+.reveal-delay-3 { transition-delay: 240ms; }
+.reveal-delay-4 { transition-delay: 320ms; }
+
+/* Hero fade-in on load — independent of scroll. */
+@keyframes pd-fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: pd-fade-in-up 800ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.animate-fade-in-up.delay-1 { animation-delay: 100ms; }
+.animate-fade-in-up.delay-2 { animation-delay: 200ms; }
+.animate-fade-in-up.delay-3 { animation-delay: 300ms; }
+.animate-fade-in-up.delay-4 { animation-delay: 400ms; }
+
+/* Subtle pulse for the small hero accent dot. */
+@keyframes pd-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+.animate-pulse-soft {
+  animation: pd-pulse-soft 2.4s ease-in-out infinite;
+}
+
+/* Reduced-motion users get the final state instantly with no animation. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-fade-in-up,
+  .animate-pulse-soft {
+    animation: none;
+  }
+}

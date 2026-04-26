@@ -77,9 +77,27 @@ impl InquiryState {
 pub(crate) struct InquiryForm {
     #[serde(default)]
     pub(crate) name: String,
-    #[serde(default)]
+    /// Reply-to email; the contact form labels this `email`.
+    #[serde(default, alias = "email")]
     pub(crate) reply_to: String,
+    #[serde(default)]
+    pub(crate) phone: String,
+    #[serde(default)]
+    pub(crate) company: String,
+    /// Selected service interest from the dropdown.
+    #[serde(default)]
+    pub(crate) service: String,
     pub(crate) message: String,
+}
+
+const MAX_PHONE_LEN: usize = 50;
+const MAX_COMPANY_LEN: usize = 200;
+const MAX_SERVICE_LEN: usize = 100;
+
+/// Returns `s` or "(omitted)" if `s` is empty. Used to keep the email
+/// body readable when optional fields are blank.
+const fn or_omitted(s: &str) -> &str {
+    if s.is_empty() { "(omitted)" } else { s }
 }
 
 /// Validate the form. Returns `Ok(())` if every field is within bounds and
@@ -90,6 +108,15 @@ fn validate(f: &InquiryForm) -> Result<(), &'static str> {
     }
     if f.reply_to.len() > MAX_REPLY_TO_LEN {
         return Err("reply-to too long");
+    }
+    if f.phone.len() > MAX_PHONE_LEN {
+        return Err("phone too long");
+    }
+    if f.company.len() > MAX_COMPANY_LEN {
+        return Err("company too long");
+    }
+    if f.service.len() > MAX_SERVICE_LEN {
+        return Err("service too long");
     }
     if f.message.is_empty() {
         return Err("message required");
@@ -155,20 +182,18 @@ pub(crate) async fn submit(
     // a legit edge-case email).
     let body = format!(
         "New inquiry from the plausiden.com contact form.\n\n\
-         Name: {}\n\
+         Name:     {}\n\
          Reply-to: {}\n\
+         Phone:    {}\n\
+         Company:  {}\n\
+         Service:  {}\n\
          \n\
          --- message ---\n{}\n",
-        if form.name.is_empty() {
-            "(omitted)"
-        } else {
-            &form.name
-        },
-        if form.reply_to.is_empty() {
-            "(omitted)"
-        } else {
-            &form.reply_to
-        },
+        or_omitted(&form.name),
+        or_omitted(&form.reply_to),
+        or_omitted(&form.phone),
+        or_omitted(&form.company),
+        or_omitted(&form.service),
         form.message,
     );
 
@@ -232,33 +257,42 @@ const _IP_FUTURE_USE: fn(IpAddr) = |_| {};
 mod tests {
     use super::*;
 
-    #[test]
-    fn validate_rejects_empty_message() {
-        let f = InquiryForm {
+    fn empty_form() -> InquiryForm {
+        InquiryForm {
             name: String::new(),
             reply_to: String::new(),
+            phone: String::new(),
+            company: String::new(),
+            service: String::new(),
             message: String::new(),
-        };
-        assert!(validate(&f).is_err());
+        }
+    }
+
+    #[test]
+    fn validate_rejects_empty_message() {
+        assert!(validate(&empty_form()).is_err());
     }
 
     #[test]
     fn validate_accepts_minimal_message() {
-        let f = InquiryForm {
-            name: String::new(),
-            reply_to: String::new(),
-            message: "hi".into(),
-        };
+        let mut f = empty_form();
+        f.message = "hi".into();
         assert!(validate(&f).is_ok());
     }
 
     #[test]
     fn validate_rejects_oversized_message() {
-        let f = InquiryForm {
-            name: String::new(),
-            reply_to: String::new(),
-            message: "x".repeat(MAX_MESSAGE_LEN + 1),
-        };
+        let mut f = empty_form();
+        f.message = "x".repeat(MAX_MESSAGE_LEN + 1);
         assert!(validate(&f).is_err());
     }
+
+    #[test]
+    fn validate_rejects_oversized_phone() {
+        let mut f = empty_form();
+        f.message = "hi".into();
+        f.phone = "x".repeat(MAX_PHONE_LEN + 1);
+        assert!(validate(&f).is_err());
+    }
+
 }

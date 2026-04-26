@@ -34,6 +34,7 @@ fn head_tag(title: &str) -> Markup {
             link rel="preconnect" href="https://fonts.gstatic.com" crossorigin;
             link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap";
             link rel="stylesheet" href="/static/index-CWVVhmVm.css";
+            link rel="stylesheet" href="/static/animations.css";
             script src="/static/menu.js" defer {}
         }
     }
@@ -184,7 +185,7 @@ fn footer() -> Markup {
                     }
                 }
                 div class="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500" {
-                    p { "© 2026 PlausiDen LLC. All rights reserved." }
+                    p { "© PlausiDen LLC. All rights reserved." }
                     div class="flex gap-6" {
                         a href="/privacy-directive" { span class="hover:text-white transition-colors cursor-pointer" { "Sovereign Privacy Directive" } }
                         a href="/terms-of-service" { span class="hover:text-white transition-colors cursor-pointer" { "Sovereign Terms of Service" } }
