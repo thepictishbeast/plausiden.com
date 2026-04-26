@@ -8,7 +8,7 @@ on:
 
 jobs:
   pre-merge:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
       - name: Run pre-merge audit routine
