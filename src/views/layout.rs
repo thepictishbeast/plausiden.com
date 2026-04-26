@@ -86,6 +86,7 @@ fn nav(current: &str) -> Markup {
                     (nav_link("/", "Home", current))
                     (nav_link("/services", "Services", current))
                     (nav_link("/about", "About", current))
+                    (nav_link("/blog", "Field Notes", current))
                     (nav_link("/contact", "Contact", current))
                     a href="/contact" {
                         (Button {
@@ -117,6 +118,7 @@ fn nav(current: &str) -> Markup {
                     a href="/" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Home" }
                     a href="/services" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Services" }
                     a href="/about" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "About" }
+                    a href="/blog" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Field Notes" }
                     a href="/contact" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Contact" }
                     a href="/contact" class="mt-2 inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium rounded-md border border-emerald-500/50 text-emerald-700 hover:bg-emerald-50 min-h-8 px-3 text-xs py-2" { "Encrypted Inquiry" }
                     a href="/contact" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium rounded-md bg-primary text-primary-foreground min-h-8 px-3 text-xs py-2" { "Get a Quote" }

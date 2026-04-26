@@ -45,9 +45,9 @@ Last reviewed: 2026-04-26.
   with counsel"). Decision: leave as-is — a young company's "drafted
   with counsel" reads more professional than fake-real boilerplate.
   Replace when real text comes back from counsel.
-- [ ] **Add `/blog` surface.** Index + post route, Markdown-or-Maud
-  source compiled at build time. Required before publishing the
-  federated-rule-learning post.
+- [x] **Add `/blog` surface.** `/blog` index + `/blog/{slug}` route, posts
+  registered as Maud functions in `src/views/posts/`. "Field Notes" link
+  in nav. First post (federated rule learning) shipped.
 
 ## POLISH — improves outbound conversion but not blocking
 

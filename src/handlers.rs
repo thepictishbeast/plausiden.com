@@ -49,6 +49,26 @@ pub async fn contact() -> Markup {
     crate::views::contact::render()
 }
 
+/// Render the blog index (`GET /blog`).
+pub async fn blog_index() -> Markup {
+    crate::views::blog::index()
+}
+
+/// Render an individual blog post (`GET /blog/:slug`). Returns the
+/// styled 404 view for unknown slugs.
+///
+/// BUG ASSUMPTION: Axum extracts `slug` from the path; we treat unknown
+/// slugs as not-found rather than redirecting to the index, so external
+/// links to a removed post fail loudly instead of silently shifting.
+pub async fn blog_post(
+    axum::extract::Path(slug): axum::extract::Path<String>,
+) -> (StatusCode, Markup) {
+    crate::views::blog::post(&slug).map_or_else(
+        || (StatusCode::NOT_FOUND, crate::views::not_found::render()),
+        |body| (StatusCode::OK, body),
+    )
+}
+
 /// Fallback handler for unmatched paths. Returns 404 with a styled page.
 ///
 /// BUG ASSUMPTION: The `404 + Markup` tuple is picked up by Axum's

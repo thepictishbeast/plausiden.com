@@ -8,9 +8,11 @@
 //! (grep the crate for `PreEscaped(`).
 
 pub mod about;
+pub mod blog;
 pub mod contact;
 pub mod home;
 pub mod layout;
 pub mod legal;
 pub mod not_found;
+pub mod posts;
 pub mod services;

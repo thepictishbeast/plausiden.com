@@ -96,6 +96,8 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/services", get(handlers::services))
         .route("/about", get(handlers::about))
         .route("/contact", get(handlers::contact).post(inquiry::submit))
+        .route("/blog", get(handlers::blog_index))
+        .route("/blog/{slug}", get(handlers::blog_post))
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/healthz", get(handlers::healthz))
@@ -215,6 +217,65 @@ mod tests {
         assert!(h.contains_key("content-security-policy"));
         assert!(h.contains_key("strict-transport-security"));
         assert!(h.contains_key("referrer-policy"));
+    }
+
+    /// `/blog` lists the published posts; the most recent is linked.
+    #[tokio::test]
+    async fn blog_index_links_known_post() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/blog")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = to_bytes(resp.into_body(), 64 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains("Field Notes"));
+        assert!(s.contains("/blog/federated-rule-learning"));
+    }
+
+    /// `/blog/<known-slug>` returns 200 + the post body.
+    #[tokio::test]
+    async fn blog_post_returns_known_post() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/blog/federated-rule-learning")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = to_bytes(resp.into_body(), 128 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains("Federated rule learning"));
+        // Excerpt's signature line should be in the body
+        assert!(s.contains("compose, don't compromise"));
+    }
+
+    /// `/blog/<unknown-slug>` returns 404 with the styled not-found.
+    #[tokio::test]
+    async fn blog_post_returns_404_for_unknown_slug() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/blog/never-written")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+        let body = to_bytes(resp.into_body(), 32 * 1024).await.unwrap();
+        assert!(std::str::from_utf8(&body).unwrap().contains("Nothing here"));
     }
 
     /// Health check is cheap, body-only, and does not set cookies.
