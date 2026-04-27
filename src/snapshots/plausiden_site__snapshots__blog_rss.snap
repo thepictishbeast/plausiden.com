@@ -11,6 +11,15 @@ expression: body
   <id>https://plausiden.com/blog</id>
   <updated>2026-04-27T00:00:00Z</updated>
   <entry>
+    <title>Why we&apos;re building Thundercrab</title>
+    <link href="https://plausiden.com/blog/why-thundercrab" rel="alternate"/>
+    <id>https://plausiden.com/blog/why-thundercrab</id>
+    <published>2026-04-27T00:00:00Z</published>
+    <updated>2026-04-27T00:00:00Z</updated>
+    <category term="Engineering"/>
+    <summary>Modern consumer mail clients replaced an open, auditable filtering standard with opaque ML categorization that users can&apos;t see, edit, or carry between providers. We&apos;re building the local-first GUI for transparent mail rules — and writing about why nobody else has.</summary>
+  </entry>
+  <entry>
     <title>Provable-by-construction privacy</title>
     <link href="https://plausiden.com/blog/provable-privacy" rel="alternate"/>
     <id>https://plausiden.com/blog/provable-privacy</id>

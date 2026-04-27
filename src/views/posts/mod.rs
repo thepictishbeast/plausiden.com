@@ -20,6 +20,7 @@ use maud::Markup;
 pub mod avp_doctrine;
 pub mod federated_learning;
 pub mod provable_privacy;
+pub mod why_thundercrab;
 
 /// Metadata + render pointer for one published post.
 #[derive(Debug, Clone, Copy)]
@@ -49,6 +50,15 @@ pub struct Post {
 /// a typo'd slug would either 404 (caller-side) or collide (caught by
 /// [`tests::slug_uniqueness`]).
 pub const POSTS: &[Post] = &[
+    Post {
+        slug: "why-thundercrab",
+        title: "Why we're building Thundercrab",
+        excerpt: "Modern consumer mail clients replaced an open, auditable filtering standard with opaque ML categorization that users can't see, edit, or carry between providers. We're building the local-first GUI for transparent mail rules — and writing about why nobody else has.",
+        category: "Engineering",
+        published: "2026-04-27",
+        read_time: "10 min read",
+        render: why_thundercrab::render,
+    },
     Post {
         slug: "provable-privacy",
         title: "Provable-by-construction privacy",
