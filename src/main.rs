@@ -101,6 +101,8 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/solutions/legal", get(handlers::solutions_legal))
         .route("/solutions/healthcare", get(handlers::solutions_healthcare))
         .route("/solutions/journalism", get(handlers::solutions_journalism))
+        .route("/solutions/financial-advisors", get(handlers::solutions_financial_advisors))
+        .route("/solutions/nonprofit", get(handlers::solutions_nonprofit))
         .route("/how-we-work", get(handlers::how_we_work))
         .route("/pricing-transparency", get(handlers::pricing))
         .route("/sitemap.xml", get(handlers::sitemap_xml))

@@ -69,6 +69,16 @@ pub async fn solutions_journalism() -> Markup {
     crate::views::solutions::journalism::render()
 }
 
+/// Render the financial-advisors-vertical landing page.
+pub async fn solutions_financial_advisors() -> Markup {
+    crate::views::solutions::financial_advisors::render()
+}
+
+/// Render the nonprofit-vertical landing page.
+pub async fn solutions_nonprofit() -> Markup {
+    crate::views::solutions::nonprofit::render()
+}
+
 /// Render `/how-we-work` — engagement model + four commitments.
 pub async fn how_we_work() -> Markup {
     crate::views::how_we_work::render()
@@ -114,6 +124,8 @@ const SITEMAP_ROUTES: &[&str] = &[
     "/solutions/legal",
     "/solutions/healthcare",
     "/solutions/journalism",
+    "/solutions/financial-advisors",
+    "/solutions/nonprofit",
     "/how-we-work",
     "/pricing-transparency",
     "/privacy-directive",
