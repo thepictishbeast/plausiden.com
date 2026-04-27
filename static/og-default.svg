@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="PlausiDen LLC — Privacy-first IT for the modern enterprise">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d488a"/>
+      <stop offset="100%" stop-color="#0a2c52"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- subtle grid pattern -->
+  <g opacity="0.06" stroke="#ffffff" stroke-width="1">
+    <path d="M0 105H1200M0 210H1200M0 315H1200M0 420H1200M0 525H1200"/>
+    <path d="M150 0V630M300 0V630M450 0V630M600 0V630M750 0V630M900 0V630M1050 0V630"/>
+  </g>
+
+  <!-- brand block -->
+  <g transform="translate(80, 220)">
+    <!-- shield -->
+    <rect x="0" y="0" width="80" height="80" rx="12" fill="url(#accent)"/>
+    <svg x="16" y="16" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+    </svg>
+
+    <!-- wordmark -->
+    <text x="100" y="56" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="700" fill="#ffffff">
+      PlausiDen <tspan fill="#3b82f6">LLC</tspan>
+    </text>
+  </g>
+
+  <!-- tagline -->
+  <text x="80" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="600" fill="#ffffff" opacity="0.95">
+    Privacy-first IT
+  </text>
+  <text x="80" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="600" fill="#3b82f6">
+    for the modern enterprise.
+  </text>
+
+  <!-- subline -->
+  <text x="80" y="500" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#cbd5e1">
+    Cybersecurity · cloud · custom software · operations.
+  </text>
+  <text x="80" y="530" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#cbd5e1">
+    plausiden.com
+  </text>
+</svg>

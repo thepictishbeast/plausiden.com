@@ -78,9 +78,14 @@ fn head_tag(title: &str, current: &str, description: &str) -> Markup {
             meta property="og:title" content=(title);
             meta property="og:description" content=(description);
             meta property="og:url" content=(canonical);
+            meta property="og:image" content=(format!("{SITE_ORIGIN}/static/og-default.svg"));
+            meta property="og:image:width" content="1200";
+            meta property="og:image:height" content="630";
+            meta property="og:image:alt" content="PlausiDen LLC — Privacy-first IT for the modern enterprise";
             meta name="twitter:card" content="summary_large_image";
             meta name="twitter:title" content=(title);
             meta name="twitter:description" content=(description);
+            meta name="twitter:image" content=(format!("{SITE_ORIGIN}/static/og-default.svg"));
 
             // JSON-LD: tells crawlers who we are without parsing the page body.
             script type="application/ld+json" { (PreEscaped(JSON_LD_ORGANIZATION)) }
