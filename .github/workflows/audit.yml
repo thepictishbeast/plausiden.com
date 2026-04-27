@@ -13,7 +13,7 @@ permissions:
 jobs:
   cargo-audit:
     name: cargo-audit (RustSec advisories)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
       - name: Clone PlausiDen-Loom (private path dep)
@@ -32,7 +32,7 @@ jobs:
 
   cargo-deny:
     name: cargo-deny (license + bans + sources)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
       - name: Clone PlausiDen-Loom (private path dep)
@@ -48,7 +48,7 @@ jobs:
 
   coupling:
     name: "Backend↔Frontend coupling audit"
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, plausiden]
     permissions:
       contents: read
     steps:
@@ -72,7 +72,7 @@ jobs:
 
   version-control:
     name: "Version Control audit"
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, plausiden]
     permissions:
       contents: read
     steps:

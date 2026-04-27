@@ -113,9 +113,10 @@ jobs:
   build-musl:
     name: build (musl, static)
     # GitHub-hosted runner so apt-get + sudo work; the self-hosted runner
-    # has `no_new_privs` set, which blocks the musl-tools install. The
-    # static build is a release-artifact step, low frequency, so the
-    # GH-hosted minutes cost is negligible.
+    # has `no_new_privs` set, which blocks the musl-tools install. Keep
+    # this on ubuntu-latest so the static-build artifact step has a
+    # writeable apt. Other jobs run on self-hosted to bypass GH-hosted
+    # minute exhaustion.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
