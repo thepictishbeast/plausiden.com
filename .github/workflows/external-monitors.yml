@@ -1,0 +1,152 @@
+name: external-monitors
+
+# External infrastructure health checks. None of these run on every
+# push (they touch third-party services, sometimes paid, and they're
+# diagnostic — they don't gate code merges).
+#
+# Each job runs on its own cron schedule plus manual dispatch.
+# Failures surface as Actions UI errors and (eventually) email
+# notifications via the repo's notification settings.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # SSL Labs — weekly Tuesday 09:00 UTC. Their public scanner is
+    # rate-limited and shared; once a week is plenty for our threat model.
+    - cron: "0 9 * * 2"
+    # DNS health (DKIM/SPF/DMARC) — daily 06:00 UTC. Cheap, local,
+    # but worth daily because mail deliverability degrades silently
+    # the moment a record drifts.
+    - cron: "0 6 * * *"
+    # mail-tester.com — weekly Wednesday 10:00 UTC. The free tier
+    # rate-limits per IP; once a week is the sustainable cadence.
+    - cron: "0 10 * * 3"
+    # Link rot — monthly first-of-the-month 12:00 UTC. Blog posts
+    # don't reference many external links today, but as the catalog
+    # grows, pre-emptive checks save embarrassment.
+    - cron: "0 12 1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  ssl-labs:
+    name: "SSL Labs grade scan"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0 9 * * 2')
+    steps:
+      - name: Probe via SSL Labs Analyze API
+        run: |
+          # The SSL Labs API kicks off a scan and returns a "ready" status
+          # only after the analysis completes. We poll up to ~5 minutes.
+          set -euo pipefail
+          host="plausiden.com"
+          api="https://api.ssllabs.com/api/v3/analyze?host=$host&publish=off&all=done&fromCache=off"
+          curl -fsS "$api" >/dev/null  # kick off
+          for i in $(seq 1 30); do
+            sleep 10
+            resp=$(curl -fsS "$api")
+            status=$(echo "$resp" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','?'))")
+            echo "attempt $i: status=$status"
+            if [[ "$status" == "READY" || "$status" == "ERROR" ]]; then
+              break
+            fi
+          done
+          if [[ "$status" != "READY" ]]; then
+            echo "::error::SSL Labs scan did not complete within budget (status=$status)"
+            exit 1
+          fi
+          grade=$(echo "$resp" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['endpoints'][0].get('grade','?'))")
+          echo "grade: $grade"
+          # Anything below A+ is a finding for plausiden.com — the
+          # site's whole pitch is hardening.
+          if [[ "$grade" != "A+" ]]; then
+            echo "::error::SSL Labs grade $grade < A+; investigate cipher suite, OCSP stapling, HSTS preload"
+            exit 1
+          fi
+
+  dns-health:
+    name: "DNS health: SPF + DKIM + DMARC + MX"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0 6 * * *')
+    steps:
+      - name: Verify mail authentication records resolve
+        run: |
+          set -euo pipefail
+          domain="plausiden.com"
+
+          fail=0
+          report() { echo "$1"; if [[ "$1" == FAIL* ]]; then fail=1; fi; }
+
+          # MX must resolve to mail.plausiden.com
+          mx=$(dig +short MX "$domain" | head -1 | awk '{print $2}' | sed 's/\.$//')
+          if [[ -n "$mx" ]]; then
+            report "OK    MX → $mx"
+          else
+            report "FAIL  MX  no record"
+          fi
+
+          # SPF v1 record on the apex
+          spf=$(dig +short TXT "$domain" | grep -i 'v=spf1' || true)
+          if [[ -n "$spf" ]]; then
+            report "OK    SPF $spf"
+          else
+            report "FAIL  SPF no record"
+          fi
+
+          # DKIM selector — we use `mail`. If the rotate cadence
+          # changes the selector, update here.
+          dkim=$(dig +short TXT "mail._domainkey.$domain" | grep -i 'v=DKIM1' || true)
+          if [[ -n "$dkim" ]]; then
+            report "OK    DKIM mail._domainkey present"
+          else
+            report "FAIL  DKIM mail._domainkey missing"
+          fi
+
+          # DMARC policy
+          dmarc=$(dig +short TXT "_dmarc.$domain" | grep -i 'v=DMARC1' || true)
+          if [[ -n "$dmarc" ]]; then
+            report "OK    DMARC $dmarc"
+          else
+            report "FAIL  DMARC no record"
+          fi
+
+          if [[ $fail -ne 0 ]]; then
+            echo "::error::DNS health: one or more authentication records missing"
+            exit 1
+          fi
+
+  mail-tester:
+    name: "mail-tester.com deliverability score"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0 10 * * 3')
+    steps:
+      - name: Skip — manual check
+        run: |
+          # mail-tester.com requires sending a real email to a
+          # rotating address shown on their website. Automating it
+          # via API requires a paid plan ($0.10/check) we haven't
+          # signed up for. Treating this as a manual quarterly
+          # checkpoint until the plan is approved.
+          echo "::warning::mail-tester automation requires paid API; manual check quarterly"
+
+  link-rot:
+    name: "External link rot in blog posts"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0 12 1 * *')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run lychee against blog post sources
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # `--no-progress` for cleaner CI output. Restrict to the
+          # blog post .rs files since the rest of the codebase has
+          # no external URLs we control.
+          args: >-
+            --no-progress
+            --max-concurrency 4
+            --timeout 20
+            --retry-wait-time 5
+            'src/views/posts/*.rs'
+          fail: true
