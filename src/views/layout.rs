@@ -2,6 +2,8 @@
 //! nav / footer structure so visual parity is preserved across server-rendered
 //! pages.
 
+use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink};
+use loom_icons as icons;
 use maud::{DOCTYPE, Markup, PreEscaped, html};
 
 use crate::components::{Button, ButtonSize, ButtonVariant, Decoration, IconPosition};
@@ -158,74 +160,70 @@ fn nav(current: &str) -> Markup {
     }
 }
 
-/// Shared footer. Matches the production 4-column layout (brand / Company /
-/// Solutions / Contact) and slate-900 background.
+// Footer content lives in static slices so the typed Loom Footer
+// primitive can borrow them by reference.
+const FOOTER_COMPANY: &[FooterItem<'static>] = &[
+    FooterItem::Link { href: "/", label: "Home" },
+    FooterItem::Link { href: "/about", label: "About Us" },
+    FooterItem::Link { href: "/services", label: "Services" },
+    FooterItem::Link { href: "/blog", label: "Field Notes" },
+    FooterItem::Link { href: "/how-we-work", label: "How We Work" },
+    FooterItem::Link { href: "/pricing-transparency", label: "Pricing" },
+    FooterItem::Link { href: "/contact", label: "Contact" },
+];
+
+const FOOTER_SOLUTIONS: &[FooterItem<'static>] = &[
+    FooterItem::Link { href: "/solutions/legal", label: "Legal" },
+    FooterItem::Link { href: "/solutions/healthcare", label: "Healthcare" },
+    FooterItem::Link { href: "/solutions/journalism", label: "Journalism" },
+    FooterItem::Link { href: "/solutions/financial-advisors", label: "Financial Advisors" },
+    FooterItem::Link { href: "/solutions/nonprofit", label: "Nonprofits" },
+    FooterItem::Text { text: "IT Operations" },
+    FooterItem::Text { text: "Cyber Security" },
+];
+
+static FOOTER_CONTACT: &[FooterItem<'static>] = &[
+    FooterItem::Contact {
+        icon: &icons::PHONE,
+        label: "978-351-6495",
+        href: Some("tel:9783516495"),
+    },
+    FooterItem::Contact {
+        icon: &icons::MAIL,
+        label: "team@plausiden.com",
+        href: Some("mailto:team@plausiden.com"),
+    },
+    FooterItem::Contact {
+        icon: &icons::MAP_PIN,
+        label: "Massachusetts, USA",
+        href: None,
+    },
+];
+
+static FOOTER_COLUMNS: &[FooterColumn<'static>] = &[
+    FooterColumn { heading: "Company", items: FOOTER_COMPANY },
+    FooterColumn { heading: "Solutions", items: FOOTER_SOLUTIONS },
+    FooterColumn { heading: "Contact", items: FOOTER_CONTACT },
+];
+
+const FOOTER_LEGAL: &[FooterLegalLink<'static>] = &[
+    FooterLegalLink { href: "/privacy-directive", label: "Sovereign Privacy Directive" },
+    FooterLegalLink { href: "/terms-of-service", label: "Sovereign Terms of Service" },
+];
+
+/// Shared footer. Composed entirely from the typed `loom_components::Footer`
+/// primitive. Visual contract preserved exactly.
 fn footer() -> Markup {
-    html! {
-        footer class="bg-slate-900 text-slate-300 py-16" {
-            div class="container mx-auto px-4 md:px-6" {
-                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12" {
-                    div class="space-y-6" {
-                        div class="flex items-center gap-2 text-white" {
-                            div class="bg-primary p-1.5 rounded-lg" {
-                                (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-6 h-6 text-white"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>"#))
-                            }
-                            span class="font-display font-bold text-xl tracking-tight" {
-                                "PlausiDen " span class="text-primary" { "LLC" }
-                            }
-                        }
-                        p class="text-slate-400 text-sm leading-relaxed max-w-xs" {
-                            "Providing comprehensive, high-quality IT solutions that empower modern enterprises. General yet specific excellence in technology."
-                        }
-                    }
-                    div class="space-y-6" {
-                        h3 class="text-white font-display font-semibold text-lg" { "Company" }
-                        ul class="space-y-3" {
-                            li { a href="/" { span class="text-sm hover:text-white transition-colors cursor-pointer" { "Home" } } }
-                            li { a href="/about" { span class="text-sm hover:text-white transition-colors cursor-pointer" { "About Us" } } }
-                            li { a href="/services" { span class="text-sm hover:text-white transition-colors cursor-pointer" { "Services" } } }
-                            li { a href="/contact" { span class="text-sm hover:text-white transition-colors cursor-pointer" { "Contact" } } }
-                        }
-                    }
-                    div class="space-y-6" {
-                        h3 class="text-white font-display font-semibold text-lg" { "Solutions" }
-                        ul class="space-y-3 text-sm" {
-                            li { "IT Operations" }
-                            li { "Cyber Security" }
-                            li { "Artificial Intelligence" }
-                            li { "Industrial Automation" }
-                            li { "Software Development" }
-                            li { "Network Architecture" }
-                        }
-                    }
-                    div class="space-y-6" {
-                        h3 class="text-white font-display font-semibold text-lg" { "Contact" }
-                        ul class="space-y-4" {
-                            li class="flex items-start gap-3" {
-                                (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-5 h-5 text-primary shrink-0 mt-0.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>"#))
-                                span class="text-sm hover:text-white transition-colors" { "978-351-6495" }
-                            }
-                            li class="flex items-start gap-3" {
-                                (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-5 h-5 text-primary shrink-0 mt-0.5"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>"#))
-                                span class="text-sm hover:text-white transition-colors" { "team@plausiden.com" }
-                            }
-                            li class="flex items-start gap-3" {
-                                (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5 text-primary shrink-0 mt-0.5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>"#))
-                                span class="text-sm" { "Massachusetts, USA" }
-                            }
-                        }
-                    }
-                }
-                div class="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500" {
-                    p { "© PlausiDen LLC. All rights reserved." }
-                    div class="flex gap-6" {
-                        a href="/privacy-directive" { span class="hover:text-white transition-colors cursor-pointer" { "Sovereign Privacy Directive" } }
-                        a href="/terms-of-service" { span class="hover:text-white transition-colors cursor-pointer" { "Sovereign Terms of Service" } }
-                    }
-                }
-            }
-        }
+    Footer {
+        brand_logo: &icons::SHIELD,
+        brand_name: "PlausiDen",
+        brand_accent: "LLC",
+        brand_tagline: "Providing comprehensive, high-quality IT solutions that empower modern enterprises. General yet specific excellence in technology.",
+        columns: FOOTER_COLUMNS,
+        copyright: "© PlausiDen LLC. All rights reserved.",
+        legal_links: FOOTER_LEGAL,
     }
+    .render()
 }
 
 /// Render a page with the site-wide chrome and the default site
