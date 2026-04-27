@@ -59,3 +59,30 @@ jobs:
             exit 1
           fi
           echo "All COUPLING-EXEMPT annotations carry reasons."
+
+  version-control:
+    name: "Version Control audit"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Audit walks git log + ls-files; needs deeper history than
+          # the default depth=1 shallow checkout.
+          fetch-depth: 1000
+
+      - name: Run version-control audit (vendored from PlausiDen-Audits)
+        run: |
+          ./.github/scripts/version-control-check.sh "$GITHUB_WORKSPACE" \
+            | tee /tmp/version-control-report.txt
+          # Surface FAIL lines as ::error:: so the Actions UI flags them
+          # without having to dig into the log.
+          grep '^FAIL' /tmp/version-control-report.txt 2>/dev/null \
+            | while IFS= read -r line; do
+                echo "::error::version-control: $line"
+              done || true
+          grep '^WARN' /tmp/version-control-report.txt 2>/dev/null \
+            | while IFS= read -r line; do
+                echo "::warning::version-control: $line"
+              done || true
