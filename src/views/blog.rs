@@ -6,6 +6,7 @@
 
 use maud::{Markup, html};
 
+use loom_components::card::LinkCard;
 use super::layout::{page, page_with_description};
 use super::posts::{POSTS, Post, by_slug};
 
@@ -96,27 +97,28 @@ pub fn post(slug: &str) -> Option<Markup> {
 
 fn post_card(post: &Post) -> Markup {
     let href = format!("/blog/{}", post.slug);
-    html! {
-        a href=(href) class="group block reveal" {
-            article class="rounded-xl border border-slate-200 bg-white p-6 md:p-8 transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5" {
-                div class="flex items-center gap-3 text-xs text-slate-500" {
-                    span class="inline-block px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20" {
-                        (post.category)
-                    }
-                    span { (post.published) }
-                    span class="text-slate-300" { "·" }
-                    span { (post.read_time) }
-                }
-                h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-3 group-hover:text-primary transition-colors" {
-                    (post.title)
-                }
-                p class="text-slate-600 mt-3 leading-relaxed" {
-                    (post.excerpt)
-                }
-                p class="mt-4 text-primary font-semibold text-sm" {
-                    "Read more →"
-                }
+    let body = html! {
+        div class="flex items-center gap-3 text-xs text-slate-500" {
+            span class="inline-block px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20" {
+                (post.category)
             }
+            span { (post.published) }
+            span class="text-slate-300" { "·" }
+            span { (post.read_time) }
+        }
+        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-3 group-hover:text-primary transition-colors" {
+            (post.title)
+        }
+        p class="text-slate-600 mt-3 leading-relaxed" {
+            (post.excerpt)
+        }
+        p class="mt-4 text-primary font-semibold text-sm" {
+            "Read more →"
+        }
+    };
+    html! {
+        div class="reveal" {
+            (LinkCard { href: &href, body: &body }.render())
         }
     }
 }

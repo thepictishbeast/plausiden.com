@@ -9,6 +9,7 @@
 //! provide legal advice. Wording is "designed around" / "built for" —
 //! never "compliant with" without a specific, verified scope.
 
+use loom_components::card::FeatureCard;
 use maud::{Markup, PreEscaped, html};
 
 use crate::views::layout::page_with_description;
@@ -93,36 +94,36 @@ pub fn render() -> Markup {
                     }
                 }
                 div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-1" {
-                    (capability_card(
-                        ICON_LOCK,
-                        "Confidential email + file sharing",
-                        "Self-hosted mail with TLS-required transport, DKIM/SPF/DMARC enforced, encrypted-at-rest storage, and routing that never sends client data through third-party content scanners. No \"smart features\" that require reading messages.",
-                    ))
-                    (capability_card(
-                        ICON_FILE,
-                        "Matter-aware document handling",
-                        "Document management with per-matter access control, retention policies that honor preservation obligations, and audit trails that survive the inevitable \"who saw what, when?\" question. Designed to make e-discovery production faster, not slower.",
-                    ))
-                    (capability_card(
-                        ICON_AUDIT,
-                        "Compliance-ready audit posture",
-                        "Logs, access reviews, and control documentation organized for state-bar inquiries, cyber-liability questionnaires, and client-side vendor reviews. We've answered these questions before; we know which evidence each reviewer actually wants.",
-                    ))
-                    (capability_card(
-                        ICON_USERS,
-                        "Conflicts and access discipline",
-                        "User and group structure that mirrors how matters actually run — partner / associate / paralegal / outside counsel — so an ethical wall is enforced by the file system, not by an attorney remembering not to look. Onboarding and offboarding scripts that don't leave a former associate with stale access.",
-                    ))
-                    (capability_card(
-                        ICON_SHIELD,
-                        "Threat-modeled defense",
-                        "Phishing resistance tuned for the lures that actually target lawyers (wire-fraud impersonations, false subpoenas, malicious filing-portal lookalikes). Endpoint and network defenses sized to the firm — no enterprise theater you can't operate.",
-                    ))
-                    (capability_card(
-                        ICON_FILE,
-                        "Continuity and recovery",
-                        "Backups that survive ransomware (immutable, tested, restorable to a known-good point). Documented runbooks for the scenarios most likely to take a small firm offline. Retainer-grade response if the worst day happens.",
-                    ))
+                    (FeatureCard {
+                        icon_svg: ICON_LOCK,
+                        title: "Confidential email + file sharing",
+                        description: "Self-hosted mail with TLS-required transport, DKIM/SPF/DMARC enforced, encrypted-at-rest storage, and routing that never sends client data through third-party content scanners. No \"smart features\" that require reading messages.",
+                    }.render())
+                    (FeatureCard {
+                        icon_svg: ICON_FILE,
+                        title: "Matter-aware document handling",
+                        description: "Document management with per-matter access control, retention policies that honor preservation obligations, and audit trails that survive the inevitable \"who saw what, when?\" question. Designed to make e-discovery production faster, not slower.",
+                    }.render())
+                    (FeatureCard {
+                        icon_svg: ICON_AUDIT,
+                        title: "Compliance-ready audit posture",
+                        description: "Logs, access reviews, and control documentation organized for state-bar inquiries, cyber-liability questionnaires, and client-side vendor reviews. We've answered these questions before; we know which evidence each reviewer actually wants.",
+                    }.render())
+                    (FeatureCard {
+                        icon_svg: ICON_USERS,
+                        title: "Conflicts and access discipline",
+                        description: "User and group structure that mirrors how matters actually run — partner / associate / paralegal / outside counsel — so an ethical wall is enforced by the file system, not by an attorney remembering not to look. Onboarding and offboarding scripts that don't leave a former associate with stale access.",
+                    }.render())
+                    (FeatureCard {
+                        icon_svg: ICON_SHIELD,
+                        title: "Threat-modeled defense",
+                        description: "Phishing resistance tuned for the lures that actually target lawyers (wire-fraud impersonations, false subpoenas, malicious filing-portal lookalikes). Endpoint and network defenses sized to the firm — no enterprise theater you can't operate.",
+                    }.render())
+                    (FeatureCard {
+                        icon_svg: ICON_FILE,
+                        title: "Continuity and recovery",
+                        description: "Backups that survive ransomware (immutable, tested, restorable to a known-good point). Documented runbooks for the scenarios most likely to take a small firm offline. Retainer-grade response if the worst day happens.",
+                    }.render())
                 }
             }
         }
@@ -215,18 +216,6 @@ pub fn render() -> Markup {
         LEGAL_DESCRIPTION,
         body,
     )
-}
-
-fn capability_card(svg: &str, title: &str, description: &str) -> Markup {
-    html! {
-        div class="rounded-xl border border-slate-200 bg-white p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5" {
-            div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4" {
-                (PreEscaped(svg))
-            }
-            h3 class="font-display text-xl font-bold text-slate-900 mb-2" { (title) }
-            p class="text-slate-600 text-sm leading-relaxed" { (description) }
-        }
-    }
 }
 
 fn check_line(text: &str) -> Markup {
