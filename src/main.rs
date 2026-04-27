@@ -412,4 +412,76 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
         assert!(resp.headers().get("set-cookie").is_none());
     }
+
+    /// Fetch one route through the router and return its decoded body.
+    ///
+    /// BUG ASSUMPTION: Bodies fit in 256 KiB. The largest snapshot today
+    /// (a long blog post) is ~50 KiB — leaves 5× headroom for ordinary
+    /// growth before the cap needs revisiting.
+    pub(super) async fn fetch_body(path: &str) -> String {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri(path)
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            resp.status(),
+            StatusCode::OK,
+            "unexpected status for {path}"
+        );
+        let body = to_bytes(resp.into_body(), 256 * 1024).await.unwrap();
+        String::from_utf8(body.to_vec()).expect("rendered body must be utf-8")
+    }
+}
+
+/// Snapshot tests for every public route. Any byte-level change to a
+/// rendered page must be approved with `cargo insta review` before it
+/// can land — making accidental layout regressions impossible to merge
+/// silently.
+///
+/// SECURITY: These tests do not touch the network (the in-process
+/// router serves them) and use a fresh `InquiryState` per test, so
+/// they cannot leak SMTP credentials or cross-test rate-limit state.
+#[cfg(test)]
+mod snapshots {
+    use super::tests::fetch_body;
+
+    /// Drive the assertion for one route. Insta dedupes on the snapshot
+    /// name, so passing the route's unique name keeps every snapshot
+    /// in its own `.snap` file.
+    macro_rules! snap_route {
+        ($name:ident, $path:expr) => {
+            #[tokio::test]
+            async fn $name() {
+                let body = fetch_body($path).await;
+                insta::assert_snapshot!(stringify!($name), body);
+            }
+        };
+    }
+
+    snap_route!(home, "/");
+    snap_route!(services, "/services");
+    snap_route!(about, "/about");
+    snap_route!(contact, "/contact");
+    snap_route!(blog_index, "/blog");
+    snap_route!(blog_post_federated, "/blog/federated-rule-learning");
+    snap_route!(blog_post_avp, "/blog/avp-doctrine");
+    snap_route!(blog_post_provable_privacy, "/blog/provable-privacy");
+    snap_route!(solutions_legal, "/solutions/legal");
+    snap_route!(solutions_healthcare, "/solutions/healthcare");
+    snap_route!(solutions_journalism, "/solutions/journalism");
+    snap_route!(solutions_financial_advisors, "/solutions/financial-advisors");
+    snap_route!(solutions_nonprofit, "/solutions/nonprofit");
+    snap_route!(how_we_work, "/how-we-work");
+    snap_route!(pricing, "/pricing-transparency");
+    snap_route!(privacy, "/privacy-directive");
+    snap_route!(terms, "/terms-of-service");
+    snap_route!(sitemap, "/sitemap.xml");
+    snap_route!(robots, "/robots.txt");
+    snap_route!(blog_rss, "/blog/rss.xml");
 }

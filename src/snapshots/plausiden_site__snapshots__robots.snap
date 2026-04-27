@@ -1,0 +1,7 @@
+---
+source: src/main.rs
+expression: body
+---
+User-agent: *
+Allow: /
+Sitemap: https://plausiden.com/sitemap.xml

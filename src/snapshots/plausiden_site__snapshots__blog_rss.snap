@@ -1,0 +1,40 @@
+---
+source: src/main.rs
+expression: body
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>PlausiDen — Field Notes</title>
+  <subtitle>Notes on infrastructure, privacy, and how we work.</subtitle>
+  <link href="https://plausiden.com/blog" rel="alternate"/>
+  <link href="https://plausiden.com/blog/rss.xml" rel="self"/>
+  <id>https://plausiden.com/blog</id>
+  <updated>2026-04-27T00:00:00Z</updated>
+  <entry>
+    <title>Provable-by-construction privacy</title>
+    <link href="https://plausiden.com/blog/provable-privacy" rel="alternate"/>
+    <id>https://plausiden.com/blog/provable-privacy</id>
+    <published>2026-04-27T00:00:00Z</published>
+    <updated>2026-04-27T00:00:00Z</updated>
+    <category term="Architecture"/>
+    <summary>Two ways to promise to protect data: a policy you trust, or a property the type system enforces. We try to pick the second whenever the engineering allows. What that changes about audits, incident response, and the trade-offs people accept.</summary>
+  </entry>
+  <entry>
+    <title>How a written-down doctrine changes what &quot;shipping&quot; means</title>
+    <link href="https://plausiden.com/blog/avp-doctrine" rel="alternate"/>
+    <id>https://plausiden.com/blog/avp-doctrine</id>
+    <published>2026-04-27T00:00:00Z</published>
+    <updated>2026-04-27T00:00:00Z</updated>
+    <category term="Operating Model"/>
+    <summary>We wrote our taste down. Every public function carries a BUG ASSUMPTION annotation; every defense-in-depth carries a SECURITY annotation; CI enforces both. Why we think this is the right pace.</summary>
+  </entry>
+  <entry>
+    <title>Federated rule learning, without ever reading your mail</title>
+    <link href="https://plausiden.com/blog/federated-rule-learning" rel="alternate"/>
+    <id>https://plausiden.com/blog/federated-rule-learning</id>
+    <published>2026-04-26T00:00:00Z</published>
+    <updated>2026-04-26T00:00:00Z</updated>
+    <category term="Architecture"/>
+    <summary>How sorting rules can get smarter from the collective without any provider — including us — seeing message content. A note on what we built and why we think it matters.</summary>
+  </entry>
+</feed>

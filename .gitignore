@@ -16,3 +16,9 @@
 # Backup artifacts
 *.bak
 *.tar.gz
+
+# Insta snapshot pending-review files; the accepted .snap files ARE
+# committed (they are the test oracle). The .new / .pending files are
+# local-only until `cargo insta review` accepts them.
+**/*.snap.new
+**/*.pending-snap

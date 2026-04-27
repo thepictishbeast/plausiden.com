@@ -1,0 +1,24 @@
+---
+source: src/main.rs
+expression: body
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://plausiden.com/</loc></url>
+  <url><loc>https://plausiden.com/services</loc></url>
+  <url><loc>https://plausiden.com/about</loc></url>
+  <url><loc>https://plausiden.com/blog</loc></url>
+  <url><loc>https://plausiden.com/contact</loc></url>
+  <url><loc>https://plausiden.com/solutions/legal</loc></url>
+  <url><loc>https://plausiden.com/solutions/healthcare</loc></url>
+  <url><loc>https://plausiden.com/solutions/journalism</loc></url>
+  <url><loc>https://plausiden.com/solutions/financial-advisors</loc></url>
+  <url><loc>https://plausiden.com/solutions/nonprofit</loc></url>
+  <url><loc>https://plausiden.com/how-we-work</loc></url>
+  <url><loc>https://plausiden.com/pricing-transparency</loc></url>
+  <url><loc>https://plausiden.com/privacy-directive</loc></url>
+  <url><loc>https://plausiden.com/terms-of-service</loc></url>
+  <url><loc>https://plausiden.com/blog/provable-privacy</loc><lastmod>2026-04-27</lastmod></url>
+  <url><loc>https://plausiden.com/blog/avp-doctrine</loc><lastmod>2026-04-27</lastmod></url>
+  <url><loc>https://plausiden.com/blog/federated-rule-learning</loc><lastmod>2026-04-26</lastmod></url>
+</urlset>

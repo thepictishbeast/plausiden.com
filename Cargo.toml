@@ -42,6 +42,13 @@ loom-tokens = { path = "../PlausiDen-Loom/loom-tokens" }
 # Leave stubbed; activate after landlock has baked:
 # seccompiler = "0.5"
 
+[dev-dependencies]
+# Snapshot tests against the rendered HTML/XML of every public route.
+# Any byte-level change to the output requires `cargo insta review`,
+# which forces a human glance before a layout regression ships.
+insta = { version = "1", features = ["yaml", "filters"] }
+http-body-util = "0.1"
+
 [profile.release]
 opt-level = 3
 lto = "fat"
