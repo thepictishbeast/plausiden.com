@@ -1,0 +1,57 @@
+name: release
+
+# Static-musl build for portable deployment. Runs on:
+#   - tag push (`vX.Y.Z`) — produces the release artifact.
+#   - workflow_dispatch — manual trigger from the Actions UI when you want
+#     a one-off static binary without cutting a tag.
+#
+# Why not on every commit: the running prod binary on web-01 is glibc-linked
+# (dynamically linked against /lib64/ld-linux-x86-64.so.2), so the musl
+# artifact isn't on the deployment hot-path. Building it every push burns
+# minutes and adds a CI red light when the GH-hosted runner has assignment
+# issues.
+#
+# Why ubuntu-latest: the self-hosted (laptop) runner has `no_new_privs` set,
+# so `sudo apt-get install -y musl-tools` doesn't work there. ubuntu-latest
+# is also fine for infrequent tag-triggered runs even if minute budget is
+# tight day-to-day. If GH-hosted ever stops working entirely, install
+# musl-tools once on the self-hosted runner and switch this job over.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-musl:
+    name: build (musl, static)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+      - run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - run: cargo build --release --target x86_64-unknown-linux-musl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plausiden-site-musl
+          path: target/x86_64-unknown-linux-musl/release/plausiden-site
+          if-no-files-found: error
+          retention-days: 90
