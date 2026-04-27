@@ -2,23 +2,24 @@
 //! so visual parity is preserved. Classes reference the copied production
 //! Tailwind/shadcn stylesheet at `/static/index-CWVVhmVm.css`.
 
+use loom_components::card::{FeatureCard, FeatureCardStyle};
+use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
 use super::layout::page;
 
-// --- Lucide SVG icons, inlined to match the React output ---
+// Lucide path bodies for icons not yet in loom-icons. Once promoted
+// to the registry these inlines collapse.
 
-const ICON_SERVER: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-server w-7 h-7 text-primary group-hover:text-white transition-colors"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>"#;
+const ICON_SERVER_PATH: &str = r#"<rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line>"#;
 
-const ICON_SHIELD: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-7 h-7 text-primary group-hover:text-white transition-colors"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>"#;
+const ICON_BRAIN_PATH: &str = r#"<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M9 13a4.5 4.5 0 0 0 3-4"></path><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"></path><path d="M3.477 10.896a4 4 0 0 1 .585-.396"></path><path d="M6 18a4 4 0 0 1-1.967-.516"></path><path d="M12 13h4"></path><path d="M12 18h6a2 2 0 0 1 2 2v1"></path><path d="M12 8h8"></path><path d="M16 8V5a2 2 0 0 1 2-2"></path><circle cx="16" cy="13" r=".5"></circle><circle cx="18" cy="3" r=".5"></circle><circle cx="20" cy="21" r=".5"></circle><circle cx="20" cy="8" r=".5"></circle>"#;
 
-const ICON_BRAIN: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brain-circuit w-7 h-7 text-primary group-hover:text-white transition-colors"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M9 13a4.5 4.5 0 0 0 3-4"></path><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"></path><path d="M3.477 10.896a4 4 0 0 1 .585-.396"></path><path d="M6 18a4 4 0 0 1-1.967-.516"></path><path d="M12 13h4"></path><path d="M12 18h6a2 2 0 0 1 2 2v1"></path><path d="M12 8h8"></path><path d="M16 8V5a2 2 0 0 1 2-2"></path><circle cx="16" cy="13" r=".5"></circle><circle cx="18" cy="3" r=".5"></circle><circle cx="20" cy="21" r=".5"></circle><circle cx="20" cy="8" r=".5"></circle></svg>"#;
+const ICON_SETTINGS_PATH: &str = r#"<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>"#;
 
-const ICON_SETTINGS: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings w-7 h-7 text-primary group-hover:text-white transition-colors"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>"#;
+const ICON_CODE_PATH: &str = r#"<polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline>"#;
 
-const ICON_CODE: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code w-7 h-7 text-primary group-hover:text-white transition-colors"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>"#;
-
-const ICON_CPU: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cpu w-7 h-7 text-primary group-hover:text-white transition-colors"><rect width="16" height="16" x="4" y="4" rx="2"></rect><rect width="6" height="6" x="9" y="9" rx="1"></rect><path d="M15 2v2"></path><path d="M15 20v2"></path><path d="M2 15h2"></path><path d="M2 9h2"></path><path d="M20 15h2"></path><path d="M20 9h2"></path><path d="M9 2v2"></path><path d="M9 20v2"></path></svg>"#;
+const ICON_CPU_PATH: &str = r#"<rect width="16" height="16" x="4" y="4" rx="2"></rect><rect width="6" height="6" x="9" y="9" rx="1"></rect><path d="M15 2v2"></path><path d="M15 20v2"></path><path d="M2 15h2"></path><path d="M2 9h2"></path><path d="M20 15h2"></path><path d="M20 9h2"></path><path d="M9 2v2"></path><path d="M9 20v2"></path>"#;
 
 const ICON_ARROW_RIGHT: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-5 h-5 ml-2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>"#;
 
@@ -26,20 +27,21 @@ const ICON_TERMINAL: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24
 
 const ICON_CHECK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check w-6 h-6 text-primary shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>"#;
 
-fn service_card(icon_svg: &str, title: &str, desc: &str) -> Markup {
-    html! {
-        div {
-            div class="shadcn-card rounded-xl bg-card text-card-foreground h-full border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/20 group" {
-                div class="p-8" {
-                    div class="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300" {
-                        (PreEscaped(icon_svg))
-                    }
-                    h3 class="font-display text-xl font-bold text-slate-900 mb-3" { (title) }
-                    p class="text-slate-600 leading-relaxed" { (desc) }
-                }
-            }
-        }
+/// Wrap a Lucide path body in an `<svg>` with the home-grid icon classes
+/// (`w-7 h-7 text-primary group-hover:text-white transition-colors`).
+fn home_icon_svg(path: &str) -> String {
+    format!(
+        r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-primary group-hover:text-white transition-colors">{path}</svg>"#
+    )
+}
+
+fn service_card(icon_svg: &str, title: &str, description: &str) -> Markup {
+    FeatureCard {
+        icon_svg,
+        title,
+        description,
     }
+    .render_with_style(FeatureCardStyle::Bold)
 }
 
 fn check_line(text: &str) -> Markup {
@@ -107,13 +109,19 @@ pub fn render() -> Markup {
                     h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-4" { "Everything Your Business Needs" }
                     p class="text-slate-600 text-lg" { "We provide end-to-end solutions that cover every aspect of your technology stack." }
                 }
+                @let svg_server = home_icon_svg(ICON_SERVER_PATH);
+                @let svg_shield = icons::SHIELD.render_with_class("w-7 h-7 text-primary group-hover:text-white transition-colors");
+                @let svg_brain = home_icon_svg(ICON_BRAIN_PATH);
+                @let svg_settings = home_icon_svg(ICON_SETTINGS_PATH);
+                @let svg_code = home_icon_svg(ICON_CODE_PATH);
+                @let svg_cpu = home_icon_svg(ICON_CPU_PATH);
                 div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal reveal-delay-1" {
-                    (service_card(ICON_SERVER, "IT Operations", "Robust infrastructure management and operational excellence."))
-                    (service_card(ICON_SHIELD, "Cyber Security", "Advanced threat protection and compliance assurance."))
-                    (service_card(ICON_BRAIN, "Artificial Intelligence", "Intelligent systems and predictive analytics for your enterprise."))
-                    (service_card(ICON_SETTINGS, "Automation & IoT", "Operational efficiency through industrial-grade automation."))
-                    (service_card(ICON_CODE, "Software", "Custom development tailored to your specific needs."))
-                    (service_card(ICON_CPU, "Hardware", "Enterprise-grade procurement and deployment."))
+                    (service_card(&svg_server, "IT Operations", "Robust infrastructure management and operational excellence."))
+                    (service_card(&svg_shield, "Cyber Security", "Advanced threat protection and compliance assurance."))
+                    (service_card(&svg_brain, "Artificial Intelligence", "Intelligent systems and predictive analytics for your enterprise."))
+                    (service_card(&svg_settings, "Automation & IoT", "Operational efficiency through industrial-grade automation."))
+                    (service_card(&svg_code, "Software", "Custom development tailored to your specific needs."))
+                    (service_card(&svg_cpu, "Hardware", "Enterprise-grade procurement and deployment."))
                 }
             }
         }

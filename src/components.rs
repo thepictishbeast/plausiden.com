@@ -30,7 +30,10 @@ pub(crate) use badge::{Badge, BadgeTone};
 #[allow(unused_imports)]
 pub(crate) use button::{Button, ButtonSize, ButtonVariant, Decoration, IconPosition};
 #[allow(unused_imports)]
-pub(crate) use card::{ServiceCard, service_card};
+pub(crate) use card::{
+    Card, CardElevation, CardHover, CardPadding, FeatureCard, FeatureCardStyle, LinkCard,
+    ServiceCard,
+};
 
 /// Every component that renders a `class="…"` string goes through this
 /// trait. Forces "base classes + variant classes + size classes + extra"
