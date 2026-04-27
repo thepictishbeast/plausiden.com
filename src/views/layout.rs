@@ -3,14 +3,42 @@
 //! pages.
 
 use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink};
+use loom_components::nav::{Nav, NavCta, NavLink};
+use loom_components::ButtonVariant;
 use loom_icons as icons;
 use maud::{DOCTYPE, Markup, PreEscaped, html};
-
-use crate::components::{Button, ButtonSize, ButtonVariant, Decoration, IconPosition};
 
 const ICON_SHIELD_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>"#;
 
 const ICON_PHONE_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-4 h-4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>"#;
+
+/// Top-nav links shown on every page. Order is left-to-right.
+const NAV_LINKS: &[NavLink<'static>] = &[
+    NavLink { href: "/", label: "Home" },
+    NavLink { href: "/services", label: "Services" },
+    NavLink { href: "/about", label: "About" },
+    NavLink { href: "/blog", label: "Field Notes" },
+    NavLink { href: "/contact", label: "Contact" },
+];
+
+/// Top-nav CTA buttons. Both route to /contact today; the variant /
+/// icon distinguish the two affordances visually.
+const NAV_CTAS: &[NavCta<'static>] = &[
+    NavCta {
+        href: "/contact",
+        label: "Encrypted Inquiry",
+        variant: ButtonVariant::OutlineSuccess,
+        icon: Some(ICON_SHIELD_SM),
+        aria_label: Some("Encrypted Inquiry"),
+    },
+    NavCta {
+        href: "/contact",
+        label: "Get a Quote",
+        variant: ButtonVariant::Primary,
+        icon: Some(ICON_PHONE_SM),
+        aria_label: Some("Get a Quote"),
+    },
+];
 
 /// Canonical site origin used for absolute URLs in metadata.
 const SITE_ORIGIN: &str = "https://plausiden.com";
@@ -72,92 +100,19 @@ fn head_tag(title: &str, current: &str, description: &str) -> Markup {
     }
 }
 
-/// Emit a single nav link with production's active/inactive styling.
-/// Active = current route: blue text + full-width underline bar.
-/// Inactive = slate-600 text + hover-only underline.
-fn nav_link(href: &str, label: &str, current: &str) -> Markup {
-    let is_active = href == current;
-    let text_class = if is_active {
-        "text-primary"
-    } else {
-        "text-slate-600"
-    };
-    let bar_class = if is_active {
-        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-full"
-    } else {
-        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full"
-    };
-    html! {
-        a href=(href) {
-            span class=(format!("text-sm font-medium transition-colors hover:text-primary cursor-pointer relative group {text_class}")) {
-                (label)
-                span class=(bar_class) {}
-            }
-        }
-    }
-}
-
-/// Shared top nav. Matches the production DOM classes so shadcn/ui + Tailwind
-/// styling applies unchanged. `current` is the request path so the active
-/// tab gets the production-style blue underline bar.
+/// Shared top nav. Composed entirely from the typed `loom_components::Nav`
+/// primitive — every visual choice (active styling, mobile drawer, CTA
+/// rendering) is owned by the design system, not duplicated here.
 fn nav(current: &str) -> Markup {
-    html! {
-        nav id="site-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-transparent border-transparent py-5" {
-            div class="container mx-auto px-4 md:px-6 flex items-center justify-between" {
-                a href="/" {
-                    div class="flex items-center gap-2 cursor-pointer group" {
-                        div class="bg-primary p-1.5 rounded-lg group-hover:scale-105 transition-transform duration-300" {
-                            (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-6 h-6 text-white"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>"#))
-                        }
-                        span class="font-display font-bold text-xl tracking-tight transition-colors text-slate-900" {
-                            "PlausiDen " span class="text-primary" { "LLC" }
-                        }
-                    }
-                }
-                div class="hidden md:flex items-center gap-6" {
-                    (nav_link("/", "Home", current))
-                    (nav_link("/services", "Services", current))
-                    (nav_link("/about", "About", current))
-                    (nav_link("/blog", "Field Notes", current))
-                    (nav_link("/contact", "Contact", current))
-                    a href="/contact" {
-                        (Button {
-                            label: "Encrypted Inquiry",
-                            variant: ButtonVariant::OutlineSuccess,
-                            size: ButtonSize::Sm,
-                            aria_label: None,
-                            icon: Some((ICON_SHIELD_SM, IconPosition::Before)),
-                            decoration: Decoration::None,
-                        }.render())
-                    }
-                    a href="/contact" {
-                        (Button {
-                            label: "Get a Quote",
-                            variant: ButtonVariant::Primary,
-                            size: ButtonSize::Sm,
-                            aria_label: None,
-                            icon: Some((ICON_PHONE_SM, IconPosition::Before)),
-                            decoration: Decoration::SoftShadow,
-                        }.render())
-                    }
-                }
-                button id="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-menu" class="md:hidden p-2 text-slate-600" aria-label="Toggle menu" {
-                    (PreEscaped(r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>"#))
-                }
-            }
-            div id="mobile-menu" class="md:hidden hidden border-t border-slate-200 bg-white" aria-hidden="true" {
-                div class="container mx-auto px-4 py-4 flex flex-col gap-3" {
-                    a href="/" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Home" }
-                    a href="/services" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Services" }
-                    a href="/about" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "About" }
-                    a href="/blog" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Field Notes" }
-                    a href="/contact" class="text-sm font-medium text-slate-700 hover:text-primary py-2" { "Contact" }
-                    a href="/contact" class="mt-2 inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium rounded-md border border-emerald-500/50 text-emerald-700 hover:bg-emerald-50 min-h-8 px-3 text-xs py-2" { "Encrypted Inquiry" }
-                    a href="/contact" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium rounded-md bg-primary text-primary-foreground min-h-8 px-3 text-xs py-2" { "Get a Quote" }
-                }
-            }
-        }
+    Nav {
+        brand_logo: &icons::SHIELD,
+        brand_name: "PlausiDen",
+        brand_accent: "LLC",
+        links: NAV_LINKS,
+        ctas: NAV_CTAS,
+        current,
     }
+    .render()
 }
 
 // Footer content lives in static slices so the typed Loom Footer
