@@ -36,6 +36,7 @@ governor = "0.8"
 # PlausiDen-Loom — typed design system. Path dep for local dev; CI
 # uses git dep (see #52 in the task list).
 loom-components = { path = "../PlausiDen-Loom/loom-components" }
+loom-icons = { path = "../PlausiDen-Loom/loom-icons" }
 loom-tokens = { path = "../PlausiDen-Loom/loom-tokens" }
 
 # Leave stubbed; activate after landlock has baked:

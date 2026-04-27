@@ -749,6 +749,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "loom-icons"
+version = "0.1.0"
+
+[[package]]
 name = "loom-tokens"
 version = "0.1.0"
 dependencies = [
@@ -909,6 +913,7 @@ dependencies = [
  "landlock",
  "lettre",
  "loom-components",
+ "loom-icons",
  "loom-tokens",
  "maud",
  "serde",
