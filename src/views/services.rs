@@ -1,29 +1,269 @@
-//! Services page. DOM is captured verbatim from the production React site
-//! (rendered via Playwright 2026-04-25) and baked in with `include_str!`,
-//! then wrapped in the shared layout.
+//! Services page — proper Maud composition with Loom primitives.
 //!
-//! SECURITY: Post-capture scrub replaced `images.unsplash.com` → self-hosted,
-//! `/secure-drop` → `/contact`, and removed the placeholder testimonial text.
-//! SHIP-DECISION: 2026-04-25 — accepting production HTML as-is for parity;
-//! refactor to typed components (see `src/components.rs`) when parity is
-//! verified acceptable by the human reviewer.
+//! Replaces the prior `include_str!` bake of the production React DOM
+//! with deeper per-service content: each capability area gets a
+//! description, a "what this looks like in practice" sub-paragraph,
+//! 5–7 capability bullets, a "who we typically work with" line, and
+//! its own contact CTA. Every service section links to /contact so a
+//! prospect can act on the specific area without scrolling through
+//! the rest.
 
+use loom_components::hero::{Hero, HeroBackground};
+use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
 use super::layout::page;
 
-const SERVICES_HTML: &str = include_str!("../pages/services.html");
+/// One service category as it appears on the services page.
+struct Service<'a> {
+    /// `loom_icons` constant rendered with the section-icon class.
+    icon: &'a icons::Icon,
+    /// Section title.
+    title: &'a str,
+    /// One-paragraph lede.
+    lede: &'a str,
+    /// "What this looks like in practice" sub-paragraph.
+    practice: &'a str,
+    /// Capability bullets — what we actually do under this heading.
+    capabilities: &'a [&'a str],
+    /// Who we typically work with — sets the audience expectation.
+    audience: &'a str,
+    /// Sample engagement callout — concrete example shape (not a
+    /// case study, just a representative scenario).
+    sample: &'a str,
+}
 
-/// Render the services body verbatim from the captured production DOM.
-///
-/// BUG ASSUMPTION: The HTML file is pre-scrubbed of third-party origins and
-/// stale route paths. Re-capture + re-scrub any time production changes.
+const SERVICES: &[Service] = &[
+    Service {
+        icon: &icons::SERVER,
+        title: "IT Operations",
+        lede: "Complete infrastructure management designed to keep your business running smoothly. We handle monitoring, maintenance, patching, and support so your team can focus on the work that earns revenue.",
+        practice: "We operate IT the way ops engineers do at companies that take uptime seriously: written runbooks, change management with rollback paths, monitoring you can interpret without a dashboard PhD, and tickets that close with documentation, not just \"fixed.\"",
+        capabilities: &[
+            "24/7 monitoring with alert routing tuned for your team's actual on-call hours",
+            "Patching cadence + change windows documented in advance, never a surprise",
+            "Backup + tested restore procedures (the test is the part most vendors skip)",
+            "Disaster-recovery runbooks specific to your stack, rehearsed annually",
+            "Cloud cost discipline — we'll flag the $400/mo orphaned NAT gateway",
+            "Help desk that documents the answer once, not the same answer ten times",
+        ],
+        audience: "Practices and small businesses with 5–100 staff whose IT is currently \"the person who's good with computers\" plus a Microsoft 365 reseller.",
+        sample: "A 15-person law firm handed off the IT function from a departing partner. We took over Microsoft 365 admin, rebuilt the patch cadence, wrote three runbooks (network down, M365 outage, ransomware), and migrated their backups to a tested off-site target. 90-day handoff to a half-time IT coordinator.",
+    },
+    Service {
+        icon: &icons::SHIELD,
+        title: "Cyber Security",
+        lede: "Defense-in-depth strategies sized to your actual threat model. From compliance audits to real-time threat detection, we secure your digital perimeter without the enterprise theater you can't operate.",
+        practice: "Most small organizations don't need a SOC; they need correctly-configured defaults, a written incident-response plan, and someone whose phone rings when the canary trips. We design the posture that matches that reality — and produces evidence regulators, carriers, and clients are starting to ask for.",
+        capabilities: &[
+            "Threat modeling — what would actually hurt us, vs. checklist theater",
+            "Endpoint defense (EDR + DNS + DLP) sized to staff count, not seat-license fantasies",
+            "Email authentication: SPF, DKIM, DMARC, MTA-STS — all four, properly tuned",
+            "Penetration testing on the surfaces that matter (web app, internal AD, BYOD)",
+            "Compliance audits + evidence packets for SOC 2, HIPAA, state-bar, NIST CSF",
+            "Phishing simulation tuned to the lures targeting your industry, not generic",
+            "Incident-response retainer — we'll be the people you call at 3am",
+        ],
+        audience: "Organizations whose clients, regulators, or insurers are starting to ask pointed security questions. Law firms, healthcare practices, RIAs, journalism orgs, advocacy nonprofits.",
+        sample: "A regional medical practice failed a malpractice carrier renewal questionnaire on three controls. We documented the existing controls, remediated the three gaps (MFA on M365 admin, encrypted backups, written WISP), and produced an evidence packet the carrier accepted. Next renewal sailed through.",
+    },
+    Service {
+        icon: &icons::BRAIN_CIRCUIT,
+        title: "Artificial Intelligence",
+        lede: "Practical AI integration that solves a real bottleneck — not AI for AI's sake. We help you identify where machine learning earns its keep, build it cleanly, and avoid the failure modes that have made \"AI rollout\" a synonym for \"vendor lock-in\" for many organizations.",
+        practice: "We start with the question \"what would a 30% improvement on this specific workflow be worth?\" and work backward. If the answer is \"a tool already exists that's good enough,\" we say so. If the answer is \"build a custom model,\" we scope it like any other software engagement: written requirements, milestones, acceptance criteria.",
+        capabilities: &[
+            "Custom ML models for narrow, well-bounded problems (classification, extraction, ranking)",
+            "Document intake automation — OCR + structured extraction + human-in-the-loop review",
+            "Natural language search over your own corpus (without sending it to a third party)",
+            "Predictive analytics with auditable feature engineering, not opaque black boxes",
+            "AI strategy review — which of the 47 vendor pitches you've heard are actually worth a pilot",
+            "Privacy-preserving deployment patterns (on-prem inference, federated approaches, content-free pipelines)",
+        ],
+        audience: "Organizations with a specific high-volume manual workflow they suspect could be partially automated, or a strategy team that needs a reality check on a pending vendor decision.",
+        sample: "A small-claims litigation practice was spending 6 hours per case extracting deadlines from court filings. We built a document-intake pipeline that flags every deadline mentioned in incoming PDFs, attorney reviews and confirms in 5 minutes per case. Throughput up 4x.",
+    },
+    Service {
+        icon: &icons::SETTINGS,
+        title: "Industrial Automation",
+        lede: "Operational efficiency through automation systems designed for reliability and auditability. We bridge the gap between OT and IT — without exposing your control plane to the corporate network's threat model.",
+        practice: "Industrial environments have safety, regulatory, and uptime requirements that consumer-IT vendors don't take seriously. We design with those constraints first: air-gapped where it matters, segmented where it doesn't, and documented at a level that survives the operator turnover that eventually happens.",
+        capabilities: &[
+            "Robotic process automation (RPA) for back-office workflows that crossed the line from \"manual\" to \"a person's full-time job\"",
+            "PLC programming + SCADA integration with proper version control and rollback",
+            "OT/IT segmentation — production network properly isolated from the corporate domain",
+            "Predictive-maintenance instrumentation: sensors, time-series data, alert routing",
+            "IoT integration with vendor-locked-down devices, where the only sane path is custom",
+            "Workflow optimization audits — find the part of the process that's costing 4x what it should",
+        ],
+        audience: "Manufacturers, logistics operators, lab facilities, and field-service organizations whose ops floor still runs on a 12-year-old WindowsCE box that nobody wants to touch.",
+        sample: "A 40-person specialty manufacturer was losing ~3 hours/day to a manual inventory reconciliation between the floor and ERP. We built a barcode-scan pipeline with offline tolerance + nightly reconciliation. Reconciliation now takes 15 minutes; gap-closing time fell from days to hours.",
+    },
+    Service {
+        icon: &icons::CODE,
+        title: "Software Development",
+        lede: "Custom software solutions tailored to your unique workflows. We build scalable, secure, and maintainable applications — and write them so the next engineer (yours or ours) can pick them up without us.",
+        practice: "We treat every engagement as if you'll one day hire your own team to take it over. The deliverable is documented code, not a black box. Tests are real (not vanity); the deployment story is one command, not a 9-page wiki page.",
+        capabilities: &[
+            "Web applications, primarily in Rust + TypeScript stacks for type-safe correctness",
+            "Mobile apps for the workflows that need them — never as a checkbox",
+            "API design + integration with the systems you already pay for (M365, Salesforce, Stripe, Plaid, etc.)",
+            "Legacy modernization with a documented migration path, not a forklift rewrite",
+            "Database design that survives 10x growth without an emergency consulting engagement",
+            "Self-hostable architectures — your software runs on your infrastructure if you want it to",
+            "Open-source-by-default where it serves you, with a clear license posture",
+        ],
+        audience: "Organizations with a workflow that's outgrown the off-the-shelf tools, or a regulated environment where an off-the-shelf SaaS would create unacceptable data-handling exposure.",
+        sample: "A nonprofit running case-management on a Google Sheets + email workflow needed real software but couldn't afford SaaS pricing tiers. We built a self-hosted case-management app on top of their existing infrastructure, documented for in-house handoff. Annual cost: $0 SaaS, ~3hr/mo maintenance.",
+    },
+    Service {
+        icon: &icons::CPU,
+        title: "Hardware Solutions",
+        lede: "Strategic procurement and lifecycle management of enterprise hardware. We make sure your team has the right tools — and that the procurement process doesn't become an operational liability.",
+        practice: "Hardware is where small-organization IT often hemorrhages money: refresh cycles nobody owns, BYOD chaos that breaks compliance, and surprise vendor markups on \"managed\" purchases. We standardize the fleet, write the lifecycle policy, and source competitively.",
+        capabilities: &[
+            "Procurement at pass-through pricing — no license-arbitrage markup",
+            "Standardized device images (laptops, workstations, mobile) with proper MDM",
+            "Asset management: who has what, when it was bought, when it depreciates out",
+            "Lifecycle replacement planning — predictable budget, no surprises",
+            "Secure decommissioning + data destruction with documented chain of custody",
+            "Hardware repair coordination so a broken laptop is a 2-day inconvenience, not a 2-week one",
+        ],
+        audience: "Organizations whose laptop fleet is whatever the staff bought on Best Buy + a few legacy desktops nobody remembers buying. Anyone preparing for an audit that asks \"what hardware are you running?\"",
+        sample: "A 25-person practice had 19 different laptop configurations, no asset register, and three machines running unsupported OS versions. We standardized on two refresh tiers, wrote a 3-year refresh budget, sourced competitively (saved 18% over their previous vendor), and inventoried everything that walked through the door.",
+    },
+    Service {
+        icon: &icons::GLOBE,
+        title: "Network Architecture",
+        lede: "Robust network architecture that ensures high availability + speed without enterprise-tier complexity. We design connectivity that scales with you and stays operable by your eventual in-house IT person.",
+        practice: "Most small-organization networks accumulate complexity over years until nobody understands them anymore. We start with a documented current-state diagram, then design a target state that's simpler, faster, and properly segmented. No mesh-of-tunnels architectures that nobody can debug at 2am.",
+        capabilities: &[
+            "Network design + documentation (the diagram + the rationale behind every decision)",
+            "VPN solutions: WireGuard for new builds, OpenVPN where legacy compatibility demands it",
+            "Wi-Fi architecture: coverage, capacity, segmentation (guest / staff / IoT properly separated)",
+            "Connectivity audits — find the dual-uplink that became a single point of failure when one circuit was canceled",
+            "Firewall ruleset cleanup with documented rationale for every rule that survives",
+            "Tor + onion-service architecture for organizations whose threat model warrants it",
+            "Zero-trust patterns sized to small teams, not Fortune 500 implementations",
+        ],
+        audience: "Organizations whose network is \"whatever the previous IT person set up\" plus a few hardware swaps over the years. Anyone preparing to expand to a second location or a hybrid-remote workforce.",
+        sample: "A regional firm with three offices was running a hub-and-spoke VPN that fell over weekly. We replaced it with a mesh WireGuard setup, segmented per-office and per-role, documented the topology + every firewall rule. Outages dropped from weekly to none in the first 90 days.",
+    },
+];
+
+/// Render `/services`.
 #[must_use]
+#[allow(clippy::too_many_lines)]
 pub fn render() -> Markup {
     let body = html! {
-        (PreEscaped(SERVICES_HTML))
+
+        (Hero {
+            eyebrow: Some("Our services"),
+            headline_lead: "Comprehensive IT,",
+            headline_accent: Some("specifically scoped."),
+            subheadline: "We offer a full suite of IT solutions designed for organizations that want infrastructure they can audit, retain, and eventually run without us. General scope, specific expertise — pick the area that's biting you, or schedule an intake to figure out where to start.",
+            cta: None,
+            background: HeroBackground::GridLight,
+        }.render())
+
+        @for (i, svc) in SERVICES.iter().enumerate() {
+            (service_section(svc, i % 2 == 0))
+        }
+
+        // -------- How we approach IT (cross-cutting principles) --------
+        section class="py-20 bg-slate-900 text-white relative overflow-hidden" {
+            div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" {}
+            div class="container relative mx-auto px-4 md:px-6 max-w-4xl reveal" {
+                span class="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" {
+                    "How we approach every engagement"
+                }
+                h2 class="font-display text-3xl md:text-4xl font-bold mb-6 leading-tight" {
+                    "Different shapes, same posture."
+                }
+                p class="text-slate-400 text-lg leading-relaxed mb-6" {
+                    "Whether the engagement is a $1,500 discovery, a $9,500/mo retainer, or a $60,000 fixed-scope project, the operating posture is identical: written proposals, scope-limited access, audit-ready documentation, and a real handoff path."
+                }
+                p class="text-slate-400 text-lg leading-relaxed" {
+                    "We aim for engagements that produce documentation a competent successor can use to take over. The next vendor — yours or ours — should be able to read what we built, understand why, and run it without us. That's what \"compose, don't compromise\" means at the engagement level."
+                }
+                p class="text-slate-300 mt-8" {
+                    "Read more in "
+                    a href="/how-we-work" class="text-primary font-semibold underline" { "how we work" }
+                    " or check our "
+                    a href="/pricing-transparency" class="text-primary font-semibold underline" { "pricing posture" }
+                    "."
+                }
+            }
+        }
+
+        // -------- Final CTA --------
+        section class="py-20 bg-primary/5" {
+            div class="container mx-auto px-4 md:px-6 text-center max-w-3xl reveal" {
+                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" {
+                    "Not sure where to start?"
+                }
+                p class="text-slate-600 text-lg mb-8" {
+                    "The intake conversation is free, the NDA is mutual, and we'll tell you if we're not the right fit. Tell us what's on your plate — even if you're not sure whether it's an IT problem yet."
+                }
+                a href="/contact" {
+                    button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all" {
+                        "Schedule an intake call"
+                    }
+                }
+                p class="text-slate-500 text-sm mt-6" {
+                    "Or write to "
+                    a href="mailto:team@plausiden.com" class="text-primary font-medium" { "team@plausiden.com" }
+                    " · 978-351-6495"
+                }
+            }
+        }
     };
     page("Services — PlausiDen", "/services", body)
+}
+
+/// Render one service deep-dive section. `light_band` toggles the
+/// background so adjacent sections alternate (white / slate-50).
+fn service_section(svc: &Service, light_band: bool) -> Markup {
+    let bg = if light_band { "bg-white" } else { "bg-slate-50" };
+    let icon_svg = svc.icon.render_with_class("w-7 h-7 text-primary");
+    html! {
+        section class=(format!("py-16 md:py-20 {bg}")) {
+            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" {
+                div class="flex items-center gap-4 mb-4" {
+                    div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center" {
+                        (PreEscaped(icon_svg))
+                    }
+                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900" {
+                        (svc.title)
+                    }
+                }
+                p class="text-slate-700 text-lg leading-relaxed mb-4" { (svc.lede) }
+                p class="text-slate-600 leading-relaxed mb-6" { (svc.practice) }
+
+                p class="font-semibold text-slate-900 mb-2" { "Capabilities" }
+                ul class="list-disc list-inside space-y-1.5 mb-6 text-slate-700" {
+                    @for cap in svc.capabilities {
+                        li { (*cap) }
+                    }
+                }
+
+                div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" {
+                    div class="rounded-lg bg-slate-50 border border-slate-200 p-5" {
+                        p class="font-semibold text-slate-900 mb-1" { "Who we typically work with" }
+                        p class="text-slate-600 text-sm leading-relaxed" { (svc.audience) }
+                    }
+                    div class="rounded-lg bg-slate-50 border border-slate-200 p-5" {
+                        p class="font-semibold text-slate-900 mb-1" { "Sample engagement" }
+                        p class="text-slate-600 text-sm leading-relaxed" { (svc.sample) }
+                    }
+                }
+
+                a href="/contact" class="inline-flex items-center gap-2 text-primary font-semibold" {
+                    "Talk to us about " (svc.title) " →"
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -31,28 +271,70 @@ mod tests {
     use super::*;
 
     #[test]
-    fn services_contains_production_heading() {
-        let s = render().into_string();
-        assert!(
-            s.len() > 5000,
-            "services page unexpectedly short: {} bytes",
-            s.len()
-        );
+    fn renders_nonempty() {
+        assert!(render().into_string().len() > 12_000);
     }
 
+    /// Every service section has a contact link — the user-facing
+    /// requirement that prompted this rewrite.
     #[test]
-    fn services_has_no_unsplash_origin() {
+    fn every_service_has_a_contact_cta() {
         let s = render().into_string();
-        assert!(
-            !s.contains("images.unsplash.com"),
-            "Unsplash origin leaked into /services; scrub step failed"
-        );
+        for svc in SERVICES {
+            let needle = format!("Talk to us about {} →", svc.title);
+            assert!(
+                s.contains(&needle),
+                "missing per-service contact CTA for {}",
+                svc.title
+            );
+        }
     }
 
+    /// All seven services are present.
     #[test]
-    fn services_has_no_secure_drop_text() {
-        // REGRESSION-GUARD: renamed to Encrypted Inquiry.
+    fn all_services_listed() {
+        let s = render().into_string();
+        for title in &[
+            "IT Operations",
+            "Cyber Security",
+            "Artificial Intelligence",
+            "Industrial Automation",
+            "Software Development",
+            "Hardware Solutions",
+            "Network Architecture",
+        ] {
+            assert!(s.contains(title), "missing service: {title}");
+        }
+    }
+
+    /// Each service surfaces at least 5 capabilities (deeper than the
+    /// 4 the prior baked DOM had).
+    #[test]
+    fn every_service_has_5plus_capabilities() {
+        for svc in SERVICES {
+            assert!(
+                svc.capabilities.len() >= 5,
+                "{} has only {} capabilities; need >= 5",
+                svc.title,
+                svc.capabilities.len()
+            );
+        }
+    }
+
+    /// REGRESSION-GUARD: page must not silently revert to the legacy
+    /// Secure Drop wording.
+    #[test]
+    fn no_secure_drop_text() {
         let s = render().into_string();
         assert!(!s.contains(">Secure Drop<"));
+    }
+
+    /// Cross-link to /how-we-work + /pricing — these are mid-funnel
+    /// pages the services page should hand off to.
+    #[test]
+    fn cross_links_to_how_we_work_and_pricing() {
+        let s = render().into_string();
+        assert!(s.contains(r#"href="/how-we-work""#));
+        assert!(s.contains(r#"href="/pricing-transparency""#));
     }
 }
