@@ -28,7 +28,7 @@ pub(crate) mod card;
 #[allow(unused_imports)] // re-exports kept for callers that adopt these later
 pub(crate) use badge::{Badge, BadgeTone};
 #[allow(unused_imports)]
-pub(crate) use button::{Button, ButtonSize, ButtonVariant, IconPosition};
+pub(crate) use button::{Button, ButtonSize, ButtonVariant, Decoration, IconPosition};
 #[allow(unused_imports)]
 pub(crate) use card::{ServiceCard, service_card};
 

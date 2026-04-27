@@ -33,6 +33,11 @@ landlock = "0.4"
 lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1", "tokio1-rustls-tls", "builder"] }
 governor = "0.8"
 
+# PlausiDen-Loom — typed design system. Path dep for local dev; CI
+# uses git dep (see #52 in the task list).
+loom-components = { path = "../PlausiDen-Loom/loom-components" }
+loom-tokens = { path = "../PlausiDen-Loom/loom-tokens" }
+
 # Leave stubbed; activate after landlock has baked:
 # seccompiler = "0.5"
 
