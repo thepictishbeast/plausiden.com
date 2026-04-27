@@ -9,6 +9,7 @@
 
 pub mod about;
 pub mod blog;
+pub mod case_studies;
 pub mod contact;
 pub mod home;
 pub mod how_we_work;

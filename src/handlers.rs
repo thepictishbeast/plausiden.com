@@ -30,6 +30,15 @@ pub async fn about() -> Markup {
     crate::views::about::render()
 }
 
+/// Render the case-studies index (`GET /case-studies`).
+///
+/// BUG ASSUMPTION: Same purity guarantee as [`home`]. Studies are
+/// hard-coded constants vetted at authoring time; nothing client-
+/// identifying is interpolated at render time.
+pub async fn case_studies() -> Markup {
+    crate::views::case_studies::render()
+}
+
 /// Render the Sovereign Privacy Directive placeholder (`GET /privacy-directive`).
 pub async fn privacy() -> Markup {
     crate::views::legal::privacy()
@@ -119,6 +128,7 @@ const SITEMAP_ROUTES: &[&str] = &[
     "/",
     "/services",
     "/about",
+    "/case-studies",
     "/blog",
     "/contact",
     "/solutions/legal",

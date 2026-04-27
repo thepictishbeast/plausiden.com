@@ -95,6 +95,7 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/", get(handlers::home))
         .route("/services", get(handlers::services))
         .route("/about", get(handlers::about))
+        .route("/case-studies", get(handlers::case_studies))
         .route("/contact", get(handlers::contact).post(inquiry::submit))
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
@@ -500,6 +501,7 @@ mod snapshots {
     snap_route!(home, "/");
     snap_route!(services, "/services");
     snap_route!(about, "/about");
+    snap_route!(case_studies, "/case-studies");
     snap_route!(contact, "/contact");
     snap_route!(blog_index, "/blog");
     snap_route!(blog_post_federated, "/blog/federated-rule-learning");
