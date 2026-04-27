@@ -39,6 +39,14 @@ pub async fn case_studies() -> Markup {
     crate::views::case_studies::render()
 }
 
+/// Render the operational status page (`GET /status`). Self-reports
+/// the running process's uptime + build identity. The route is
+/// public but COUPLING-EXEMPT in the audit since it's discovered
+/// out-of-band (status.plausiden.com when that subdomain ships).
+pub async fn status() -> Markup {
+    crate::views::status::render()
+}
+
 /// Render the Sovereign Privacy Directive placeholder (`GET /privacy-directive`).
 pub async fn privacy() -> Markup {
     crate::views::legal::privacy()

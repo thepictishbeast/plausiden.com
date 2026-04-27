@@ -112,6 +112,7 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/healthz", get(handlers::healthz)) // COUPLING-EXEMPT: internal liveness probe, never advertised
+        .route("/status", get(handlers::status)) // COUPLING-EXEMPT: discovered via status.plausiden.com out-of-band, not via in-site nav
         .nest_service(
             "/static",
             // Long-cache the static dir. CSS bundle name + favicon are
