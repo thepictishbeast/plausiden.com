@@ -145,15 +145,7 @@ mod tests {
         // lists that go stale faster than the publishing cadence.
         let s = render().into_string();
         for forbidden in &[
-            "Postfix",
-            "Dovecot",
-            "Iced",
-            "Maud",
-            "Axum",
-            "v1.",
-            "v2.",
-            "ChatGPT",
-            "GPT-4",
+            "Postfix", "Dovecot", "Iced", "Maud", "Axum", "v1.", "v2.", "ChatGPT", "GPT-4",
             "OpenAI",
         ] {
             assert!(

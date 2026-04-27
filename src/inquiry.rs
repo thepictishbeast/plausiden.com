@@ -71,8 +71,7 @@ impl InquiryState {
     /// in tests + as a fallback when the on-disk DB cannot be opened.
     #[must_use]
     pub fn new() -> Self {
-        let store = FeedbackStore::open_in_memory()
-            .expect("in-memory sqlite always opens cleanly");
+        let store = FeedbackStore::open_in_memory().expect("in-memory sqlite always opens cleanly");
         Self::with_components(store, String::new())
     }
 
@@ -326,9 +325,7 @@ fn validate_feedback(f: &FeedbackForm) -> Result<(), &'static str> {
     if f.name.len() > MAX_NAME_LEN {
         return Err("name too long");
     }
-    if f.company.len() > MAX_COMPANY_LEN
-        || f.email.len() > MAX_REPLY_TO_LEN
-    {
+    if f.company.len() > MAX_COMPANY_LEN || f.email.len() > MAX_REPLY_TO_LEN {
         return Err("identity field too long");
     }
     for (label, val) in [
@@ -391,9 +388,7 @@ pub(crate) async fn feedback_submit(
     if state.limiter.check().is_err() {
         return (
             StatusCode::TOO_MANY_REQUESTS,
-            feedback_ack(
-                "The inbox is being flooded right now — please try again in a minute.",
-            ),
+            feedback_ack("The inbox is being flooded right now — please try again in a minute."),
         )
             .into_response();
     }
@@ -529,17 +524,14 @@ pub(crate) async fn feedback_export(
     let mut headers = HeaderMap::new();
     let (body, content_type) = match q.format.as_str() {
         "csv" => (export_dsv(&rows, ','), "text/csv; charset=utf-8"),
-        "tsv" => (export_dsv(&rows, '\t'), "text/tab-separated-values; charset=utf-8"),
+        "tsv" => (
+            export_dsv(&rows, '\t'),
+            "text/tab-separated-values; charset=utf-8",
+        ),
         _ => (export_json(&rows), "application/json"),
     };
-    headers.insert(
-        header::CONTENT_TYPE,
-        HeaderValue::from_static(content_type),
-    );
-    headers.insert(
-        header::CACHE_CONTROL,
-        HeaderValue::from_static("no-store"),
-    );
+    headers.insert(header::CONTENT_TYPE, HeaderValue::from_static(content_type));
+    headers.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-store"));
     (StatusCode::OK, headers, body).into_response()
 }
 

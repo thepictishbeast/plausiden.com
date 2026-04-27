@@ -19,9 +19,7 @@
 //! Form chrome composed entirely from typed Loom primitives —
 //! Hero for the top band, TextInput / TextArea / Select for fields.
 
-use loom_components::{
-    Hero, HeroBackground, InputType, Select, SelectOption, TextArea, TextInput,
-};
+use loom_components::{Hero, HeroBackground, InputType, Select, SelectOption, TextArea, TextInput};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -223,10 +221,7 @@ mod tests {
     fn consent_options_cover_attribution_modes() {
         let s = render().into_string();
         for opt in &["full", "name_only", "role_only", "anonymous", "private"] {
-            assert!(
-                s.contains(opt),
-                "missing consent option: {opt}"
-            );
+            assert!(s.contains(opt), "missing consent option: {opt}");
         }
     }
 

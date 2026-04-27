@@ -81,7 +81,7 @@ impl FeedbackStore {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
         conn.execute_batch(
-            r#"
+            r"
             CREATE TABLE IF NOT EXISTS feedback (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 received_at     TEXT    NOT NULL,
@@ -99,7 +99,7 @@ impl FeedbackStore {
             );
             CREATE INDEX IF NOT EXISTS feedback_received_at
                 ON feedback(received_at);
-            "#,
+            ",
         )?;
         Ok(Arc::new(Self {
             conn: tokio::sync::Mutex::new(conn),
@@ -113,7 +113,7 @@ impl FeedbackStore {
     pub fn open_in_memory() -> rusqlite::Result<Arc<Self>> {
         let conn = Connection::open_in_memory()?;
         conn.execute_batch(
-            r#"
+            r"
             CREATE TABLE IF NOT EXISTS feedback (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 received_at     TEXT    NOT NULL,
@@ -129,7 +129,7 @@ impl FeedbackStore {
                 recommend       TEXT    NOT NULL,
                 anything_else   TEXT    NOT NULL
             );
-            "#,
+            ",
         )?;
         Ok(Arc::new(Self {
             conn: tokio::sync::Mutex::new(conn),
@@ -144,14 +144,14 @@ impl FeedbackStore {
         let conn = self.conn.lock().await;
         let received_at = Utc::now().to_rfc3339();
         conn.execute(
-            r#"
+            r"
             INSERT INTO feedback (
                 received_at, name, company, email,
                 worked_well, didnt_work,
                 consent, alternative, why_chose, whats_changed,
                 recommend, anything_else
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
-            "#,
+            ",
             params![
                 received_at,
                 row.name,
@@ -174,23 +174,23 @@ impl FeedbackStore {
     ///
     /// # Errors
     /// Returns the underlying rusqlite error on query failure.
+    #[allow(clippy::significant_drop_tightening)]
     pub async fn list_all(&self) -> rusqlite::Result<Vec<FeedbackRow>> {
         let conn = self.conn.lock().await;
         let mut stmt = conn.prepare(
-            r#"
+            r"
             SELECT id, received_at, name, company, email,
                    worked_well, didnt_work, consent, alternative,
                    why_chose, whats_changed, recommend, anything_else
             FROM feedback
             ORDER BY id ASC
-            "#,
+            ",
         )?;
         let rows = stmt
             .query_map([], |r| {
                 let received_str: String = r.get(1)?;
                 let received_at = DateTime::parse_from_rfc3339(&received_str)
-                    .map(|dt| dt.with_timezone(&Utc))
-                    .unwrap_or_else(|_| Utc::now());
+                    .map_or_else(|_| Utc::now(), |dt| dt.with_timezone(&Utc));
                 Ok(FeedbackRow {
                     id: r.get(0)?,
                     received_at,
