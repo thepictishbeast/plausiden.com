@@ -105,12 +105,12 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/solutions/nonprofit", get(handlers::solutions_nonprofit))
         .route("/how-we-work", get(handlers::how_we_work))
         .route("/pricing-transparency", get(handlers::pricing))
-        .route("/sitemap.xml", get(handlers::sitemap_xml))
-        .route("/robots.txt", get(handlers::robots_txt))
+        .route("/sitemap.xml", get(handlers::sitemap_xml)) // COUPLING-EXEMPT: served to crawlers, not clicked from UI
+        .route("/robots.txt", get(handlers::robots_txt)) // COUPLING-EXEMPT: served to crawlers, not clicked from UI
         .route("/blog/rss.xml", get(handlers::blog_rss))
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
-        .route("/healthz", get(handlers::healthz))
+        .route("/healthz", get(handlers::healthz)) // COUPLING-EXEMPT: internal liveness probe, never advertised
         .nest_service(
             "/static",
             // Long-cache the static dir. CSS bundle name + favicon are

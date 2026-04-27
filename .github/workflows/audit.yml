@@ -35,3 +35,31 @@ jobs:
         run: cargo install cargo-deny --locked
       - name: Check
         run: cargo deny check
+
+  coupling:
+    name: "Backend↔Frontend coupling audit"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch coupling check from PlausiDen-Audits
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/thepictishbeast/PlausiDen-Audits/main/audits/backend-frontend/check.sh" \
+            -o /tmp/coupling-check.sh
+          chmod +x /tmp/coupling-check.sh
+
+      - name: Run static coupling check
+        run: |
+          /tmp/coupling-check.sh "$GITHUB_WORKSPACE"
+
+      - name: Verify COUPLING-EXEMPT annotations carry reasons
+        run: |
+          if grep -rnE 'COUPLING-EXEMPT(\b|$)(:[[:space:]]*$)?' "$GITHUB_WORKSPACE/src" 2>/dev/null \
+              | grep -vE 'COUPLING-EXEMPT:[[:space:]]*\S+'; then
+            echo "::error::COUPLING-EXEMPT annotation missing a reason"
+            exit 1
+          fi
+          echo "All COUPLING-EXEMPT annotations carry reasons."
