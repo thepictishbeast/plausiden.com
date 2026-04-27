@@ -56,9 +56,9 @@ const JSON_LD_ORGANIZATION: &str = r#"{"@context":"https://schema.org","@type":"
 /// Emits `OpenGraph` + Twitter card metadata and a canonical URL so links
 /// shared in Slack/email/social preview cleanly.
 ///
-/// SECURITY: `<link rel="preconnect" ...>` to the Google Fonts origins is
-/// deliberate — paired with the relaxed CSP in `crate::security`. SHIP-DECISION
-/// recorded there.
+/// SECURITY: Fonts are self-hosted under `/static/fonts/`; no
+/// third-party origin is referenced. CSP in `crate::security` locks
+/// every fetch directive to `'self'`.
 fn head_tag(title: &str, current: &str, description: &str) -> Markup {
     let canonical = format!("{SITE_ORIGIN}{current}");
     html! {
@@ -90,9 +90,7 @@ fn head_tag(title: &str, current: &str, description: &str) -> Markup {
             link rel="shortcut icon" href="/static/favicon.ico";
             link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png";
             link rel="manifest" href="/static/site.webmanifest";
-            link rel="preconnect" href="https://fonts.googleapis.com";
-            link rel="preconnect" href="https://fonts.gstatic.com" crossorigin;
-            link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap";
+            link rel="stylesheet" href="/static/self-hosted-fonts.css";
             link rel="stylesheet" href="/static/index-CWVVhmVm.css";
             link rel="stylesheet" href="/static/animations.css";
             script src="/static/menu.js" defer {}

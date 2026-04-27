@@ -10,23 +10,19 @@
 use axum::http::{HeaderName, HeaderValue};
 use tower_http::set_header::SetResponseHeaderLayer;
 
-// SECURITY: CSP limited to `'self'` plus the Google Fonts CSS host
-// (`fonts.googleapis.com`) for stylesheet and the Google Fonts CDN host
-// (`fonts.gstatic.com`) for font binary. This is a deliberate deviation from
-// the stricter `default-src 'self'` posture, taken to match the production
-// React site's visual exactly (user directive: "no visual differences at all").
-// SHIP-DECISION: 2026-04-24 — accept Google Fonts as a third-party origin
-// until we self-host the two fonts actually used (Plus Jakarta Sans, Outfit).
-// Residual risk: Google can observe per-request timing of font loads from
-// visitors. Mitigation path: bundle WOFF2 files under /static/fonts/ and
-// revert this CSP to the strict form.
+// SECURITY: CSP locked to `'self'` for every fetch directive. Fonts
+// (Plus Jakarta Sans + Outfit) are self-hosted under /static/fonts/
+// and referenced by /static/self-hosted-fonts.css, so no third-party
+// origin is allowed at all. `'unsafe-inline'` for style-src remains
+// because Maud emits a few inline `style=` attributes; tightening that
+// is a follow-up (#69) once the inline styles are migrated to classes.
 const CSP: &str = "default-src 'self'; \
                    base-uri 'self'; \
                    form-action 'self'; \
                    frame-ancestors 'none'; \
                    img-src 'self' data:; \
-                   font-src 'self' https://fonts.gstatic.com; \
-                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
+                   font-src 'self'; \
+                   style-src 'self' 'unsafe-inline'; \
                    script-src 'self'; \
                    object-src 'none'; \
                    upgrade-insecure-requests";
@@ -140,13 +136,16 @@ mod tests {
         }
     }
 
-    /// CSP now allows Google Fonts explicitly; every other non-self origin
-    /// remains forbidden.
+    /// CSP locks every fetch directive to `'self'` — no third-party origins.
+    /// Fonts are self-hosted under /static/fonts/. The only relaxation is
+    /// `'unsafe-inline'` on style-src for Maud's inline `style=` attributes
+    /// (tracked: tighten in follow-up #69 once inline styles are migrated).
     #[test]
-    fn csp_allows_google_fonts_only_as_non_self_origin() {
+    fn csp_locks_every_origin_to_self() {
         assert!(CSP.contains("default-src 'self'"));
-        assert!(CSP.contains("https://fonts.gstatic.com"));
-        assert!(CSP.contains("https://fonts.googleapis.com"));
+        assert!(CSP.contains("font-src 'self'"));
+        assert!(!CSP.contains("https://fonts.gstatic.com"));
+        assert!(!CSP.contains("https://fonts.googleapis.com"));
         assert!(!CSP.contains("unsafe-eval"), "CSP must not allow eval");
         assert!(CSP.contains("frame-ancestors 'none'"));
         assert!(CSP.contains("form-action 'self'"));
