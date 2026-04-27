@@ -19,6 +19,7 @@ use maud::Markup;
 
 pub mod avp_doctrine;
 pub mod federated_learning;
+pub mod provable_privacy;
 
 /// Metadata + render pointer for one published post.
 #[derive(Debug, Clone, Copy)]
@@ -48,6 +49,15 @@ pub struct Post {
 /// a typo'd slug would either 404 (caller-side) or collide (caught by
 /// [`tests::slug_uniqueness`]).
 pub const POSTS: &[Post] = &[
+    Post {
+        slug: "provable-privacy",
+        title: "Provable-by-construction privacy",
+        excerpt: "Two ways to promise to protect data: a policy you trust, or a property the type system enforces. We try to pick the second whenever the engineering allows. What that changes about audits, incident response, and the trade-offs people accept.",
+        category: "Architecture",
+        published: "2026-04-27",
+        read_time: "9 min read",
+        render: provable_privacy::render,
+    },
     Post {
         slug: "avp-doctrine",
         title: "How a written-down doctrine changes what \"shipping\" means",
