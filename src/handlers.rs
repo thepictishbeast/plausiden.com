@@ -143,6 +143,72 @@ pub async fn robots_txt() -> impl IntoResponse {
     )
 }
 
+/// `GET /blog/rss.xml` — Atom feed of every published post. Auto-
+/// generated from the same `POSTS` registry the index uses.
+///
+/// SECURITY: We emit only metadata (title, excerpt, link, date,
+/// category). No author email, no IP, no analytics token. Feed
+/// readers + LLM crawlers can ingest the firehose without any
+/// per-reader identifier.
+pub async fn blog_rss() -> impl IntoResponse {
+    use std::fmt::Write as _;
+    let mut out = String::with_capacity(4096);
+    out.push_str(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>PlausiDen — Field Notes</title>
+  <subtitle>Notes on infrastructure, privacy, and how we work.</subtitle>
+  <link href="https://plausiden.com/blog" rel="alternate"/>
+  <link href="https://plausiden.com/blog/rss.xml" rel="self"/>
+  <id>https://plausiden.com/blog</id>
+"#,
+    );
+    if let Some(latest) = crate::views::posts::POSTS.first() {
+        let _ = writeln!(out, "  <updated>{}T00:00:00Z</updated>", latest.published);
+    }
+    for post in crate::views::posts::POSTS {
+        let _ = writeln!(
+            out,
+            "  <entry>\n\
+             \x20\x20\x20\x20<title>{title}</title>\n\
+             \x20\x20\x20\x20<link href=\"https://plausiden.com/blog/{slug}\" rel=\"alternate\"/>\n\
+             \x20\x20\x20\x20<id>https://plausiden.com/blog/{slug}</id>\n\
+             \x20\x20\x20\x20<published>{date}T00:00:00Z</published>\n\
+             \x20\x20\x20\x20<updated>{date}T00:00:00Z</updated>\n\
+             \x20\x20\x20\x20<category term=\"{category}\"/>\n\
+             \x20\x20\x20\x20<summary>{excerpt}</summary>\n\
+             \x20\x20</entry>",
+            title = xml_escape(post.title),
+            slug = post.slug,
+            date = post.published,
+            category = xml_escape(post.category),
+            excerpt = xml_escape(post.excerpt),
+        );
+    }
+    out.push_str("</feed>\n");
+    (
+        [(axum::http::header::CONTENT_TYPE, "application/atom+xml; charset=utf-8")],
+        out,
+    )
+}
+
+/// Minimal XML escaper for `<`, `>`, `&`, `"`, `'`. Sufficient for
+/// short text inside element bodies and attribute values.
+fn xml_escape(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 8);
+    for c in s.chars() {
+        match c {
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '&' => out.push_str("&amp;"),
+            '"' => out.push_str("&quot;"),
+            '\'' => out.push_str("&apos;"),
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
 /// Liveness probe (`GET /healthz`). Used by local health-checks, not advertised
 /// in the page navigation.
 ///

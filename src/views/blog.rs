@@ -21,8 +21,13 @@ pub fn index() -> Markup {
                 h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-4" {
                     "Notes from the build floor."
                 }
-                p class="text-lg text-slate-600 max-w-2xl leading-relaxed" {
+                p class="text-lg text-slate-600 max-w-2xl leading-relaxed mb-4" {
                     "How we think about privacy, infrastructure, and shipping. The thesis behind the work — sanitized so we can talk about it without exposing client systems."
+                }
+                p class="text-sm text-slate-500" {
+                    "Subscribe via "
+                    a href="/blog/rss.xml" class="text-primary font-semibold underline" { "RSS / Atom" }
+                    "."
                 }
             }
         }

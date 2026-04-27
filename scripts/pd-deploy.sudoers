@@ -1,0 +1,15 @@
+# Sudoers rule for unattended plausiden-site deploys.
+#
+# Install:    sudo visudo -f /etc/sudoers.d/plausiden-deploy
+# (paste the line below; visudo validates syntax before writing).
+#
+# This permits admin to run ONLY the pd-deploy script without a
+# password. The script itself is the only path to /opt/plausiden-site
+# modifications and systemctl restart of the unit; nothing else
+# privileged becomes available to admin.
+#
+# SECURITY: The script path is absolute and must match exactly.
+# Renaming or moving the script breaks the rule (intentional — the
+# rule is bound to this specific script's path).
+
+admin ALL=(root) NOPASSWD: /home/admin/plausiden-site/scripts/pd-deploy.sh, /home/admin/plausiden-site/scripts/pd-deploy.sh --dry-run

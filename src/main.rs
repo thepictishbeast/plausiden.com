@@ -103,6 +103,7 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/solutions/journalism", get(handlers::solutions_journalism))
         .route("/sitemap.xml", get(handlers::sitemap_xml))
         .route("/robots.txt", get(handlers::robots_txt))
+        .route("/blog/rss.xml", get(handlers::blog_rss))
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/healthz", get(handlers::healthz))
@@ -289,6 +290,30 @@ mod tests {
         assert!(s.contains("https://plausiden.com/blog/federated-rule-learning"));
         // Healthz must NOT be listed — internal liveness only.
         assert!(!s.contains("/healthz"));
+    }
+
+    /// `/blog/rss.xml` returns an Atom feed of published posts.
+    #[tokio::test]
+    async fn blog_rss_emits_atom_feed() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/blog/rss.xml")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let ct = resp.headers().get("content-type").unwrap().to_str().unwrap();
+        assert!(ct.contains("atom") || ct.contains("xml"));
+        let body = to_bytes(resp.into_body(), 32 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains("<feed"));
+        assert!(s.contains("<entry>"));
+        assert!(s.contains("https://plausiden.com/blog/federated-rule-learning"));
+        assert!(s.contains("https://plausiden.com/blog/avp-doctrine"));
     }
 
     /// `/robots.txt` allows everything and points at the sitemap.
