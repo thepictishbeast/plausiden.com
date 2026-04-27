@@ -171,16 +171,16 @@ pub async fn sitemap_xml() -> impl IntoResponse {
         );
     }
     out.push_str("</urlset>\n");
-    (
-        [(axum::http::header::CONTENT_TYPE, "application/xml")],
-        out,
-    )
+    ([(axum::http::header::CONTENT_TYPE, "application/xml")], out)
 }
 
 /// `GET /robots.txt` — allow everything, point at the sitemap.
 pub async fn robots_txt() -> impl IntoResponse {
     (
-        [(axum::http::header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+        [(
+            axum::http::header::CONTENT_TYPE,
+            "text/plain; charset=utf-8",
+        )],
         "User-agent: *\nAllow: /\nSitemap: https://plausiden.com/sitemap.xml\n",
     )
 }
@@ -229,7 +229,10 @@ pub async fn blog_rss() -> impl IntoResponse {
     }
     out.push_str("</feed>\n");
     (
-        [(axum::http::header::CONTENT_TYPE, "application/atom+xml; charset=utf-8")],
+        [(
+            axum::http::header::CONTENT_TYPE,
+            "application/atom+xml; charset=utf-8",
+        )],
         out,
     )
 }

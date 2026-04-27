@@ -22,12 +22,7 @@ fn fetch_blocking(rt: &tokio::runtime::Runtime, path: &str) -> Vec<u8> {
     rt.block_on(async {
         let app = build_router(InquiryState::new());
         let resp = app
-            .oneshot(
-                Request::builder()
-                    .uri(path)
-                    .body(Body::empty())
-                    .unwrap(),
-            )
+            .oneshot(Request::builder().uri(path).body(Body::empty()).unwrap())
             .await
             .unwrap();
         let body = to_bytes(resp.into_body(), 256 * 1024).await.unwrap();

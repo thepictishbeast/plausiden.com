@@ -2,9 +2,9 @@
 //! nav / footer structure so visual parity is preserved across server-rendered
 //! pages.
 
+use loom_components::ButtonVariant;
 use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink};
 use loom_components::nav::{Nav, NavCta, NavLink};
-use loom_components::ButtonVariant;
 use loom_icons as icons;
 use maud::{DOCTYPE, Markup, PreEscaped, html};
 
@@ -14,11 +14,26 @@ const ICON_PHONE_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24
 
 /// Top-nav links shown on every page. Order is left-to-right.
 const NAV_LINKS: &[NavLink<'static>] = &[
-    NavLink { href: "/", label: "Home" },
-    NavLink { href: "/services", label: "Services" },
-    NavLink { href: "/about", label: "About" },
-    NavLink { href: "/blog", label: "Field Notes" },
-    NavLink { href: "/contact", label: "Contact" },
+    NavLink {
+        href: "/",
+        label: "Home",
+    },
+    NavLink {
+        href: "/services",
+        label: "Services",
+    },
+    NavLink {
+        href: "/about",
+        label: "About",
+    },
+    NavLink {
+        href: "/blog",
+        label: "Field Notes",
+    },
+    NavLink {
+        href: "/contact",
+        label: "Contact",
+    },
 ];
 
 /// Top-nav CTA buttons. Both route to /contact today; the variant /
@@ -121,23 +136,63 @@ fn nav(current: &str) -> Markup {
 // Footer content lives in static slices so the typed Loom Footer
 // primitive can borrow them by reference.
 const FOOTER_COMPANY: &[FooterItem<'static>] = &[
-    FooterItem::Link { href: "/", label: "Home" },
-    FooterItem::Link { href: "/about", label: "About Us" },
-    FooterItem::Link { href: "/services", label: "Services" },
-    FooterItem::Link { href: "/blog", label: "Field Notes" },
-    FooterItem::Link { href: "/how-we-work", label: "How We Work" },
-    FooterItem::Link { href: "/pricing-transparency", label: "Pricing" },
-    FooterItem::Link { href: "/contact", label: "Contact" },
+    FooterItem::Link {
+        href: "/",
+        label: "Home",
+    },
+    FooterItem::Link {
+        href: "/about",
+        label: "About Us",
+    },
+    FooterItem::Link {
+        href: "/services",
+        label: "Services",
+    },
+    FooterItem::Link {
+        href: "/blog",
+        label: "Field Notes",
+    },
+    FooterItem::Link {
+        href: "/how-we-work",
+        label: "How We Work",
+    },
+    FooterItem::Link {
+        href: "/pricing-transparency",
+        label: "Pricing",
+    },
+    FooterItem::Link {
+        href: "/contact",
+        label: "Contact",
+    },
 ];
 
 const FOOTER_SOLUTIONS: &[FooterItem<'static>] = &[
-    FooterItem::Link { href: "/solutions/legal", label: "Legal" },
-    FooterItem::Link { href: "/solutions/healthcare", label: "Healthcare" },
-    FooterItem::Link { href: "/solutions/journalism", label: "Journalism" },
-    FooterItem::Link { href: "/solutions/financial-advisors", label: "Financial Advisors" },
-    FooterItem::Link { href: "/solutions/nonprofit", label: "Nonprofits" },
-    FooterItem::Text { text: "IT Operations" },
-    FooterItem::Text { text: "Cyber Security" },
+    FooterItem::Link {
+        href: "/solutions/legal",
+        label: "Legal",
+    },
+    FooterItem::Link {
+        href: "/solutions/healthcare",
+        label: "Healthcare",
+    },
+    FooterItem::Link {
+        href: "/solutions/journalism",
+        label: "Journalism",
+    },
+    FooterItem::Link {
+        href: "/solutions/financial-advisors",
+        label: "Financial Advisors",
+    },
+    FooterItem::Link {
+        href: "/solutions/nonprofit",
+        label: "Nonprofits",
+    },
+    FooterItem::Text {
+        text: "IT Operations",
+    },
+    FooterItem::Text {
+        text: "Cyber Security",
+    },
 ];
 
 static FOOTER_CONTACT: &[FooterItem<'static>] = &[
@@ -159,14 +214,29 @@ static FOOTER_CONTACT: &[FooterItem<'static>] = &[
 ];
 
 static FOOTER_COLUMNS: &[FooterColumn<'static>] = &[
-    FooterColumn { heading: "Company", items: FOOTER_COMPANY },
-    FooterColumn { heading: "Solutions", items: FOOTER_SOLUTIONS },
-    FooterColumn { heading: "Contact", items: FOOTER_CONTACT },
+    FooterColumn {
+        heading: "Company",
+        items: FOOTER_COMPANY,
+    },
+    FooterColumn {
+        heading: "Solutions",
+        items: FOOTER_SOLUTIONS,
+    },
+    FooterColumn {
+        heading: "Contact",
+        items: FOOTER_CONTACT,
+    },
 ];
 
 const FOOTER_LEGAL: &[FooterLegalLink<'static>] = &[
-    FooterLegalLink { href: "/privacy-directive", label: "Sovereign Privacy Directive" },
-    FooterLegalLink { href: "/terms-of-service", label: "Sovereign Terms of Service" },
+    FooterLegalLink {
+        href: "/privacy-directive",
+        label: "Sovereign Privacy Directive",
+    },
+    FooterLegalLink {
+        href: "/terms-of-service",
+        label: "Sovereign Terms of Service",
+    },
 ];
 
 /// Shared footer. Composed entirely from the typed `loom_components::Footer`

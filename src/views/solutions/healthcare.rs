@@ -246,7 +246,10 @@ mod tests {
     #[test]
     fn no_unconditional_hipaa_compliant_claim() {
         let s = render().into_string().to_lowercase();
-        assert!(!s.contains("hipaa compliant"), "page implies HIPAA compliance");
+        assert!(
+            !s.contains("hipaa compliant"),
+            "page implies HIPAA compliance"
+        );
         assert!(!s.contains("we are compliant with hipaa"));
     }
 

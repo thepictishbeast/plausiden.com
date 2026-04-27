@@ -19,12 +19,33 @@ allow = [
   "Unicode-3.0",
   "Zlib",
   "CC0-1.0",
+  # 0BSD is the simplest permissive license — used by quoted_printable
+  # via lettre. No attribution requirement, public-domain-equivalent
+  # in jurisdictions that recognize it.
+  "0BSD",
+  # CDLA-Permissive-2.0 covers webpki-roots (Mozilla CA bundle).
+  # Permissive, attribution-required, OSI-style.
+  "CDLA-Permissive-2.0",
+  # PlausiDen-Loom is AGPL-3.0-or-later by design; we own it.
+  "AGPL-3.0-or-later",
+  # PlausiDen-Loom + plausiden-site themselves are UNLICENSED in
+  # cargo's terms (private), surfaced as the literal "UNLICENSED"
+  # spdx-ish string. We're the publisher; allow.
 ]
 confidence-threshold = 0.9
 
+[licenses.private]
+# We're the publisher of plausiden-site (UNLICENSED) — skip license
+# checks on our own private crates.
+ignore = true
+
 [bans]
 multiple-versions = "warn"
+# Path deps to PlausiDen-Loom resolve as wildcards in lock terms;
+# allow-wildcards bypasses the check for sibling crates we own.
+# Any third-party wildcard still fails.
 wildcards = "deny"
+allow-wildcard-paths = true
 
 [sources]
 unknown-registry = "deny"

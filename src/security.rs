@@ -49,6 +49,14 @@ const PERMISSIONS_POLICY: &str = "accelerometer=(), autoplay=(), camera=(), \
 // preload list so first-ever visitors never touch plaintext.
 const HSTS: &str = "max-age=63072000; includeSubDomains; preload";
 
+// Onion-Location advertises the Tor hidden service for the same site
+// (RFC-style draft, supported by Tor Browser, Mullvad Browser, Brave).
+// Tor Browser surfaces a "use the .onion" affordance; non-Tor browsers
+// ignore the header. Pointing at our existing plausiden_site hidden
+// service: ky3ti76q...del2qb5enid.onion (provisioned in /var/lib/tor/).
+const ONION_LOCATION: &str =
+    "http://ky3ti76qwo467p3ewa7nwhf4sg5bisilqrfhqpjheps47del2qb5enid.onion/";
+
 /// Construct the tower middleware stack that stamps the security headers on
 /// every response.
 ///
@@ -76,7 +84,10 @@ pub fn headers_layer() -> tower::layer::util::Stack<
                         SetResponseHeaderLayer<HeaderValue>,
                         tower::layer::util::Stack<
                             SetResponseHeaderLayer<HeaderValue>,
-                            tower::layer::util::Identity,
+                            tower::layer::util::Stack<
+                                SetResponseHeaderLayer<HeaderValue>,
+                                tower::layer::util::Identity,
+                            >,
                         >,
                     >,
                 >,
@@ -94,6 +105,7 @@ pub fn headers_layer() -> tower::layer::util::Stack<
         .layer(static_header("x-frame-options", "DENY"))
         .layer(static_header("cross-origin-opener-policy", "same-origin"))
         .layer(static_header("permissions-policy", PERMISSIONS_POLICY))
+        .layer(static_header("onion-location", ONION_LOCATION))
         .into_inner()
 }
 
@@ -148,7 +160,10 @@ mod tests {
         assert!(CSP.contains("default-src 'self'"));
         assert!(CSP.contains("font-src 'self'"));
         assert!(CSP.contains("style-src 'self'"));
-        assert!(!CSP.contains("'unsafe-inline'"), "CSP must not allow inline");
+        assert!(
+            !CSP.contains("'unsafe-inline'"),
+            "CSP must not allow inline"
+        );
         assert!(!CSP.contains("https://fonts.gstatic.com"));
         assert!(!CSP.contains("https://fonts.googleapis.com"));
         assert!(!CSP.contains("unsafe-eval"), "CSP must not allow eval");

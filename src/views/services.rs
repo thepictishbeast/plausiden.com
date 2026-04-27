@@ -224,7 +224,11 @@ pub fn render() -> Markup {
 /// Render one service deep-dive section. `light_band` toggles the
 /// background so adjacent sections alternate (white / slate-50).
 fn service_section(svc: &Service, light_band: bool) -> Markup {
-    let bg = if light_band { "bg-white" } else { "bg-slate-50" };
+    let bg = if light_band {
+        "bg-white"
+    } else {
+        "bg-slate-50"
+    };
     let icon_svg = svc.icon.render_with_class("w-7 h-7 text-primary");
     html! {
         section class=(format!("py-16 md:py-20 {bg}")) {

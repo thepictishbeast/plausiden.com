@@ -6,9 +6,9 @@
 
 use maud::{Markup, html};
 
-use loom_components::card::LinkCard;
 use super::layout::{page, page_with_description};
 use super::posts::{POSTS, Post, by_slug};
+use loom_components::card::LinkCard;
 
 /// Render the blog index — list of published posts, newest first.
 #[must_use]

@@ -44,9 +44,16 @@ const MAX_MESSAGE_LEN: usize = 5000;
 /// Shared application state for the inquiry handler. Constructed once in
 /// `main.rs` and cloned per-request via Axum's `State` extractor.
 #[derive(Clone)]
+#[allow(missing_debug_implementations)]
 pub struct InquiryState {
     pub(crate) mailer: Arc<AsyncSmtpTransport<Tokio1Executor>>,
     pub(crate) limiter: Arc<RateLimiter<NotKeyed, InMemoryState, DefaultClock, NoOpMiddleware>>,
+}
+
+impl Default for InquiryState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl InquiryState {
@@ -295,5 +302,4 @@ mod tests {
         f.phone = "x".repeat(MAX_PHONE_LEN + 1);
         assert!(validate(&f).is_err());
     }
-
 }

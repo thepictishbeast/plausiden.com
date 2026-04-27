@@ -19,15 +19,42 @@ use maud::{Markup, PreEscaped, html};
 use super::layout::page;
 
 const SERVICE_OPTIONS: &[SelectOption<'static>] = &[
-    SelectOption { value: "", label: "Select a service" },
-    SelectOption { value: "IT Operations", label: "IT Operations" },
-    SelectOption { value: "Cyber Security", label: "Cyber Security" },
-    SelectOption { value: "Artificial Intelligence", label: "Artificial Intelligence" },
-    SelectOption { value: "Industrial Automation", label: "Industrial Automation" },
-    SelectOption { value: "Software Development", label: "Software Development" },
-    SelectOption { value: "Hardware Solutions", label: "Hardware Solutions" },
-    SelectOption { value: "Networking", label: "Networking" },
-    SelectOption { value: "Other", label: "Other / General Inquiry" },
+    SelectOption {
+        value: "",
+        label: "Select a service",
+    },
+    SelectOption {
+        value: "IT Operations",
+        label: "IT Operations",
+    },
+    SelectOption {
+        value: "Cyber Security",
+        label: "Cyber Security",
+    },
+    SelectOption {
+        value: "Artificial Intelligence",
+        label: "Artificial Intelligence",
+    },
+    SelectOption {
+        value: "Industrial Automation",
+        label: "Industrial Automation",
+    },
+    SelectOption {
+        value: "Software Development",
+        label: "Software Development",
+    },
+    SelectOption {
+        value: "Hardware Solutions",
+        label: "Hardware Solutions",
+    },
+    SelectOption {
+        value: "Networking",
+        label: "Networking",
+    },
+    SelectOption {
+        value: "Other",
+        label: "Other / General Inquiry",
+    },
 ];
 
 /// Render the contact page.
@@ -175,7 +202,11 @@ mod tests {
     #[test]
     fn contact_renders_nonempty() {
         let s = render().into_string();
-        assert!(s.len() > 4000, "contact page unexpectedly short: {} bytes", s.len());
+        assert!(
+            s.len() > 4000,
+            "contact page unexpectedly short: {} bytes",
+            s.len()
+        );
     }
 
     #[test]

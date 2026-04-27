@@ -164,7 +164,12 @@ mod tests {
     #[test]
     fn no_advice_claim() {
         let s = render().into_string().to_lowercase();
-        for forbidden in &["legal advice", "financial advice", "investment advice", "we advise"] {
+        for forbidden in &[
+            "legal advice",
+            "financial advice",
+            "investment advice",
+            "we advise",
+        ] {
             assert!(!s.contains(forbidden), "forbidden phrase: {forbidden}");
         }
     }

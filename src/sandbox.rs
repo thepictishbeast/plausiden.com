@@ -55,6 +55,7 @@ fn is_disabled_by_env() -> bool {
 /// (we install no `AccessFs::write_to` allowances). A later exec would
 /// inherit the restriction. Tokio's epoll / socket FDs are unaffected — they
 /// were opened before `restrict_self()`.
+#[must_use]
 pub fn apply(static_dir: &str) -> SandboxOutcome {
     apply_inner(static_dir, is_disabled_by_env())
 }

@@ -8,6 +8,15 @@
 //! annotation (see `annotations/README.md` in the doctrine repo).
 
 #![doc(html_no_source)]
+// The lib carving exposed several internal items as pub. These lints
+// fire on existing code that was previously pub(crate); they're
+// noisy without changing correctness. Allow at the lib level until
+// the conciseness audit (PlausiDen-Audits/audits/conciseness) does
+// a sweep.
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::too_many_lines)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::too_long_first_doc_paragraph)]
 
 use std::time::Duration;
 
@@ -22,8 +31,6 @@ pub mod views;
 
 /// Request processing timeout. Matches the `TimeoutLayer` installed below.
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
-
-
 
 /// Construct the fully-wired router. Exposed at crate scope so tests can hit
 /// the same graph the production binary serves.
@@ -52,7 +59,10 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/solutions/legal", get(handlers::solutions_legal))
         .route("/solutions/healthcare", get(handlers::solutions_healthcare))
         .route("/solutions/journalism", get(handlers::solutions_journalism))
-        .route("/solutions/financial-advisors", get(handlers::solutions_financial_advisors))
+        .route(
+            "/solutions/financial-advisors",
+            get(handlers::solutions_financial_advisors),
+        )
         .route("/solutions/nonprofit", get(handlers::solutions_nonprofit))
         .route("/how-we-work", get(handlers::how_we_work))
         .route("/pricing-transparency", get(handlers::pricing))
@@ -69,10 +79,12 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
             // content-addressed; if a file changes we'll bump its name.
             // `immutable` lets browsers skip revalidation entirely.
             tower::ServiceBuilder::new()
-                .layer(tower_http::set_header::SetResponseHeaderLayer::if_not_present(
-                    axum::http::header::CACHE_CONTROL,
-                    axum::http::HeaderValue::from_static("public, max-age=604800, immutable"),
-                ))
+                .layer(
+                    tower_http::set_header::SetResponseHeaderLayer::if_not_present(
+                        axum::http::header::CACHE_CONTROL,
+                        axum::http::HeaderValue::from_static("public, max-age=604800, immutable"),
+                    ),
+                )
                 .service(tower_http::services::ServeDir::new("static")),
         )
         .with_state(inquiry_state)
@@ -85,8 +97,6 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .layer(TraceLayer::new_for_http())
         .fallback(handlers::not_found)
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -216,7 +226,12 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
-        let ct = resp.headers().get("content-type").unwrap().to_str().unwrap();
+        let ct = resp
+            .headers()
+            .get("content-type")
+            .unwrap()
+            .to_str()
+            .unwrap();
         assert!(ct.contains("xml"));
         let body = to_bytes(resp.into_body(), 16 * 1024).await.unwrap();
         let s = std::str::from_utf8(&body).unwrap();
@@ -242,7 +257,12 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
-        let ct = resp.headers().get("content-type").unwrap().to_str().unwrap();
+        let ct = resp
+            .headers()
+            .get("content-type")
+            .unwrap()
+            .to_str()
+            .unwrap();
         assert!(ct.contains("atom") || ct.contains("xml"));
         let body = to_bytes(resp.into_body(), 32 * 1024).await.unwrap();
         let s = std::str::from_utf8(&body).unwrap();
@@ -428,11 +448,17 @@ mod snapshots {
     snap_route!(blog_post_avp, "/blog/avp-doctrine");
     snap_route!(blog_post_provable_privacy, "/blog/provable-privacy");
     snap_route!(blog_post_why_thundercrab, "/blog/why-thundercrab");
-    snap_route!(blog_post_plausible_deniability, "/blog/plausible-deniability");
+    snap_route!(
+        blog_post_plausible_deniability,
+        "/blog/plausible-deniability"
+    );
     snap_route!(solutions_legal, "/solutions/legal");
     snap_route!(solutions_healthcare, "/solutions/healthcare");
     snap_route!(solutions_journalism, "/solutions/journalism");
-    snap_route!(solutions_financial_advisors, "/solutions/financial-advisors");
+    snap_route!(
+        solutions_financial_advisors,
+        "/solutions/financial-advisors"
+    );
     snap_route!(solutions_nonprofit, "/solutions/nonprofit");
     snap_route!(how_we_work, "/how-we-work");
     snap_route!(pricing, "/pricing-transparency");

@@ -125,7 +125,12 @@ pub fn render() -> Markup {
             }
         }
     };
-    page_with_description("Pricing — PlausiDen", "/pricing-transparency", PRICING_DESCRIPTION, body)
+    page_with_description(
+        "Pricing — PlausiDen",
+        "/pricing-transparency",
+        PRICING_DESCRIPTION,
+        body,
+    )
 }
 
 #[cfg(test)]
@@ -157,7 +162,10 @@ mod tests {
             "long-term lock-in",
             "referral kickbacks",
         ] {
-            assert!(s.to_lowercase().contains(&promise.to_lowercase()), "missing: {promise}");
+            assert!(
+                s.to_lowercase().contains(&promise.to_lowercase()),
+                "missing: {promise}"
+            );
         }
     }
 }

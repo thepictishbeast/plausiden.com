@@ -118,7 +118,12 @@ pub fn render() -> Markup {
             }
         }
     };
-    page_with_description("How we work — PlausiDen", "/how-we-work", HWW_DESCRIPTION, body)
+    page_with_description(
+        "How we work — PlausiDen",
+        "/how-we-work",
+        HWW_DESCRIPTION,
+        body,
+    )
 }
 
 #[cfg(test)]

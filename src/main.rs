@@ -13,6 +13,7 @@
 //! carries a `SECURITY:` annotation.
 
 #![doc(html_no_source)]
+#![allow(clippy::doc_markdown)]
 
 use std::net::SocketAddr;
 use std::time::Duration;
