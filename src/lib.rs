@@ -78,6 +78,7 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/blog/rss.xml", get(handlers::blog_rss))
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
+        .route("/subscribe", get(handlers::subscribe))
         .route("/healthz", get(handlers::healthz)) // COUPLING-EXEMPT: internal liveness probe, never advertised
         .route("/status", get(handlers::status)) // COUPLING-EXEMPT: discovered via status.plausiden.com out-of-band, not via in-site nav
         .nest_service(
@@ -451,6 +452,7 @@ mod snapshots {
     snap_route!(capabilities, "/capabilities");
     snap_route!(case_studies, "/case-studies");
     snap_route!(feedback, "/feedback");
+    snap_route!(subscribe, "/subscribe");
     snap_route!(contact, "/contact");
     snap_route!(blog_index, "/blog");
     snap_route!(blog_post_federated, "/blog/federated-rule-learning");

@@ -23,3 +23,4 @@ pub mod pricing;
 pub mod services;
 pub mod solutions;
 pub mod status;
+pub mod subscribe;

@@ -239,8 +239,15 @@ pub fn render() -> Markup {
     page("Services — PlausiDen", "/services", body)
 }
 
-/// Render one service deep-dive section. `light_band` toggles the
-/// background so adjacent sections alternate (white / slate-50).
+/// Render one service as a condensed card with `<details>` for the
+/// depth. The summary panel — icon + title + lede — is always
+/// visible; clicking expands into practice + full capabilities +
+/// audience + sample + the per-service CTA.
+///
+/// Native `<details>` was chosen over a JS toggle: it works without
+/// JS, is keyboard accessible by default, and survives reduced-
+/// motion / no-JS / RSS-reader / accessibility-tree consumption.
+/// `light_band` toggles the background so adjacent cards alternate.
 fn service_section(svc: &Service, light_band: bool) -> Markup {
     let bg = if light_band {
         "bg-white"
@@ -249,39 +256,46 @@ fn service_section(svc: &Service, light_band: bool) -> Markup {
     };
     let icon_svg = svc.icon.render_with_class("w-7 h-7 text-primary");
     html! {
-        section class=(format!("py-16 md:py-20 {bg}")) {
+        section class=(format!("py-8 md:py-10 {bg}")) {
             div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" {
-                div class="flex items-center gap-4 mb-4" {
-                    div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center" {
-                        (PreEscaped(icon_svg))
+                details class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow" {
+                    summary class="flex items-start gap-4 p-5 md:p-6 cursor-pointer" {
+                        div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0" {
+                            (PreEscaped(icon_svg))
+                        }
+                        div class="flex-1 min-w-0" {
+                            h2 class="font-display text-xl md:text-2xl font-bold text-slate-900" {
+                                (svc.title)
+                            }
+                            p class="text-slate-600 text-sm md:text-base leading-relaxed mt-2" { (svc.lede) }
+                            p class="text-xs text-primary mt-3 font-semibold" { "Read more →" }
+                        }
                     }
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900" {
-                        (svc.title)
-                    }
-                }
-                p class="text-slate-700 text-lg leading-relaxed mb-4" { (svc.lede) }
-                p class="text-slate-600 leading-relaxed mb-6" { (svc.practice) }
+                    div class="px-5 md:px-6 pb-6 pt-2 border-t border-slate-100" {
+                        p class="text-slate-600 leading-relaxed mb-5" { (svc.practice) }
 
-                p class="font-semibold text-slate-900 mb-2" { "Capabilities" }
-                ul class="list-disc list-inside space-y-1.5 mb-6 text-slate-700" {
-                    @for cap in svc.capabilities {
-                        li { (*cap) }
-                    }
-                }
+                        p class="font-semibold text-slate-900 mb-2" { "Capabilities" }
+                        ul class="list-disc list-inside space-y-1.5 mb-6 text-slate-700" {
+                            @for cap in svc.capabilities {
+                                li { (*cap) }
+                            }
+                        }
 
-                div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" {
-                    div class="rounded-lg bg-slate-50 border border-slate-200 p-5" {
-                        p class="font-semibold text-slate-900 mb-1" { "Who we typically work with" }
-                        p class="text-slate-600 text-sm leading-relaxed" { (svc.audience) }
-                    }
-                    div class="rounded-lg bg-slate-50 border border-slate-200 p-5" {
-                        p class="font-semibold text-slate-900 mb-1" { "Sample engagement" }
-                        p class="text-slate-600 text-sm leading-relaxed" { (svc.sample) }
-                    }
-                }
+                        div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" {
+                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" {
+                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Who we typically work with" }
+                                p class="text-slate-600 text-sm leading-relaxed" { (svc.audience) }
+                            }
+                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" {
+                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Sample engagement" }
+                                p class="text-slate-600 text-sm leading-relaxed" { (svc.sample) }
+                            }
+                        }
 
-                a href="/contact" class="inline-flex items-center gap-2 text-primary font-semibold" {
-                    "Talk to us about " (svc.title) " →"
+                        a href="/contact" class="inline-flex items-center gap-2 text-primary font-semibold" {
+                            "Talk to us about " (svc.title) " →"
+                        }
+                    }
                 }
             }
         }

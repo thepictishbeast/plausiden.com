@@ -61,6 +61,11 @@ pub async fn status() -> Markup {
     crate::views::status::render()
 }
 
+/// Render the RSS / Atom subscribe instructions page (`GET /subscribe`).
+pub async fn subscribe() -> Markup {
+    crate::views::subscribe::render()
+}
+
 /// Render the Sovereign Privacy Directive placeholder (`GET /privacy-directive`).
 pub async fn privacy() -> Markup {
     crate::views::legal::privacy()
@@ -154,6 +159,7 @@ const SITEMAP_ROUTES: &[&str] = &[
     "/case-studies",
     "/feedback",
     "/blog",
+    "/subscribe",
     "/contact",
     "/solutions/legal",
     "/solutions/healthcare",

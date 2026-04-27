@@ -149,6 +149,14 @@ const FOOTER_COMPANY: &[FooterItem<'static>] = &[
         label: "Services",
     },
     FooterItem::Link {
+        href: "/capabilities",
+        label: "Capabilities",
+    },
+    FooterItem::Link {
+        href: "/case-studies",
+        label: "Case Studies",
+    },
+    FooterItem::Link {
         href: "/blog",
         label: "Field Notes",
     },
@@ -163,6 +171,10 @@ const FOOTER_COMPANY: &[FooterItem<'static>] = &[
     FooterItem::Link {
         href: "/contact",
         label: "Contact",
+    },
+    FooterItem::Link {
+        href: "/feedback",
+        label: "Feedback",
     },
 ];
 
