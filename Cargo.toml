@@ -8,7 +8,7 @@ license = "UNLICENSED"
 publish = false
 
 [dependencies]
-axum = { version = "0.8", default-features = false, features = ["http1", "http2", "tokio", "tracing", "form", "matched-path"] }
+axum = { version = "0.8", default-features = false, features = ["http1", "http2", "tokio", "tracing", "form", "query", "matched-path"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
 tower = "0.5"
 tower-http = { version = "0.6", default-features = false, features = [
@@ -22,6 +22,7 @@ tower-http = { version = "0.6", default-features = false, features = [
 ] }
 maud = { version = "0.27", features = ["axum"] }
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
 thiserror = "2"
@@ -32,6 +33,12 @@ landlock = "0.4"
 
 lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1", "tokio1-rustls-tls", "builder"] }
 governor = "0.8"
+
+# SQLite-backed feedback store. CMS-shaped substrate that PlausiDen-CMS
+# will eventually consume; until then the export endpoint dumps it as
+# JSON / CSV / TSV.
+rusqlite = { version = "0.32", features = ["bundled", "chrono"] }
+chrono = { version = "0.4", features = ["serde"] }
 
 # PlausiDen-Loom — typed design system. Path dep for local dev; CI
 # uses git dep (see #52 in the task list).

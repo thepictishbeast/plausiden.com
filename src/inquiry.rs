@@ -14,12 +14,13 @@
 
 use std::net::IpAddr;
 use std::num::NonZeroU32;
+use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 
 use axum::Form;
-use axum::extract::{ConnectInfo, State};
-use axum::http::StatusCode;
+use axum::extract::{ConnectInfo, Query, State};
+use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use governor::clock::DefaultClock;
 use governor::middleware::NoOpMiddleware;
@@ -32,6 +33,7 @@ use loom_components::hero::{Hero, HeroBackground};
 use maud::{Markup, html};
 use serde::Deserialize;
 
+use crate::feedback_store::{FeedbackInsert, FeedbackStore, export_dsv, export_json};
 use crate::views::layout::page;
 
 // Tunables — short enough to thwart trivial spam, lenient enough to never
@@ -41,13 +43,21 @@ const MAX_NAME_LEN: usize = 100;
 const MAX_REPLY_TO_LEN: usize = 200;
 const MAX_MESSAGE_LEN: usize = 5000;
 
-/// Shared application state for the inquiry handler. Constructed once in
-/// `main.rs` and cloned per-request via Axum's `State` extractor.
+/// Shared application state for the inquiry + feedback handlers.
+/// Constructed once in `main.rs` and cloned per-request via Axum's
+/// `State` extractor.
 #[derive(Clone)]
 #[allow(missing_debug_implementations)]
 pub struct InquiryState {
     pub(crate) mailer: Arc<AsyncSmtpTransport<Tokio1Executor>>,
     pub(crate) limiter: Arc<RateLimiter<NotKeyed, InMemoryState, DefaultClock, NoOpMiddleware>>,
+    /// Feedback + testimonial submissions land here. CMS-shaped
+    /// SQLite store; the export endpoint surfaces it as JSON / CSV /
+    /// TSV.
+    pub(crate) feedback: Arc<FeedbackStore>,
+    /// Admin token for the export endpoint. Read once at startup
+    /// from `PLAUSIDEN_ADMIN_TOKEN`. Empty string disables export.
+    pub(crate) admin_token: Arc<String>,
 }
 
 impl Default for InquiryState {
@@ -57,13 +67,29 @@ impl Default for InquiryState {
 }
 
 impl InquiryState {
-    /// Build a state object talking to local Postfix on `127.0.0.1:25`.
-    ///
-    /// BUG ASSUMPTION: Postfix is configured `inet_interfaces = loopback-only`
-    /// (see /etc/postfix/main.cf on the VPS). If that ever changes, this
-    /// function still uses 127.0.0.1 — fail-closed.
+    /// Build a state object with an in-memory feedback store. Used
+    /// in tests + as a fallback when the on-disk DB cannot be opened.
     #[must_use]
     pub fn new() -> Self {
+        let store = FeedbackStore::open_in_memory()
+            .expect("in-memory sqlite always opens cleanly");
+        Self::with_components(store, String::new())
+    }
+
+    /// Build a state object talking to local Postfix on `127.0.0.1:25`,
+    /// persisting feedback to the SQLite file at `db_path`, and
+    /// reading the export-endpoint token from
+    /// `PLAUSIDEN_ADMIN_TOKEN` (empty disables export).
+    ///
+    /// # Errors
+    /// Returns the rusqlite error if the DB file cannot be opened.
+    pub fn with_db(db_path: &Path) -> rusqlite::Result<Self> {
+        let store = FeedbackStore::open(db_path)?;
+        let token = std::env::var("PLAUSIDEN_ADMIN_TOKEN").unwrap_or_default();
+        Ok(Self::with_components(store, token))
+    }
+
+    fn with_components(store: Arc<FeedbackStore>, admin_token: String) -> Self {
         // SECURITY: Connect to the local Postfix without TLS (it's loopback;
         // the milter (opendkim) handles signing and Postfix's outbound TLS
         // is the actual wire encryption to the recipient's MX.
@@ -77,6 +103,8 @@ impl InquiryState {
         Self {
             mailer: Arc::new(mailer),
             limiter: Arc::new(limiter),
+            feedback: store,
+            admin_token: Arc::new(admin_token),
         }
     }
 }
@@ -260,6 +288,260 @@ pub(crate) async fn submit(
 // Keep the `IpAddr` import warning-free until per-IP keyed limiter ships.
 #[allow(dead_code)]
 const _IP_FUTURE_USE: fn(IpAddr) = |_| {};
+
+// ----- Feedback + testimonial handlers --------------------------------
+
+const MAX_FEEDBACK_FIELD_LEN: usize = 2_000;
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct FeedbackForm {
+    #[serde(default)]
+    pub(crate) name: String,
+    #[serde(default)]
+    pub(crate) company: String,
+    #[serde(default)]
+    pub(crate) email: String,
+    #[serde(default)]
+    pub(crate) worked_well: String,
+    #[serde(default)]
+    pub(crate) didnt_work: String,
+    #[serde(default)]
+    pub(crate) consent: String,
+    #[serde(default)]
+    pub(crate) alternative: String,
+    #[serde(default)]
+    pub(crate) why_chose: String,
+    #[serde(default)]
+    pub(crate) whats_changed: String,
+    #[serde(default)]
+    pub(crate) recommend: String,
+    #[serde(default)]
+    pub(crate) anything_else: String,
+}
+
+fn validate_feedback(f: &FeedbackForm) -> Result<(), &'static str> {
+    if f.name.trim().is_empty() {
+        return Err("name required");
+    }
+    if f.name.len() > MAX_NAME_LEN {
+        return Err("name too long");
+    }
+    if f.company.len() > MAX_COMPANY_LEN
+        || f.email.len() > MAX_REPLY_TO_LEN
+    {
+        return Err("identity field too long");
+    }
+    for (label, val) in [
+        ("worked_well", &f.worked_well),
+        ("didnt_work", &f.didnt_work),
+        ("alternative", &f.alternative),
+        ("why_chose", &f.why_chose),
+        ("whats_changed", &f.whats_changed),
+        ("recommend", &f.recommend),
+        ("anything_else", &f.anything_else),
+    ] {
+        if val.len() > MAX_FEEDBACK_FIELD_LEN {
+            tracing::warn!(field = label, "feedback field too long");
+            return Err("feedback field too long");
+        }
+    }
+    // At least one substantive field — refuse empty submissions.
+    let has_content = !f.worked_well.trim().is_empty()
+        || !f.didnt_work.trim().is_empty()
+        || !f.alternative.trim().is_empty()
+        || !f.why_chose.trim().is_empty()
+        || !f.whats_changed.trim().is_empty()
+        || !f.recommend.trim().is_empty()
+        || !f.anything_else.trim().is_empty();
+    if !has_content {
+        return Err("at least one answer required");
+    }
+    Ok(())
+}
+
+fn feedback_ack(message: &str) -> Markup {
+    let cta = html! {
+        a href="/" class="text-primary font-semibold" { "← Back home" }
+    };
+    let body = html! {
+        (Hero {
+            eyebrow: Some("Feedback received"),
+            headline_lead: "Thank you.",
+            headline_accent: None,
+            subheadline: message,
+            cta: Some(&cta),
+            background: HeroBackground::GridLight,
+        }.render())
+    };
+    page("Feedback received — PlausiDen", "/feedback", body)
+}
+
+/// `POST /feedback` — validate, persist to the SQLite store, email
+/// a copy to `team@plausiden.com`, render the ack page.
+///
+/// SECURITY: Same rate-limit posture as the inquiry handler. The
+/// feedback body is *more* PII than an inquiry (consented testimonial
+/// content), so the email body never logs at info; only success /
+/// failure counts surface.
+pub(crate) async fn feedback_submit(
+    State(state): State<InquiryState>,
+    ConnectInfo(_addr): ConnectInfo<std::net::SocketAddr>,
+    Form(form): Form<FeedbackForm>,
+) -> Response {
+    if state.limiter.check().is_err() {
+        return (
+            StatusCode::TOO_MANY_REQUESTS,
+            feedback_ack(
+                "The inbox is being flooded right now — please try again in a minute.",
+            ),
+        )
+            .into_response();
+    }
+    if let Err(e) = validate_feedback(&form) {
+        tracing::warn!(error = e, "feedback rejected at validation");
+        return (
+            StatusCode::BAD_REQUEST,
+            feedback_ack(
+                "Your submission didn't pass basic validation. Every answer is optional, but at least one field has to be filled in.",
+            ),
+        )
+            .into_response();
+    }
+
+    // Persist first, email second. If persistence fails we return
+    // 500 rather than silently dropping; if email fails we still
+    // accept (the row is durable).
+    let insert = FeedbackInsert {
+        name: form.name.as_str(),
+        company: form.company.as_str(),
+        email: form.email.as_str(),
+        worked_well: form.worked_well.as_str(),
+        didnt_work: form.didnt_work.as_str(),
+        consent: form.consent.as_str(),
+        alternative: form.alternative.as_str(),
+        why_chose: form.why_chose.as_str(),
+        whats_changed: form.whats_changed.as_str(),
+        recommend: form.recommend.as_str(),
+        anything_else: form.anything_else.as_str(),
+    };
+    let row_id = match state.feedback.insert(&insert).await {
+        Ok(id) => id,
+        Err(e) => {
+            tracing::warn!(error = %e, "feedback persist failed");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                feedback_ack(
+                    "Server error storing your submission. Please email team@plausiden.com directly.",
+                ),
+            )
+                .into_response();
+        }
+    };
+    tracing::info!(row_id, "feedback stored");
+
+    // Email summary to team@. Failure here is non-fatal — the row
+    // is in the DB regardless.
+    let body = format!(
+        "New feedback submission #{row_id}.\n\n\
+         Name:     {name}\n\
+         Company:  {company}\n\
+         Email:    {email}\n\
+         Consent:  {consent}\n\n\
+         --- worked well ---\n{ww}\n\n\
+         --- didn't work ---\n{dw}\n\n\
+         --- alternative ---\n{alt}\n\n\
+         --- why chose ---\n{why}\n\n\
+         --- what's changed ---\n{wc}\n\n\
+         --- recommend ---\n{rec}\n\n\
+         --- anything else ---\n{ext}\n",
+        name = form.name,
+        company = form.company,
+        email = form.email,
+        consent = form.consent,
+        ww = form.worked_well,
+        dw = form.didnt_work,
+        alt = form.alternative,
+        why = form.why_chose,
+        wc = form.whats_changed,
+        rec = form.recommend,
+        ext = form.anything_else,
+    );
+    let from: Mailbox = "PlausiDen Web <team@plausiden.com>"
+        .parse()
+        .expect("from mailbox parses");
+    let to: Mailbox = "team@plausiden.com".parse().expect("to parses");
+    if let Ok(email) = Message::builder()
+        .from(from)
+        .to(to)
+        .subject(format!("[feedback #{row_id}] {}", form.name))
+        .body(body)
+    {
+        if let Err(e) = state.mailer.send(email).await {
+            tracing::warn!(error = %e, "feedback email send failed (row already persisted)");
+        }
+    }
+
+    (
+        StatusCode::ACCEPTED,
+        feedback_ack(
+            "Your feedback is in our inbox. If you flagged a quote we can publish, we'll email you the proposed wording before anything goes live.",
+        ),
+    )
+        .into_response()
+}
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct ExportQuery {
+    /// `json` (default), `csv`, or `tsv`.
+    #[serde(default)]
+    pub(crate) format: String,
+    /// Admin token. Compared against `PLAUSIDEN_ADMIN_TOKEN` (constant-
+    /// time via `subtle` if we ever pull that in; for v0 a plain
+    /// equality check is sufficient because the token is never
+    /// surfaced to a low-trust party).
+    #[serde(default)]
+    pub(crate) token: String,
+}
+
+/// `GET /feedback/export?format=json|csv|tsv&token=…` — admin export.
+///
+/// SECURITY: Refuses every request when `PLAUSIDEN_ADMIN_TOKEN` is
+/// unset (the import default). When set, requires `token=` to match.
+/// Always returns plain `Unauthorized` text on rejection — never a
+/// detail string that leaks whether the token is set or what shape
+/// it's in.
+pub(crate) async fn feedback_export(
+    State(state): State<InquiryState>,
+    Query(q): Query<ExportQuery>,
+) -> Response {
+    if state.admin_token.is_empty() || q.token != *state.admin_token {
+        return (StatusCode::UNAUTHORIZED, "unauthorized").into_response();
+    }
+
+    let rows = match state.feedback.list_all().await {
+        Ok(rs) => rs,
+        Err(e) => {
+            tracing::warn!(error = %e, "feedback export query failed");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response();
+        }
+    };
+
+    let mut headers = HeaderMap::new();
+    let (body, content_type) = match q.format.as_str() {
+        "csv" => (export_dsv(&rows, ','), "text/csv; charset=utf-8"),
+        "tsv" => (export_dsv(&rows, '\t'), "text/tab-separated-values; charset=utf-8"),
+        _ => (export_json(&rows), "application/json"),
+    };
+    headers.insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static(content_type),
+    );
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("no-store"),
+    );
+    (StatusCode::OK, headers, body).into_response()
+}
 
 #[cfg(test)]
 mod tests {

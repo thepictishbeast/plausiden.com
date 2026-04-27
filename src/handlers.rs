@@ -39,6 +39,20 @@ pub async fn case_studies() -> Markup {
     crate::views::case_studies::render()
 }
 
+/// Render the in-house-stack page (`GET /capabilities`).
+///
+/// BUG ASSUMPTION: Same purity guarantee as [`home`]. Copy is
+/// intentionally general per the "tools mature" doctrine — no
+/// version pins, no vendor names, no feature lists.
+pub async fn capabilities() -> Markup {
+    crate::views::capabilities::render()
+}
+
+/// Render the feedback + testimonial form (`GET /feedback`).
+pub async fn feedback() -> Markup {
+    crate::views::feedback::render()
+}
+
 /// Render the operational status page (`GET /status`). Self-reports
 /// the running process's uptime + build identity. The route is
 /// public but COUPLING-EXEMPT in the audit since it's discovered
@@ -136,7 +150,9 @@ const SITEMAP_ROUTES: &[&str] = &[
     "/",
     "/services",
     "/about",
+    "/capabilities",
     "/case-studies",
+    "/feedback",
     "/blog",
     "/contact",
     "/solutions/legal",

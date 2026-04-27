@@ -9,8 +9,10 @@
 
 pub mod about;
 pub mod blog;
+pub mod capabilities;
 pub mod case_studies;
 pub mod contact;
+pub mod feedback;
 pub mod home;
 pub mod how_we_work;
 pub mod layout;

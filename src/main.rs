@@ -18,6 +18,8 @@
 use std::net::SocketAddr;
 use std::time::Duration;
 
+use std::path::PathBuf;
+
 use plausiden_site::{build_router, inquiry::InquiryState, sandbox};
 use tokio::signal;
 use tracing_subscriber::{EnvFilter, fmt};
@@ -25,6 +27,11 @@ use tracing_subscriber::{EnvFilter, fmt};
 /// Default bind address if `PLAUSIDEN_BIND` is unset. Loopback only —
 /// production deployment expects nginx in front.
 const DEFAULT_BIND: &str = "127.0.0.1:8080";
+
+/// Default feedback DB path if `PLAUSIDEN_FEEDBACK_DB` is unset.
+/// Lives outside the binary's working directory so a redeploy
+/// (which replaces the binary, leaving the DB) doesn't lose state.
+const DEFAULT_FEEDBACK_DB: &str = "/var/lib/plausiden-site/feedback.db";
 
 /// Graceful shutdown grace period; after this the runtime drops in-flight tasks.
 const SHUTDOWN_GRACE: Duration = Duration::from_secs(15);
@@ -45,7 +52,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .compact()
         .init();
 
-    let app = build_router(InquiryState::new());
+    let db_path: PathBuf = std::env::var("PLAUSIDEN_FEEDBACK_DB")
+        .unwrap_or_else(|_| DEFAULT_FEEDBACK_DB.into())
+        .into();
+    let inquiry_state = match InquiryState::with_db(&db_path) {
+        Ok(s) => {
+            tracing::info!(db = %db_path.display(), "feedback store opened");
+            s
+        }
+        Err(e) => {
+            tracing::warn!(
+                error = %e,
+                db = %db_path.display(),
+                "feedback store unavailable; falling back to in-memory store",
+            );
+            InquiryState::new()
+        }
+    };
+    let app = build_router(inquiry_state);
 
     let bind: SocketAddr = std::env::var("PLAUSIDEN_BIND")
         .unwrap_or_else(|_| DEFAULT_BIND.into())

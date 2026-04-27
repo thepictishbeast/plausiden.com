@@ -23,6 +23,7 @@ use std::time::Duration;
 use axum::Router;
 
 pub mod components;
+pub mod feedback_store;
 pub mod handlers;
 pub mod inquiry;
 pub mod sandbox;
@@ -52,8 +53,14 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/", get(handlers::home))
         .route("/services", get(handlers::services))
         .route("/about", get(handlers::about))
+        .route("/capabilities", get(handlers::capabilities))
         .route("/case-studies", get(handlers::case_studies))
         .route("/contact", get(handlers::contact).post(inquiry::submit))
+        .route(
+            "/feedback",
+            get(handlers::feedback).post(inquiry::feedback_submit),
+        )
+        .route("/feedback/export", get(inquiry::feedback_export)) // COUPLING-EXEMPT: admin token-gated, never linked from UI
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
         .route("/solutions/legal", get(handlers::solutions_legal))
@@ -441,7 +448,9 @@ mod snapshots {
     snap_route!(home, "/");
     snap_route!(services, "/services");
     snap_route!(about, "/about");
+    snap_route!(capabilities, "/capabilities");
     snap_route!(case_studies, "/case-studies");
+    snap_route!(feedback, "/feedback");
     snap_route!(contact, "/contact");
     snap_route!(blog_index, "/blog");
     snap_route!(blog_post_federated, "/blog/federated-rule-learning");

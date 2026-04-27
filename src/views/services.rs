@@ -51,6 +51,23 @@ const SERVICES: &[Service] = &[
         sample: "A 15-person law firm handed off the IT function from a departing partner. We took over Microsoft 365 admin, rebuilt the patch cadence, wrote three runbooks (network down, M365 outage, ransomware), and migrated their backups to a tested off-site target. 90-day handoff to a half-time IT coordinator.",
     },
     Service {
+        icon: &icons::CIRCLE_CHECK,
+        title: "Disaster Recovery",
+        lede: "Recovery posture engineered to be tested, not just documented. We design backup + restore + failover so the procedure on paper matches the procedure under pressure — and we rehearse it on a cadence that catches drift before an incident does.",
+        practice: "DR plans that don't get rehearsed are theater. We design the recovery procedure first, the backup schedule second, and we run live restore rehearsals on a cadence that matches the regulatory and contractual posture of the business. The test is the deliverable; the documentation is the artifact.",
+        capabilities: &[
+            "Recovery-time + recovery-point objectives written down per workload, not assumed",
+            "Backup strategy designed for the actual restore path — backups you can't restore from are a liability, not an asset",
+            "Cross-region / off-site replication tuned to threat model, not a vendor's default tier",
+            "Live restore rehearsals on a cadence the practice can sustain — typically twice yearly",
+            "Failover runbooks rehearsed under the conditions on-call would actually face",
+            "Compliance-grade evidence packets for carriers, regulators, and downstream client reviews",
+            "Tabletop incident exercises with the people who'd actually be in the room",
+        ],
+        audience: "Practices and small businesses that have outgrown \"we have a backup somewhere\" and need a recovery posture that survives a malpractice carrier review, a state-bar audit, or a HIPAA OCR letter.",
+        sample: "A specialty practice's annual DR rehearsal exposed that their last-known-good backup was 11 days stale and the documented restore procedure referenced an admin who'd left two years prior. We rebuilt the backup target, rewrote the restore runbook against the current stack, and ran a tested restore that completed inside the documented RTO.",
+    },
+    Service {
         icon: &icons::SHIELD,
         title: "Cyber Security",
         lede: "Defense-in-depth strategies sized to your actual threat model. From compliance audits to real-time threat detection, we secure your digital perimeter without the enterprise theater you can't operate.",
@@ -102,9 +119,10 @@ const SERVICES: &[Service] = &[
     Service {
         icon: &icons::CODE,
         title: "Software Development",
-        lede: "Custom software solutions tailored to your unique workflows. We build scalable, secure, and maintainable applications — and write them so the next engineer (yours or ours) can pick them up without us.",
-        practice: "We treat every engagement as if you'll one day hire your own team to take it over. The deliverable is documented code, not a black box. Tests are real (not vanity); the deployment story is one command, not a 9-page wiki page.",
+        lede: "Custom software for anything you can describe. If a workflow is yours, a tool is yours, a system is yours, we build it the way it should be built — typed, tested, documented, deployable, and structured so the next engineer (yours or ours) can pick it up without us.",
+        practice: "We treat every engagement as if you'll one day hire your own team to take it over. The deliverable is documented code, not a black box. Tests are real (not vanity); the deployment story is one command, not a 9-page wiki page. \"Custom\" means custom — we don't have a 200-template SaaS framework you have to fit into. We have an opinionated stack and we apply it to whatever the problem actually is.",
         capabilities: &[
+            "Anything custom — name a workflow, name a tool, name a system. Civic / governance tooling (e.g., Sacred.Vote), case management, intake automation, internal admin, public-facing apps",
             "Web applications, primarily in Rust + TypeScript stacks for type-safe correctness",
             "Mobile apps for the workflows that need them — never as a checkbox",
             "API design + integration with the systems you already pay for (M365, Salesforce, Stripe, Plaid, etc.)",
@@ -113,7 +131,7 @@ const SERVICES: &[Service] = &[
             "Self-hostable architectures — your software runs on your infrastructure if you want it to",
             "Open-source-by-default where it serves you, with a clear license posture",
         ],
-        audience: "Organizations with a workflow that's outgrown the off-the-shelf tools, or a regulated environment where an off-the-shelf SaaS would create unacceptable data-handling exposure.",
+        audience: "Organizations with a workflow that's outgrown the off-the-shelf tools, a regulated environment where an off-the-shelf SaaS would create unacceptable data-handling exposure, or a one-of-a-kind requirement (Sacred.Vote-class civic infrastructure, niche compliance pipelines, novel research instrumentation) that no vendor sells.",
         sample: "A nonprofit running case-management on a Google Sheets + email workflow needed real software but couldn't afford SaaS pricing tiers. We built a self-hosted case-management app on top of their existing infrastructure, documented for in-house handoff. Annual cost: $0 SaaS, ~3hr/mo maintenance.",
     },
     Service {
