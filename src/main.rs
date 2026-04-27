@@ -396,6 +396,39 @@ mod tests {
         assert!(std::str::from_utf8(&body).unwrap().contains("Nothing here"));
     }
 
+    /// Pages must emit no inline `style="…"` attributes and no
+    /// `<style>` blocks. The CSP forbids them; this test catches a
+    /// regression at PR-time, before the browser refuses to apply
+    /// the style and the visual breaks silently.
+    ///
+    /// REGRESSION-GUARD: dropped `'unsafe-inline'` from style-src on
+    /// 2026-04-27 after confirming zero inline styles in every
+    /// rendered snapshot. Any future inline emission must either
+    /// remove it or explicitly relax CSP, never both silently.
+    #[tokio::test]
+    async fn csp_no_inline_styles_emitted() {
+        for path in [
+            "/",
+            "/services",
+            "/about",
+            "/contact",
+            "/blog",
+            "/blog/why-thundercrab",
+            "/solutions/legal",
+            "/pricing-transparency",
+        ] {
+            let body = fetch_body(path).await;
+            assert!(
+                !body.contains("style=\""),
+                "{path}: inline style= emitted; CSP forbids it"
+            );
+            assert!(
+                !body.contains("<style"),
+                "{path}: inline <style> block emitted; CSP forbids it"
+            );
+        }
+    }
+
     /// Health check is cheap, body-only, and does not set cookies.
     #[tokio::test]
     async fn healthz_is_cookie_free() {

@@ -13,16 +13,19 @@ use tower_http::set_header::SetResponseHeaderLayer;
 // SECURITY: CSP locked to `'self'` for every fetch directive. Fonts
 // (Plus Jakarta Sans + Outfit) are self-hosted under /static/fonts/
 // and referenced by /static/self-hosted-fonts.css, so no third-party
-// origin is allowed at all. `'unsafe-inline'` for style-src remains
-// because Maud emits a few inline `style=` attributes; tightening that
-// is a follow-up (#69) once the inline styles are migrated to classes.
+// origin is allowed at all. style-src is `'self'` only — every page
+// in the snapshot test suite was confirmed to emit zero inline
+// `style=` attributes and zero `<style>` blocks, so 'unsafe-inline'
+// is unnecessary. The `csp_no_inline_styles_emitted` test enforces
+// the invariant: any future inline-style emission must either remove
+// the inline-ness or explicitly relax the CSP, never both silently.
 const CSP: &str = "default-src 'self'; \
                    base-uri 'self'; \
                    form-action 'self'; \
                    frame-ancestors 'none'; \
                    img-src 'self' data:; \
                    font-src 'self'; \
-                   style-src 'self' 'unsafe-inline'; \
+                   style-src 'self'; \
                    script-src 'self'; \
                    object-src 'none'; \
                    upgrade-insecure-requests";
@@ -136,14 +139,16 @@ mod tests {
         }
     }
 
-    /// CSP locks every fetch directive to `'self'` — no third-party origins.
-    /// Fonts are self-hosted under /static/fonts/. The only relaxation is
-    /// `'unsafe-inline'` on style-src for Maud's inline `style=` attributes
-    /// (tracked: tighten in follow-up #69 once inline styles are migrated).
+    /// CSP locks every fetch directive to `'self'` — no third-party origins
+    /// and no `'unsafe-inline'` anywhere. Fonts self-hosted under
+    /// /static/fonts/. Inline-style invariant enforced separately by
+    /// `csp_no_inline_styles_emitted` below.
     #[test]
     fn csp_locks_every_origin_to_self() {
         assert!(CSP.contains("default-src 'self'"));
         assert!(CSP.contains("font-src 'self'"));
+        assert!(CSP.contains("style-src 'self'"));
+        assert!(!CSP.contains("'unsafe-inline'"), "CSP must not allow inline");
         assert!(!CSP.contains("https://fonts.gstatic.com"));
         assert!(!CSP.contains("https://fonts.googleapis.com"));
         assert!(!CSP.contains("unsafe-eval"), "CSP must not allow eval");
