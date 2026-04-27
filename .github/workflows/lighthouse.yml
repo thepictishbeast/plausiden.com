@@ -1,0 +1,57 @@
+name: lighthouse
+
+# Runs Lighthouse against the live staging site (next.plausiden.com)
+# and asserts our perf/a11y/SEO floor. Configured in .github/lighthouserc.json.
+#
+# Triggers:
+#   - manual dispatch  (any time)
+#   - weekly schedule  (catches infrastructure regressions even if no
+#                       commit landed: TLS, CDN cache, font CDN, etc.)
+#   - release tag      (pre-promote gate; tag-driven cuts must clear
+#                       the floor before the tag is considered shipped).
+#
+# We do NOT run on every push/PR because:
+#   1. The job exercises live infra; it's noisy on transient CDN flakes.
+#   2. Three runs × eight URLs takes ~6 minutes and burns Actions budget.
+#   3. The snapshot tests + coupling audit already gate every push;
+#      Lighthouse is a slower, network-dependent confirmation layer.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * 1"  # weekly Monday 13:00 UTC (post-deploy window)
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    name: Lighthouse CI (perf + a11y + SEO + best-practices)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Lighthouse CI
+        run: npm install --global @lhci/cli@0.14.x
+
+      - name: Run Lighthouse CI
+        # Reads .github/lighthouserc.json. Asserts perf >= 0.90,
+        # a11y == 1.00, best-practices >= 0.95, SEO >= 0.95. CLS
+        # capped at 0.05 (hard error). FCP/LCP/TBT are warn-only —
+        # they fluctuate with CDN warmth and we don't want a transient
+        # cold-cache to fail a release.
+        run: lhci autorun --config=./.github/lighthouserc.json
+        env:
+          # Uploads the report to lhci.app temporary public storage so
+          # we have a clickable URL on every run. The link surface
+          # area is just our staging URLs (already public), so no
+          # confidentiality cost.
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

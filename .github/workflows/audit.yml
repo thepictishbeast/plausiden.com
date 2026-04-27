@@ -44,16 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch coupling check from PlausiDen-Audits
+      - name: Run static coupling check (vendored from PlausiDen-Audits)
         run: |
-          curl -fsSL \
-            "https://raw.githubusercontent.com/thepictishbeast/PlausiDen-Audits/main/audits/backend-frontend/check.sh" \
-            -o /tmp/coupling-check.sh
-          chmod +x /tmp/coupling-check.sh
-
-      - name: Run static coupling check
-        run: |
-          /tmp/coupling-check.sh "$GITHUB_WORKSPACE"
+          # The script is vendored at .github/scripts/coupling-check.sh
+          # because PlausiDen-Audits is private; see header comment in
+          # that file for the upstream pointer + un-vendoring trigger.
+          ./.github/scripts/coupling-check.sh "$GITHUB_WORKSPACE"
 
       - name: Verify COUPLING-EXEMPT annotations carry reasons
         run: |
