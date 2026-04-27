@@ -3,6 +3,7 @@
 //! vertical landing page.
 
 use loom_components::card::FeatureCard;
+use loom_components::hero::{Hero, HeroBackground};
 use maud::{Markup, html};
 
 use super::layout::page_with_description;
@@ -22,19 +23,14 @@ const ICON_USERS: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" h
 pub fn render() -> Markup {
     let body = html! {
 
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20 animate-fade-in-up" { "Operating model" }
-                h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" {
-                    "How we work, "
-                    span class="text-primary" { "in writing." }
-                }
-                p class="text-lg md:text-xl text-slate-600 mb-4 max-w-2xl leading-relaxed animate-fade-in-up delay-2" {
-                    "Most consultancies have a tribal sense of how to ship. We wrote ours down. Every engagement runs on the same operating posture: doctrine-driven code, scope-limited access, in-writing proposals, audit-ready documentation."
-                }
-            }
-        }
+        (Hero {
+            eyebrow: Some("Operating model"),
+            headline_lead: "How we work,",
+            headline_accent: Some("in writing."),
+            subheadline: "Most consultancies have a tribal sense of how to ship. We wrote ours down. Every engagement runs on the same operating posture: doctrine-driven code, scope-limited access, in-writing proposals, audit-ready documentation.",
+            cta: None,
+            background: HeroBackground::GridLight,
+        }.render())
 
         section class="py-16 bg-white" {
             div class="container mx-auto px-4 md:px-6 max-w-6xl" {

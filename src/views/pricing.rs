@@ -2,6 +2,7 @@
 //! prices engagements. Distinguishes us from MSPs that hide pricing
 //! until a sales call.
 
+use loom_components::hero::{Hero, HeroBackground};
 use maud::{Markup, PreEscaped, html};
 
 use super::layout::page_with_description;
@@ -16,19 +17,14 @@ const ICON_CHECK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" h
 pub fn render() -> Markup {
     let body = html! {
 
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20 animate-fade-in-up" { "Pricing" }
-                h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" {
-                    "What it costs, "
-                    span class="text-primary" { "before we get on a call." }
-                }
-                p class="text-lg md:text-xl text-slate-600 mb-4 max-w-2xl leading-relaxed animate-fade-in-up delay-2" {
-                    "We'd rather you know up front whether we're affordable than waste your time on a sales call. Here are the ranges. Specific quotes follow the intake conversation; nothing on this page is a binding offer."
-                }
-            }
-        }
+        (Hero {
+            eyebrow: Some("Pricing"),
+            headline_lead: "What it costs,",
+            headline_accent: Some("before we get on a call."),
+            subheadline: "We'd rather you know up front whether we're affordable than waste your time on a sales call. Here are the ranges. Specific quotes follow the intake conversation; nothing on this page is a binding offer.",
+            cta: None,
+            background: HeroBackground::GridLight,
+        }.render())
 
         section class="py-16 bg-white" {
             div class="container mx-auto px-4 md:px-6 max-w-4xl space-y-12" {

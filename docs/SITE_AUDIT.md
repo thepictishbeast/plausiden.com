@@ -49,6 +49,25 @@ Last reviewed: 2026-04-26.
   registered as Maud functions in `src/views/posts/`. "Field Notes" link
   in nav. First post (federated rule learning) shipped.
 
+## Loom migration progress
+
+Tracked via `~/PlausiDen-Loom/target/release/loom lint ~/plausiden-site`.
+
+| Date | Count | Note |
+|------|-------|------|
+| 2026-04-26 | 192 | Pre-Loom baseline |
+| 2026-04-26 | 187 | After Button migration |
+| 2026-04-26 | 183 | After contact-form migration |
+| 2026-04-26 | 178 | After legal capability cards + blog post cards migrated to FeatureCard / LinkCard |
+| 2026-04-27 | 340 | After shipping /how-we-work, /pricing, /solutions/healthcare, /solutions/journalism, AVP doctrine post (new content brought new debt faster than migration retired old debt) |
+
+Path to lint-zero, in order of leverage:
+
+- [ ] `loom-icons` registry — collapses hundreds of inline SVG class strings (`"w-6 h-6 text-primary"` etc.) into typed icon constants. Single highest-leverage migration target.
+- [ ] Migrate `components/card.rs` ServiceCard to Loom Card.
+- [ ] Migrate `inquiry.rs` ack page to use Hero + Section primitives.
+- [ ] Migrate `solutions/<vertical>` Section bodies (capability grid is Loom; surrounding bands are not).
+
 ## POLISH — improves outbound conversion but not blocking
 
 - [ ] **Vertical landing page: `/solutions/legal`.** Law firms is the

@@ -7,6 +7,7 @@
 //! fit and produces a contact-form submit.
 
 use loom_components::card::FeatureCard;
+use loom_components::hero::{Hero, HeroBackground};
 use maud::{Markup, PreEscaped, html};
 
 use crate::views::layout::page_with_description;
@@ -31,36 +32,28 @@ const ICON_CHECK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" h
 #[must_use]
 #[allow(clippy::too_many_lines)]
 pub fn render() -> Markup {
-    let body = html! {
-
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/5 to-transparent skew-x-12 transform origin-top-right translate-x-32" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20 animate-fade-in-up" {
-                    "For journalists + newsrooms"
-                }
-                h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" {
-                    "Sources should be able to trust you. "
-                    span class="text-primary" { "Your tools should too." }
-                }
-                p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed animate-fade-in-up delay-2" {
-                    "Source confidentiality is your most binding obligation, and the threat model is real. We build infrastructure for newsrooms whose adversaries include state-level actors, well-resourced corporate counsel, and routine credential phishing. Same posture, sized to your team."
-                }
-                div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-3" {
-                    a href="/contact" {
-                        button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground border border-primary-border min-h-10 text-lg px-8 py-6 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all" {
-                            "Schedule a threat-model conversation"
-                        }
-                    }
-                    a href="/services" {
-                        button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium border border-slate-200 min-h-10 text-lg px-8 py-6 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white" {
-                            "See our services"
-                        }
-                    }
-                }
+    let cta = html! {
+        a href="/contact" {
+            button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground border border-primary-border min-h-10 text-lg px-8 py-6 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all" {
+                "Schedule a threat-model conversation"
             }
         }
+        a href="/services" {
+            button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium border border-slate-200 min-h-10 text-lg px-8 py-6 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white" {
+                "See our services"
+            }
+        }
+    };
+    let body = html! {
+
+        (Hero {
+            eyebrow: Some("For journalists + newsrooms"),
+            headline_lead: "Sources should be able to trust you.",
+            headline_accent: Some("Your tools should too."),
+            subheadline: "Source confidentiality is your most binding obligation, and the threat model is real. We build infrastructure for newsrooms whose adversaries include state-level actors, well-resourced corporate counsel, and routine credential phishing. Same posture, sized to your team.",
+            cta: Some(&cta),
+            background: HeroBackground::GridLight,
+        }.render())
 
         section class="py-20 bg-white" {
             div class="container mx-auto px-4 md:px-6 max-w-4xl" {
