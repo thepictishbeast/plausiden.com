@@ -28,6 +28,7 @@ use governor::{Quota, RateLimiter};
 use lettre::message::{Mailbox, Message};
 use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{AsyncTransport, Tokio1Executor};
+use loom_components::hero::{Hero, HeroBackground};
 use maud::{Markup, html};
 use serde::Deserialize;
 
@@ -128,18 +129,18 @@ fn validate(f: &InquiryForm) -> Result<(), &'static str> {
 }
 
 fn ack_page(message: &str) -> Markup {
+    let cta = html! {
+        a href="/" class="text-primary font-semibold" { "← Back home" }
+    };
     let body = html! {
-        section class="relative pt-32 pb-16 md:pt-48 md:pb-20 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10" {
-                div class="max-w-3xl" {
-                    span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" { "Encrypted Inquiry" }
-                    h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-4" { "Message received." }
-                    p class="text-lg text-slate-600 max-w-2xl leading-relaxed mb-6" { (message) }
-                    a href="/" class="text-primary font-semibold" { "← Back home" }
-                }
-            }
-        }
+        (Hero {
+            eyebrow: Some("Encrypted Inquiry"),
+            headline_lead: "Message received.",
+            headline_accent: None,
+            subheadline: message,
+            cta: Some(&cta),
+            background: HeroBackground::GridLight,
+        }.render())
     };
     page("Encrypted Inquiry — PlausiDen", "/contact", body)
 }
