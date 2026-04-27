@@ -48,6 +48,18 @@ loom-tokens = { path = "../PlausiDen-Loom/loom-tokens" }
 # which forces a human glance before a layout regression ships.
 insta = { version = "1", features = ["yaml", "filters"] }
 http-body-util = "0.1"
+# Microbenchmarks for the render hot path. Criterion's HTML reports
+# land under target/criterion; run via `cargo bench`. A lib-target
+# refactor of this crate is a prerequisite for the bench to actually
+# build (the bench harness needs to import `build_router`); the
+# Cargo.toml entry is kept here as the design pin so the next person
+# touching this knows the intent + the gating step.
+criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
+
+# [[bench]]
+# name = "render"
+# harness = false
+# # Uncomment after splitting src/main.rs → src/lib.rs + src/main.rs.
 
 [profile.release]
 opt-level = 3
