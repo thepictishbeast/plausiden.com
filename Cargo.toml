@@ -56,10 +56,9 @@ http-body-util = "0.1"
 # touching this knows the intent + the gating step.
 criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
 
-# [[bench]]
-# name = "render"
-# harness = false
-# # Uncomment after splitting src/main.rs → src/lib.rs + src/main.rs.
+[[bench]]
+name = "render"
+harness = false
 
 [profile.release]
 opt-level = 3

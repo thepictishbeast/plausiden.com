@@ -44,7 +44,7 @@ const MAX_MESSAGE_LEN: usize = 5000;
 /// Shared application state for the inquiry handler. Constructed once in
 /// `main.rs` and cloned per-request via Axum's `State` extractor.
 #[derive(Clone)]
-pub(crate) struct InquiryState {
+pub struct InquiryState {
     pub(crate) mailer: Arc<AsyncSmtpTransport<Tokio1Executor>>,
     pub(crate) limiter: Arc<RateLimiter<NotKeyed, InMemoryState, DefaultClock, NoOpMiddleware>>,
 }
@@ -56,7 +56,7 @@ impl InquiryState {
     /// (see /etc/postfix/main.cf on the VPS). If that ever changes, this
     /// function still uses 127.0.0.1 — fail-closed.
     #[must_use]
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         // SECURITY: Connect to the local Postfix without TLS (it's loopback;
         // the milter (opendkim) handles signing and Postfix's outbound TLS
         // is the actual wire encryption to the recipient's MX.

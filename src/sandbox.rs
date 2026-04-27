@@ -16,7 +16,7 @@ use landlock::{
 /// Outcome of the sandbox application. Logged at startup.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(dead_code)] // `NotApplicable` is never constructed on Linux builds; kept for readable log output on ports.
-pub(crate) enum SandboxOutcome {
+pub enum SandboxOutcome {
     /// Kernel enforced every rule we installed. Best case.
     FullyEnforced,
     /// Kernel accepted rules but at an older ABI level than requested.
@@ -55,7 +55,7 @@ fn is_disabled_by_env() -> bool {
 /// (we install no `AccessFs::write_to` allowances). A later exec would
 /// inherit the restriction. Tokio's epoll / socket FDs are unaffected — they
 /// were opened before `restrict_self()`.
-pub(crate) fn apply(static_dir: &str) -> SandboxOutcome {
+pub fn apply(static_dir: &str) -> SandboxOutcome {
     apply_inner(static_dir, is_disabled_by_env())
 }
 
