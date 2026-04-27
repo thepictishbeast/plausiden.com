@@ -19,6 +19,7 @@ use maud::Markup;
 
 pub mod avp_doctrine;
 pub mod federated_learning;
+pub mod plausible_deniability;
 pub mod provable_privacy;
 pub mod why_thundercrab;
 
@@ -50,6 +51,15 @@ pub struct Post {
 /// a typo'd slug would either 404 (caller-side) or collide (caught by
 /// [`tests::slug_uniqueness`]).
 pub const POSTS: &[Post] = &[
+    Post {
+        slug: "plausible-deniability",
+        title: "What plausible deniability means in our architecture",
+        excerpt: "We named the company after a phrase. Most privacy products sell hiding; we sell unreliability. What that buys, where it lands, and the bright lines we won't cross to ship it.",
+        category: "Architecture",
+        published: "2026-04-27",
+        read_time: "11 min read",
+        render: plausible_deniability::render,
+    },
     Post {
         slug: "why-thundercrab",
         title: "Why we're building Thundercrab",

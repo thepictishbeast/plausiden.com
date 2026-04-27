@@ -11,6 +11,15 @@ expression: body
   <id>https://plausiden.com/blog</id>
   <updated>2026-04-27T00:00:00Z</updated>
   <entry>
+    <title>What plausible deniability means in our architecture</title>
+    <link href="https://plausiden.com/blog/plausible-deniability" rel="alternate"/>
+    <id>https://plausiden.com/blog/plausible-deniability</id>
+    <published>2026-04-27T00:00:00Z</published>
+    <updated>2026-04-27T00:00:00Z</updated>
+    <category term="Architecture"/>
+    <summary>We named the company after a phrase. Most privacy products sell hiding; we sell unreliability. What that buys, where it lands, and the bright lines we won&apos;t cross to ship it.</summary>
+  </entry>
+  <entry>
     <title>Why we&apos;re building Thundercrab</title>
     <link href="https://plausiden.com/blog/why-thundercrab" rel="alternate"/>
     <id>https://plausiden.com/blog/why-thundercrab</id>

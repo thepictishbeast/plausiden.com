@@ -473,6 +473,7 @@ mod snapshots {
     snap_route!(blog_post_avp, "/blog/avp-doctrine");
     snap_route!(blog_post_provable_privacy, "/blog/provable-privacy");
     snap_route!(blog_post_why_thundercrab, "/blog/why-thundercrab");
+    snap_route!(blog_post_plausible_deniability, "/blog/plausible-deniability");
     snap_route!(solutions_legal, "/solutions/legal");
     snap_route!(solutions_healthcare, "/solutions/healthcare");
     snap_route!(solutions_journalism, "/solutions/journalism");
