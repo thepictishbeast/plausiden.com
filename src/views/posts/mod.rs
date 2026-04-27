@@ -17,6 +17,7 @@
 
 use maud::Markup;
 
+pub mod avp_doctrine;
 pub mod federated_learning;
 
 /// Metadata + render pointer for one published post.
@@ -46,15 +47,26 @@ pub struct Post {
 /// to its renderer. A typo'd `render` pointer would fail the compile;
 /// a typo'd slug would either 404 (caller-side) or collide (caught by
 /// [`tests::slug_uniqueness`]).
-pub const POSTS: &[Post] = &[Post {
-    slug: "federated-rule-learning",
-    title: "Federated rule learning, without ever reading your mail",
-    excerpt: "How sorting rules can get smarter from the collective without any provider — including us — seeing message content. A note on what we built and why we think it matters.",
-    category: "Architecture",
-    published: "2026-04-26",
-    read_time: "8 min read",
-    render: federated_learning::render,
-}];
+pub const POSTS: &[Post] = &[
+    Post {
+        slug: "avp-doctrine",
+        title: "How a written-down doctrine changes what \"shipping\" means",
+        excerpt: "We wrote our taste down. Every public function carries a BUG ASSUMPTION annotation; every defense-in-depth carries a SECURITY annotation; CI enforces both. Why we think this is the right pace.",
+        category: "Operating Model",
+        published: "2026-04-27",
+        read_time: "7 min read",
+        render: avp_doctrine::render,
+    },
+    Post {
+        slug: "federated-rule-learning",
+        title: "Federated rule learning, without ever reading your mail",
+        excerpt: "How sorting rules can get smarter from the collective without any provider — including us — seeing message content. A note on what we built and why we think it matters.",
+        category: "Architecture",
+        published: "2026-04-26",
+        read_time: "8 min read",
+        render: federated_learning::render,
+    },
+];
 
 /// Look up a post by slug. Returns `None` if not registered.
 #[must_use]
