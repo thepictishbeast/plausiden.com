@@ -29,7 +29,7 @@ use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use blake3::Hash;
 use chrono::{TimeZone, Utc};
-use lettre::message::{Mailbox, Message, MultiPart, SinglePart, header as msg_header};
+use lettre::message::{Mailbox, Message, MultiPart};
 use lettre::{AsyncTransport, Tokio1Executor};
 use lettre::transport::smtp::AsyncSmtpTransport;
 use rand::RngCore;
@@ -449,12 +449,7 @@ async fn send_magic_email(
         .from(from)
         .to(to_mb)
         .subject("Sign in to PlausiDen admin")
-        .header(msg_header::ContentType::TEXT_HTML)
-        .multipart(
-            MultiPart::alternative()
-                .singlepart(SinglePart::plain(plain))
-                .singlepart(SinglePart::html(html)),
-        )?;
+        .multipart(MultiPart::alternative_plain_html(plain, html))?;
     mailer.send(email).await?;
     Ok(())
 }

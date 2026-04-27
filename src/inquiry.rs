@@ -26,7 +26,7 @@ use governor::clock::DefaultClock;
 use governor::middleware::NoOpMiddleware;
 use governor::state::{InMemoryState, NotKeyed};
 use governor::{Quota, RateLimiter};
-use lettre::message::{Mailbox, Message, MultiPart, SinglePart, header as msg_header};
+use lettre::message::{Mailbox, Message, MultiPart};
 use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{AsyncTransport, Tokio1Executor};
 use loom_components::hero::{Hero, HeroBackground};
@@ -282,17 +282,14 @@ pub(crate) async fn submit(
     let mut builder = Message::builder()
         .from(from)
         .to(to)
-        .subject("[contact-form] New inquiry")
-        .header(msg_header::ContentType::TEXT_HTML);
+        .subject("[contact-form] New inquiry");
     if !form.reply_to.is_empty() {
         if let Ok(rt) = form.reply_to.parse::<Mailbox>() {
             builder = builder.reply_to(rt);
         }
     }
     let Ok(email) = builder.multipart(
-        MultiPart::alternative()
-            .singlepart(SinglePart::plain(body))
-            .singlepart(SinglePart::html(html)),
+        MultiPart::alternative_plain_html(body, html),
     ) else {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -526,12 +523,7 @@ pub(crate) async fn feedback_submit(
         .from(from)
         .to(to)
         .subject(format!("[feedback #{row_id}] {}", form.name))
-        .header(msg_header::ContentType::TEXT_HTML)
-        .multipart(
-            MultiPart::alternative()
-                .singlepart(SinglePart::plain(body))
-                .singlepart(SinglePart::html(html)),
-        )
+        .multipart(MultiPart::alternative_plain_html(body, html))
     {
         if let Err(e) = state.mailer.send(email).await {
             tracing::warn!(error = %e, "feedback email send failed (row already persisted)");

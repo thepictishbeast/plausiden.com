@@ -16,9 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install cargo-audit
-        run: cargo install cargo-audit --locked
+      - name: Install cargo-audit (idempotent)
+        run: command -v cargo-audit || cargo install cargo-audit --locked
       - name: Audit
         # Deny actual unmaintained / advisory matches; warnings (e.g.,
         # informational notices on transitive deps we can't directly
@@ -30,9 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install cargo-deny
-        run: cargo install cargo-deny --locked
+      - name: Install cargo-deny (idempotent)
+        run: command -v cargo-deny || cargo install cargo-deny --locked
       - name: Check
         run: cargo deny check
 
