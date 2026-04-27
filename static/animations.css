@@ -1,27 +1,21 @@
 /* PlausiDen reveal-on-scroll animations.
  *
- * The animation only kicks in when JS is running. menu.js adds
- * `js-on` to <html> on init; without it (no-JS browsers, JS-blocked
- * extensions, or a script that failed to load) `.reveal` stays at
- * the default `opacity: 1` so content is never invisible.
+ * Previously: `.reveal` defaulted to `opacity: 0` and an
+ * IntersectionObserver flipped it to `1` on scroll. The result on
+ * mobile was a hero + a blank middle until the user scrolled past
+ * each band — a real UX failure. Content visibility shouldn't
+ * depend on scroll behavior we can't guarantee.
  *
- * With JS on, `.reveal` starts hidden + offset; the IntersectionObserver
- * in menu.js adds `.is-visible` as elements scroll into view, which
- * fades + slides them into place. Honors `prefers-reduced-motion`.
+ * Now: `.reveal` is a no-op (kept as a class so the existing
+ * markup compiles without a sweep). Content is always visible.
+ * The reveal-on-scroll wiring in menu.js still runs but has no
+ * visual effect.
  */
 
-html.js-on .reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
-  will-change: opacity, transform;
-}
-
-html.js-on .reveal.is-visible {
+.reveal,
+.reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 /* Stagger helpers: add `.reveal-delay-1` etc. for sequential reveals. */
