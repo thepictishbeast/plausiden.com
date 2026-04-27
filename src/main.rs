@@ -99,6 +99,8 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
         .route("/solutions/legal", get(handlers::solutions_legal))
+        .route("/solutions/healthcare", get(handlers::solutions_healthcare))
+        .route("/solutions/journalism", get(handlers::solutions_journalism))
         .route("/sitemap.xml", get(handlers::sitemap_xml))
         .route("/robots.txt", get(handlers::robots_txt))
         .route("/privacy-directive", get(handlers::privacy))

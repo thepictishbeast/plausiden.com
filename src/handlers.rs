@@ -59,6 +59,16 @@ pub async fn solutions_legal() -> Markup {
     crate::views::solutions::legal::render()
 }
 
+/// Render the healthcare-vertical landing page (`GET /solutions/healthcare`).
+pub async fn solutions_healthcare() -> Markup {
+    crate::views::solutions::healthcare::render()
+}
+
+/// Render the journalism-vertical landing page (`GET /solutions/journalism`).
+pub async fn solutions_journalism() -> Markup {
+    crate::views::solutions::journalism::render()
+}
+
 /// Render an individual blog post (`GET /blog/:slug`). Returns the
 /// styled 404 view for unknown slugs.
 ///
@@ -92,6 +102,8 @@ const SITEMAP_ROUTES: &[&str] = &[
     "/blog",
     "/contact",
     "/solutions/legal",
+    "/solutions/healthcare",
+    "/solutions/journalism",
     "/privacy-directive",
     "/terms-of-service",
 ];

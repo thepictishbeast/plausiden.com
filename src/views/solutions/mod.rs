@@ -5,4 +5,6 @@
 //! point at — written for someone already pre-qualified by the email,
 //! not for cold organic traffic.
 
+pub mod healthcare;
+pub mod journalism;
 pub mod legal;
