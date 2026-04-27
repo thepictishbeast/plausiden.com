@@ -109,7 +109,18 @@ pub(crate) fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/healthz", get(handlers::healthz))
-        .nest_service("/static", tower_http::services::ServeDir::new("static"))
+        .nest_service(
+            "/static",
+            // Long-cache the static dir. CSS bundle name + favicon are
+            // content-addressed; if a file changes we'll bump its name.
+            // `immutable` lets browsers skip revalidation entirely.
+            tower::ServiceBuilder::new()
+                .layer(tower_http::set_header::SetResponseHeaderLayer::if_not_present(
+                    axum::http::header::CACHE_CONTROL,
+                    axum::http::HeaderValue::from_static("public, max-age=604800, immutable"),
+                ))
+                .service(tower_http::services::ServeDir::new("static")),
+        )
         .with_state(inquiry_state)
         .layer(security::headers_layer())
         .layer(CompressionLayer::new())
