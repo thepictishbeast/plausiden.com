@@ -26,13 +26,14 @@ use governor::clock::DefaultClock;
 use governor::middleware::NoOpMiddleware;
 use governor::state::{InMemoryState, NotKeyed};
 use governor::{Quota, RateLimiter};
-use lettre::message::{Mailbox, Message};
+use lettre::message::{Mailbox, Message, MultiPart, SinglePart, header as msg_header};
 use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{AsyncTransport, Tokio1Executor};
 use loom_components::hero::{Hero, HeroBackground};
 use maud::{Markup, html};
 use serde::Deserialize;
 
+use crate::admin::AdminState;
 use crate::feedback_store::{FeedbackInsert, FeedbackStore, export_dsv, export_json};
 use crate::views::layout::page;
 
@@ -58,6 +59,9 @@ pub struct InquiryState {
     /// Admin token for the export endpoint. Read once at startup
     /// from `PLAUSIDEN_ADMIN_TOKEN`. Empty string disables export.
     pub(crate) admin_token: Arc<String>,
+    /// Passwordless admin login state. Empty `secret` or
+    /// `allowed_emails` disables every admin route.
+    pub admin: AdminState,
 }
 
 impl Default for InquiryState {
@@ -72,23 +76,39 @@ impl InquiryState {
     #[must_use]
     pub fn new() -> Self {
         let store = FeedbackStore::open_in_memory().expect("in-memory sqlite always opens cleanly");
-        Self::with_components(store, String::new())
+        Self::with_components(store, String::new(), String::new(), Vec::new())
     }
 
     /// Build a state object talking to local Postfix on `127.0.0.1:25`,
     /// persisting feedback to the SQLite file at `db_path`, and
-    /// reading the export-endpoint token from
-    /// `PLAUSIDEN_ADMIN_TOKEN` (empty disables export).
+    /// reading admin configuration from environment variables.
     ///
     /// # Errors
     /// Returns the rusqlite error if the DB file cannot be opened.
     pub fn with_db(db_path: &Path) -> rusqlite::Result<Self> {
         let store = FeedbackStore::open(db_path)?;
         let token = std::env::var("PLAUSIDEN_ADMIN_TOKEN").unwrap_or_default();
-        Ok(Self::with_components(store, token))
+        let admin_secret = std::env::var("PLAUSIDEN_ADMIN_SECRET").unwrap_or_default();
+        let admin_emails = std::env::var("PLAUSIDEN_ADMIN_EMAILS")
+            .unwrap_or_default()
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>();
+        Ok(Self::with_components(
+            store,
+            token,
+            admin_secret,
+            admin_emails,
+        ))
     }
 
-    fn with_components(store: Arc<FeedbackStore>, admin_token: String) -> Self {
+    fn with_components(
+        store: Arc<FeedbackStore>,
+        admin_token: String,
+        admin_secret: String,
+        admin_emails: Vec<String>,
+    ) -> Self {
         // SECURITY: Connect to the local Postfix without TLS (it's loopback;
         // the milter (opendkim) handles signing and Postfix's outbound TLS
         // is the actual wire encryption to the recipient's MX.
@@ -99,11 +119,19 @@ impl InquiryState {
         // SAFETY: 3 is non-zero — used in the rate-limit quota.
         let q = Quota::per_minute(NonZeroU32::new(QUOTA_PER_MINUTE).unwrap());
         let limiter = RateLimiter::direct(q);
+        let mailer = Arc::new(mailer);
+        let admin = AdminState {
+            secret: Arc::new(admin_secret),
+            allowed_emails: Arc::new(admin_emails),
+            feedback: Arc::clone(&store),
+            mailer: Arc::clone(&mailer),
+        };
         Self {
-            mailer: Arc::new(mailer),
+            mailer,
             limiter: Arc::new(limiter),
             feedback: store,
             admin_token: Arc::new(admin_token),
+            admin,
         }
     }
 }
@@ -243,16 +271,29 @@ pub(crate) async fn submit(
         });
     let to: Mailbox = "team@plausiden.com".parse().expect("destination parses");
 
+    let html = crate::views::email::inquiry_notification_html(
+        &form.name,
+        &form.reply_to,
+        &form.phone,
+        &form.company,
+        &form.service,
+        &form.message,
+    );
     let mut builder = Message::builder()
         .from(from)
         .to(to)
-        .subject("[contact-form] New inquiry");
+        .subject("[contact-form] New inquiry")
+        .header(msg_header::ContentType::TEXT_HTML);
     if !form.reply_to.is_empty() {
         if let Ok(rt) = form.reply_to.parse::<Mailbox>() {
             builder = builder.reply_to(rt);
         }
     }
-    let Ok(email) = builder.body(body) else {
+    let Ok(email) = builder.multipart(
+        MultiPart::alternative()
+            .singlepart(SinglePart::plain(body))
+            .singlepart(SinglePart::html(html)),
+    ) else {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             ack_page("Server error composing the message. Try again later."),
@@ -465,11 +506,32 @@ pub(crate) async fn feedback_submit(
         .parse()
         .expect("from mailbox parses");
     let to: Mailbox = "team@plausiden.com".parse().expect("to parses");
+    let html = crate::views::email::feedback_notification_html(
+        row_id,
+        &form.name,
+        &form.company,
+        &form.email,
+        &form.consent,
+        &[
+            ("What worked well", form.worked_well.as_str()),
+            ("What didn't", form.didnt_work.as_str()),
+            ("Alternative considered", form.alternative.as_str()),
+            ("Why chose PlausiDen", form.why_chose.as_str()),
+            ("What's changed", form.whats_changed.as_str()),
+            ("Would recommend", form.recommend.as_str()),
+            ("Anything else", form.anything_else.as_str()),
+        ],
+    );
     if let Ok(email) = Message::builder()
         .from(from)
         .to(to)
         .subject(format!("[feedback #{row_id}] {}", form.name))
-        .body(body)
+        .header(msg_header::ContentType::TEXT_HTML)
+        .multipart(
+            MultiPart::alternative()
+                .singlepart(SinglePart::plain(body))
+                .singlepart(SinglePart::html(html)),
+        )
     {
         if let Err(e) = state.mailer.send(email).await {
             tracing::warn!(error = %e, "feedback email send failed (row already persisted)");

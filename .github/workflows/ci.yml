@@ -29,6 +29,17 @@ jobs:
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -40,6 +51,17 @@ jobs:
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features
@@ -49,9 +71,21 @@ jobs:
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo install --locked cargo-audit
+      - name: Install cargo-audit (idempotent)
+        run: command -v cargo-audit || cargo install --locked cargo-audit
       - run: cargo audit --deny warnings
 
   deny:
@@ -59,16 +93,37 @@ jobs:
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo install --locked cargo-deny
+      - name: Install cargo-deny (idempotent)
+        run: command -v cargo-deny || cargo install --locked cargo-deny
       - run: cargo deny --all-features check
 
   build-musl:
     name: build (musl, static)
-    runs-on: [self-hosted, linux, x64, plausiden]
+    # GitHub-hosted runner so apt-get + sudo work; the self-hosted runner
+    # has `no_new_privs` set, which blocks the musl-tools install. The
+    # static build is a release-artifact step, low frequency, so the
+    # GH-hosted minutes cost is negligible.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Clone PlausiDen-Loom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_PAT }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-musl

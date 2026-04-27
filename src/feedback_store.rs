@@ -80,6 +80,27 @@ impl FeedbackStore {
         let conn = Connection::open(path)?;
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
+        Self::run_migrations(&conn)?;
+        Ok(Arc::new(Self {
+            conn: tokio::sync::Mutex::new(conn),
+        }))
+    }
+
+    /// In-memory store for tests. Same schema; no on-disk side effects.
+    ///
+    /// # Errors
+    /// Returns the underlying rusqlite error on schema-creation failure.
+    pub fn open_in_memory() -> rusqlite::Result<Arc<Self>> {
+        let conn = Connection::open_in_memory()?;
+        Self::run_migrations(&conn)?;
+        Ok(Arc::new(Self {
+            conn: tokio::sync::Mutex::new(conn),
+        }))
+    }
+
+    /// Idempotent schema migrations. The feedback + admin login state
+    /// share the same DB file so a single backup covers both.
+    fn run_migrations(conn: &Connection) -> rusqlite::Result<()> {
         conn.execute_batch(
             r"
             CREATE TABLE IF NOT EXISTS feedback (
@@ -99,41 +120,39 @@ impl FeedbackStore {
             );
             CREATE INDEX IF NOT EXISTS feedback_received_at
                 ON feedback(received_at);
+
+            CREATE TABLE IF NOT EXISTS admin_consumed_tokens (
+                jti          TEXT    PRIMARY KEY,
+                consumed_at  TEXT    NOT NULL,
+                expires_at   TEXT    NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS admin_consumed_tokens_expires
+                ON admin_consumed_tokens(expires_at);
             ",
-        )?;
-        Ok(Arc::new(Self {
-            conn: tokio::sync::Mutex::new(conn),
-        }))
+        )
     }
 
-    /// In-memory store for tests. Same schema; no on-disk side effects.
+    /// Mark a magic-link token id as consumed. Returns `Ok(true)` if
+    /// this was the first time the JTI was recorded (i.e., the link is
+    /// valid), `Ok(false)` if it was already consumed (replay).
     ///
     /// # Errors
-    /// Returns the underlying rusqlite error on schema-creation failure.
-    pub fn open_in_memory() -> rusqlite::Result<Arc<Self>> {
-        let conn = Connection::open_in_memory()?;
-        conn.execute_batch(
-            r"
-            CREATE TABLE IF NOT EXISTS feedback (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                received_at     TEXT    NOT NULL,
-                name            TEXT    NOT NULL,
-                company         TEXT    NOT NULL,
-                email           TEXT    NOT NULL,
-                worked_well     TEXT    NOT NULL,
-                didnt_work      TEXT    NOT NULL,
-                consent         TEXT    NOT NULL,
-                alternative     TEXT    NOT NULL,
-                why_chose       TEXT    NOT NULL,
-                whats_changed   TEXT    NOT NULL,
-                recommend       TEXT    NOT NULL,
-                anything_else   TEXT    NOT NULL
-            );
-            ",
+    /// Returns the underlying rusqlite error on insert failure.
+    pub async fn consume_token(&self, jti: &str, expires_at_rfc3339: &str) -> rusqlite::Result<bool> {
+        let conn = self.conn.lock().await;
+        // Opportunistically GC expired entries so the table stays bounded.
+        // 14 days past expiry is enough headroom for any clock skew or audit
+        // window we'd reasonably want.
+        let _ = conn.execute(
+            "DELETE FROM admin_consumed_tokens WHERE expires_at < datetime('now', '-14 days')",
+            [],
+        );
+        let now = Utc::now().to_rfc3339();
+        let inserted = conn.execute(
+            "INSERT OR IGNORE INTO admin_consumed_tokens (jti, consumed_at, expires_at) VALUES (?1, ?2, ?3)",
+            params![jti, now, expires_at_rfc3339],
         )?;
-        Ok(Arc::new(Self {
-            conn: tokio::sync::Mutex::new(conn),
-        }))
+        Ok(inserted == 1)
     }
 
     /// Insert a new row. `received_at` is set server-side to `now()`.

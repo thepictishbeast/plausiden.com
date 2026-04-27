@@ -66,44 +66,87 @@ pub const DEFAULT_DESCRIPTION: &str = "Comprehensive IT for the modern enterpris
 /// site identity. Emitted once in every page head.
 const JSON_LD_ORGANIZATION: &str = r#"{"@context":"https://schema.org","@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com","email":"team@plausiden.com","telephone":"+1-978-351-6495","address":{"@type":"PostalAddress","addressRegion":"MA","addressCountry":"US"},"description":"Comprehensive IT solutions for the modern enterprise — cybersecurity, AI automation, cloud infrastructure, software development."}"#;
 
-/// Shared site <head>. Loads the production Tailwind/shadcn CSS and the two
-/// Google Fonts the CSS actually references (`Plus Jakarta Sans`, `Outfit`).
-/// Emits `OpenGraph` + Twitter card metadata and a canonical URL so links
-/// shared in Slack/email/social preview cleanly.
-///
-/// SECURITY: Fonts are self-hosted under `/static/fonts/`; no
-/// third-party origin is referenced. CSP in `crate::security` locks
-/// every fetch directive to `'self'`.
-fn head_tag(title: &str, current: &str, description: &str) -> Markup {
-    let canonical = format!("{SITE_ORIGIN}{current}");
+/// Per-page metadata bundle for the shared `<head>`. Keeps the
+/// signature flat instead of growing positional arguments per
+/// SEO knob; `Default` produces site-default values.
+#[derive(Debug)]
+pub struct PageMeta<'a> {
+    /// `<title>` content (also reused for og:title + twitter:title).
+    pub title: &'a str,
+    /// Request path for the canonical URL.
+    pub current: &'a str,
+    /// `<meta name="description">` (also reused for OG + Twitter).
+    pub description: &'a str,
+    /// og:image absolute URL. `None` falls back to /static/og-default.svg.
+    pub og_image: Option<&'a str>,
+    /// og:type — `"website"` for marketing pages, `"article"` for posts.
+    pub og_type: &'a str,
+    /// Pre-rendered JSON-LD object beyond the site Organization schema
+    /// (e.g., Article schema on blog posts). Empty string omits it.
+    pub extra_json_ld: &'a str,
+}
+
+impl Default for PageMeta<'_> {
+    fn default() -> Self {
+        Self {
+            title: "PlausiDen",
+            current: "/",
+            description: DEFAULT_DESCRIPTION,
+            og_image: None,
+            og_type: "website",
+            extra_json_ld: "",
+        }
+    }
+}
+
+/// Shared site <head>. Emits canonical URL + OpenGraph + Twitter
+/// card + Organization JSON-LD; layers the per-page `PageMeta`
+/// over the site defaults.
+fn head_tag(meta: &PageMeta<'_>) -> Markup {
+    let canonical = format!("{SITE_ORIGIN}{}", meta.current);
+    let og_image_url = meta
+        .og_image
+        .map_or_else(
+            || format!("{SITE_ORIGIN}/static/og-default.svg"),
+            |relative| {
+                if relative.starts_with("http") {
+                    relative.to_string()
+                } else {
+                    format!("{SITE_ORIGIN}{relative}")
+                }
+            },
+        );
     html! {
         head {
             meta charset="utf-8";
             meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1";
             meta name="color-scheme" content="light";
             meta name="robots" content="index, follow";
-            meta name="description" content=(description);
+            meta name="description" content=(meta.description);
             meta name="apple-mobile-web-app-title" content="PlausiDen";
-            title { (title) }
+            title { (meta.title) }
 
             // Canonical + OpenGraph + Twitter card.
             link rel="canonical" href=(canonical);
-            meta property="og:type" content="website";
+            meta property="og:type" content=(meta.og_type);
             meta property="og:site_name" content="PlausiDen LLC";
-            meta property="og:title" content=(title);
-            meta property="og:description" content=(description);
+            meta property="og:title" content=(meta.title);
+            meta property="og:description" content=(meta.description);
             meta property="og:url" content=(canonical);
-            meta property="og:image" content=(format!("{SITE_ORIGIN}/static/og-default.svg"));
+            meta property="og:image" content=(og_image_url);
             meta property="og:image:width" content="1200";
             meta property="og:image:height" content="630";
             meta property="og:image:alt" content="PlausiDen LLC — Privacy-first IT for the modern enterprise";
             meta name="twitter:card" content="summary_large_image";
-            meta name="twitter:title" content=(title);
-            meta name="twitter:description" content=(description);
-            meta name="twitter:image" content=(format!("{SITE_ORIGIN}/static/og-default.svg"));
+            meta name="twitter:title" content=(meta.title);
+            meta name="twitter:description" content=(meta.description);
+            meta name="twitter:image" content=(og_image_url);
 
             // JSON-LD: tells crawlers who we are without parsing the page body.
             script type="application/ld+json" { (PreEscaped(JSON_LD_ORGANIZATION)) }
+            @if !meta.extra_json_ld.is_empty() {
+                script type="application/ld+json" { (PreEscaped(meta.extra_json_ld)) }
+            }
 
             link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96";
             link rel="icon" type="image/svg+xml" href="/static/favicon.svg";
@@ -268,16 +311,8 @@ fn footer() -> Markup {
 
 /// Render a page with the site-wide chrome and the default site
 /// description. Use [`page_with_description`] when a page wants a
-/// page-specific description for OG/Twitter.
-///
-/// BUG ASSUMPTION: The nav + footer here mirror the production React site's
-/// rendered DOM. Classes are Tailwind + shadcn/ui; styling lives in
-/// `/static/index-CWVVhmVm.css` (copy of the production bundle).
-///
-/// SECURITY: The page declares two external origins: `fonts.googleapis.com`
-/// (stylesheet) and `fonts.gstatic.com` (font binary). Matches the production
-/// site's font loading. Consider self-hosting both Plus Jakarta Sans and
-/// Outfit to revert the CSP relaxation.
+/// page-specific description, or [`page_with_meta`] for the full
+/// SEO knob set (og:image, og:type, extra JSON-LD).
 #[must_use]
 pub fn page(title: &str, current: &str, body: Markup) -> Markup {
     page_with_description(title, current, DEFAULT_DESCRIPTION, body)
@@ -287,21 +322,37 @@ pub fn page(title: &str, current: &str, body: Markup) -> Markup {
 /// want their meta-description to differ from the site default
 /// (vertical landing pages, individual blog posts, etc.).
 #[must_use]
-#[allow(clippy::needless_pass_by_value)] // Markup is PreEscaped<String>; consuming is idiomatic for a composition helper.
 pub fn page_with_description(
     title: &str,
     current: &str,
     description: &str,
     body: Markup,
 ) -> Markup {
+    page_with_meta(
+        &PageMeta {
+            title,
+            current,
+            description,
+            ..PageMeta::default()
+        },
+        body,
+    )
+}
+
+/// Render a page with full per-page metadata. Used by blog posts and
+/// other views that need to override og:image, og:type, or inject
+/// extra JSON-LD (e.g., Article schema).
+#[must_use]
+#[allow(clippy::needless_pass_by_value)]
+pub fn page_with_meta(meta: &PageMeta<'_>, body: Markup) -> Markup {
     html! {
         (DOCTYPE)
         html lang="en" {
-            (head_tag(title, current, description))
+            (head_tag(meta))
             body {
                 div id="root" {
                     div class="flex flex-col min-h-screen font-body text-slate-900" {
-                        (nav(current))
+                        (nav(meta.current))
                         main class="flex-grow" {
                             (body)
                         }

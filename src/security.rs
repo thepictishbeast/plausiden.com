@@ -52,8 +52,8 @@ const HSTS: &str = "max-age=63072000; includeSubDomains; preload";
 // Onion-Location advertises the Tor hidden service for the same site
 // (RFC-style draft, supported by Tor Browser, Mullvad Browser, Brave).
 // Tor Browser surfaces a "use the .onion" affordance; non-Tor browsers
-// ignore the header. Pointing at our existing plausiden_site hidden
-// service: ky3ti76q...del2qb5enid.onion (provisioned in /var/lib/tor/).
+// ignore the header entirely. Pointing at our existing plausiden_site
+// hidden service: ky3ti76q...del2qb5enid.onion.
 const ONION_LOCATION: &str =
     "http://ky3ti76qwo467p3ewa7nwhf4sg5bisilqrfhqpjheps47del2qb5enid.onion/";
 

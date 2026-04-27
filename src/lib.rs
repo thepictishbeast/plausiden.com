@@ -22,6 +22,7 @@ use std::time::Duration;
 
 use axum::Router;
 
+pub mod admin;
 pub mod components;
 pub mod feedback_store;
 pub mod handlers;
@@ -61,8 +62,14 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
             get(handlers::feedback).post(inquiry::feedback_submit),
         )
         .route("/feedback/export", get(inquiry::feedback_export)) // COUPLING-EXEMPT: admin token-gated, never linked from UI
+        .route("/admin", get(admin::admin_root))
+        .route("/admin/login", get(admin::login_form).post(admin::login_post))
+        .route("/admin/login/verify", get(admin::verify))
+        .route("/admin/logout", axum::routing::post(admin::logout))
+        .route("/admin/feedback", get(admin::feedback_dashboard))
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
+        .route("/og/blog/{slug}", get(handlers::og_blog)) // COUPLING-EXEMPT: rendered into per-post og:image meta, not clicked from UI
         .route("/solutions/legal", get(handlers::solutions_legal))
         .route("/solutions/healthcare", get(handlers::solutions_healthcare))
         .route("/solutions/journalism", get(handlers::solutions_journalism))
@@ -325,6 +332,79 @@ mod tests {
         // JSON-LD Organization
         assert!(s.contains("application/ld+json"));
         assert!(s.contains("\"PlausiDen LLC\""));
+    }
+
+    /// `/og/blog/<slug>` returns an SVG with the post title rendered
+    /// into the card chrome.
+    #[tokio::test]
+    async fn og_blog_returns_svg_with_title() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/og/blog/federated-rule-learning")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let ct = resp
+            .headers()
+            .get("content-type")
+            .unwrap()
+            .to_str()
+            .unwrap();
+        assert!(ct.contains("svg"), "expected SVG content-type, got {ct}");
+        let body = to_bytes(resp.into_body(), 32 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.starts_with("<svg"));
+        assert!(s.contains("PlausiDen"));
+        assert!(s.contains("Federated"));
+    }
+
+    /// `/og/blog/<unknown>` returns 404, not a malformed SVG.
+    #[tokio::test]
+    async fn og_blog_returns_404_for_unknown_slug() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/og/blog/never-written")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+    }
+
+    /// Per-post pages emit the per-post og:image URL and og:type=article.
+    #[tokio::test]
+    async fn blog_post_emits_per_post_og_image_and_article_type() {
+        let app = build_router(crate::inquiry::InquiryState::new());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/blog/federated-rule-learning")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let body = to_bytes(resp.into_body(), 128 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(
+            s.contains("/og/blog/federated-rule-learning.svg"),
+            "per-post og:image URL missing"
+        );
+        assert!(
+            s.contains(r#"property="og:type" content="article""#),
+            "og:type=article missing"
+        );
+        // Article JSON-LD
+        assert!(s.contains(r#""@type":"Article""#));
+        assert!(s.contains(r#""datePublished":"2026-04-26""#));
     }
 
     /// `/blog/<unknown-slug>` returns 404 with the styled not-found.

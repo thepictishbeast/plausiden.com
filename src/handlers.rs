@@ -140,6 +140,118 @@ pub async fn blog_post(
     )
 }
 
+/// `GET /og/blog/:slug.svg` — dynamically render a 1200×630 SVG social-
+/// preview card for one blog post. Same brand chrome as the default
+/// card but with the post title and category baked in.
+///
+/// SECURITY: The slug is matched against the static `POSTS` registry —
+/// only published posts get a card. Title/category strip to a known-
+/// safe character set before rendering, so a hostile slug (already
+/// blocked by the registry) couldn't inject SVG markup.
+pub async fn og_blog(
+    axum::extract::Path(slug_with_ext): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    let slug = slug_with_ext.strip_suffix(".svg").unwrap_or(&slug_with_ext);
+    let Some(post) = crate::views::posts::by_slug(slug) else {
+        return (
+            StatusCode::NOT_FOUND,
+            [(axum::http::header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+            String::from("not found\n"),
+        );
+    };
+
+    let title_lines = wrap_for_og(post.title, 26);
+    let mut title_blocks = String::new();
+    use std::fmt::Write as _;
+    for (i, line) in title_lines.iter().enumerate() {
+        let y = 340 + (i as i32 * 70);
+        let _ = write!(
+            title_blocks,
+            "<text x=\"80\" y=\"{y}\" font-family=\"system-ui, -apple-system, sans-serif\" font-size=\"60\" font-weight=\"700\" fill=\"#ffffff\">{line}</text>",
+            line = svg_text_escape(line),
+        );
+    }
+
+    let svg = format!(
+        r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="{aria}">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#0d488a"/>
+<stop offset="100%" stop-color="#0a2c52"/>
+</linearGradient>
+<linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#3b82f6"/>
+<stop offset="100%" stop-color="#1e40af"/>
+</linearGradient>
+</defs>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<g opacity="0.06" stroke="#ffffff" stroke-width="1">
+<path d="M0 105H1200M0 210H1200M0 315H1200M0 420H1200M0 525H1200"/>
+<path d="M150 0V630M300 0V630M450 0V630M600 0V630M750 0V630M900 0V630M1050 0V630"/>
+</g>
+<g transform="translate(80, 80)">
+<rect x="0" y="0" width="56" height="56" rx="10" fill="url(#accent)"/>
+<svg x="12" y="12" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+</svg>
+<text x="74" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="700" fill="#ffffff">PlausiDen <tspan fill="#3b82f6">LLC</tspan></text>
+</g>
+<text x="80" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#3b82f6" letter-spacing="2">{category}</text>
+{title_blocks}
+<text x="80" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#cbd5e1">Field Notes · plausiden.com/blog</text>
+</svg>
+"##,
+        aria = svg_text_escape(post.title),
+        category = svg_text_escape(&post.category.to_uppercase()),
+    );
+
+    (
+        StatusCode::OK,
+        [(axum::http::header::CONTENT_TYPE, "image/svg+xml; charset=utf-8")],
+        svg,
+    )
+}
+
+/// Wrap `text` into lines no longer than `max_chars`, splitting on
+/// word boundaries. Returns at most 4 lines (truncating with an
+/// ellipsis if the title overflows the card).
+fn wrap_for_og(text: &str, max_chars: usize) -> Vec<String> {
+    let mut lines: Vec<String> = Vec::new();
+    let mut current = String::new();
+    for word in text.split_whitespace() {
+        if current.is_empty() {
+            current.push_str(word);
+        } else if current.len() + 1 + word.len() <= max_chars {
+            current.push(' ');
+            current.push_str(word);
+        } else {
+            lines.push(std::mem::take(&mut current));
+            current.push_str(word);
+            if lines.len() == 3 {
+                break;
+            }
+        }
+    }
+    if !current.is_empty() && lines.len() < 4 {
+        lines.push(current);
+    }
+    if lines.len() == 4 {
+        let last = lines.last_mut().unwrap();
+        if last.len() > max_chars - 1 {
+            last.truncate(max_chars - 1);
+        }
+        last.push('…');
+    }
+    lines
+}
+
+/// Escape text for embedding inside an SVG `<text>` element body or
+/// attribute. Same cover set as the XML escaper but reused locally to
+/// keep the OG handler self-contained.
+fn svg_text_escape(s: &str) -> String {
+    xml_escape(s)
+}
+
 /// Fallback handler for unmatched paths. Returns 404 with a styled page.
 ///
 /// BUG ASSUMPTION: The `404 + Markup` tuple is picked up by Axum's
@@ -149,45 +261,54 @@ pub async fn not_found() -> (StatusCode, Markup) {
     (StatusCode::NOT_FOUND, crate::views::not_found::render())
 }
 
-/// Static list of public routes included in `/sitemap.xml`.
-/// `/healthz` is intentionally excluded — internal liveness probe.
-const SITEMAP_ROUTES: &[&str] = &[
-    "/",
-    "/services",
-    "/about",
-    "/capabilities",
-    "/case-studies",
-    "/feedback",
-    "/blog",
-    "/subscribe",
-    "/contact",
-    "/solutions/legal",
-    "/solutions/healthcare",
-    "/solutions/journalism",
-    "/solutions/financial-advisors",
-    "/solutions/nonprofit",
-    "/how-we-work",
-    "/pricing-transparency",
-    "/privacy-directive",
-    "/terms-of-service",
+/// Public routes included in `/sitemap.xml`, with hint metadata for
+/// crawlers: `changefreq` (how often we expect the page to change) and
+/// `priority` (relative importance vs. other URLs on the same site,
+/// 0.0–1.0). `/healthz` is intentionally excluded.
+const SITEMAP_ROUTES: &[(&str, &str, &str)] = &[
+    ("/", "weekly", "1.0"),
+    ("/services", "monthly", "0.9"),
+    ("/capabilities", "monthly", "0.9"),
+    ("/case-studies", "monthly", "0.8"),
+    ("/about", "monthly", "0.7"),
+    ("/contact", "yearly", "0.8"),
+    ("/feedback", "yearly", "0.6"),
+    ("/blog", "weekly", "0.9"),
+    ("/subscribe", "yearly", "0.5"),
+    ("/solutions/legal", "monthly", "0.8"),
+    ("/solutions/healthcare", "monthly", "0.8"),
+    ("/solutions/journalism", "monthly", "0.8"),
+    ("/solutions/financial-advisors", "monthly", "0.8"),
+    ("/solutions/nonprofit", "monthly", "0.8"),
+    ("/how-we-work", "monthly", "0.7"),
+    ("/pricing-transparency", "monthly", "0.7"),
+    ("/privacy-directive", "yearly", "0.4"),
+    ("/terms-of-service", "yearly", "0.4"),
 ];
 
 /// `GET /sitemap.xml` — auto-generated from `SITEMAP_ROUTES` + every
 /// blog-post slug. Search engines fetch this; humans don't.
 pub async fn sitemap_xml() -> impl IntoResponse {
     use std::fmt::Write as _;
+    let latest_post_date = crate::views::posts::POSTS
+        .first()
+        .map_or("2026-01-01", |p| p.published);
     let mut out = String::from(
         r#"<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 "#,
     );
-    for path in SITEMAP_ROUTES {
-        let _ = writeln!(out, "  <url><loc>https://plausiden.com{path}</loc></url>");
+    for (path, changefreq, priority) in SITEMAP_ROUTES {
+        let _ = writeln!(
+            out,
+            "  <url><loc>https://plausiden.com{path}</loc><lastmod>{date}</lastmod><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>",
+            date = latest_post_date,
+        );
     }
     for post in crate::views::posts::POSTS {
         let _ = writeln!(
             out,
-            "  <url><loc>https://plausiden.com/blog/{slug}</loc><lastmod>{date}</lastmod></url>",
+            "  <url><loc>https://plausiden.com/blog/{slug}</loc><lastmod>{date}</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>",
             slug = post.slug,
             date = post.published,
         );

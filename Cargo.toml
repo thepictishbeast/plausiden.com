@@ -40,6 +40,13 @@ governor = "0.8"
 rusqlite = { version = "0.32", features = ["bundled", "chrono"] }
 chrono = { version = "0.4", features = ["serde"] }
 
+# Magic-link + session-cookie keyed-hash signing for the admin module.
+# blake3::keyed_hash is a constant-time MAC; base64 is the URL-safe
+# encoding for the link payload.
+blake3 = "1"
+base64 = "0.22"
+rand = { version = "0.8", default-features = false, features = ["std", "std_rng"] }
+
 # PlausiDen-Loom — typed design system. Path dep for local dev; CI
 # uses git dep (see #52 in the task list).
 loom-components = { path = "../PlausiDen-Loom/loom-components", version = "0.1" }

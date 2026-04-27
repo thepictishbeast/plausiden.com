@@ -6,9 +6,32 @@
 
 use maud::{Markup, html};
 
-use super::layout::{page, page_with_description};
+use super::layout::{PageMeta, page, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
+
+/// JSON escape a string for safe embedding inside a JSON literal in the
+/// Article schema. Covers the characters Maud doesn't escape inside a
+/// `<script type="application/ld+json">` block (which is HTML-CDATA-like
+/// at the parser level — but we still need real JSON validity).
+fn json_escape(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 8);
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            '<' => out.push_str("\\u003c"),
+            '>' => out.push_str("\\u003e"),
+            '&' => out.push_str("\\u0026"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out
+}
 
 /// Render the blog index — list of published posts, newest first.
 #[must_use]
@@ -92,10 +115,26 @@ pub fn post(slug: &str) -> Option<Markup> {
             }
         }
     };
-    Some(page_with_description(
-        &format!("{} — PlausiDen", post.title),
-        &format!("/blog/{}", post.slug),
-        post.excerpt,
+    let title = format!("{} — PlausiDen", post.title);
+    let current = format!("/blog/{}", post.slug);
+    let og_image = format!("/og/blog/{}.svg", post.slug);
+    let article_jsonld = format!(
+        r#"{{"@context":"https://schema.org","@type":"Article","headline":"{title}","description":"{desc}","datePublished":"{date}","mainEntityOfPage":"https://plausiden.com{path}","image":"https://plausiden.com{img}","author":{{"@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com"}},"publisher":{{"@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com","logo":{{"@type":"ImageObject","url":"https://plausiden.com/static/favicon-96x96.png"}}}}}}"#,
+        title = json_escape(post.title),
+        desc = json_escape(post.excerpt),
+        date = post.published,
+        path = current,
+        img = og_image,
+    );
+    Some(page_with_meta(
+        &PageMeta {
+            title: &title,
+            current: &current,
+            description: post.excerpt,
+            og_image: Some(&og_image),
+            og_type: "article",
+            extra_json_ld: &article_jsonld,
+        },
         body,
     ))
 }
