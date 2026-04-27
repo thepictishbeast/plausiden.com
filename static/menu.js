@@ -48,6 +48,11 @@
   }
 
   function init() {
+    // Mark <html> as JS-enabled so the animations.css `.js-on` rules
+    // kick in. Without this, `.reveal` stays at its default
+    // `opacity: 1` — the baseline ensures no-JS users always see
+    // every section, not a hero plus a giant blank gap.
+    document.documentElement.classList.add('js-on');
     initNavScroll();
     initReveal();
     var btn = document.getElementById('mobile-menu-toggle');

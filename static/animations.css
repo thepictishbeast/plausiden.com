@@ -1,14 +1,16 @@
 /* PlausiDen reveal-on-scroll animations.
  *
- * The baseline state for `.reveal` is invisible + offset; once the
- * IntersectionObserver in menu.js adds `.is-visible`, the element
- * fades + slides into place. Honors `prefers-reduced-motion`.
+ * The animation only kicks in when JS is running. menu.js adds
+ * `js-on` to <html> on init; without it (no-JS browsers, JS-blocked
+ * extensions, or a script that failed to load) `.reveal` stays at
+ * the default `opacity: 1` so content is never invisible.
  *
- * We also expose a couple of tiny named keyframes for content that
- * should animate on load (hero) without waiting for scroll.
+ * With JS on, `.reveal` starts hidden + offset; the IntersectionObserver
+ * in menu.js adds `.is-visible` as elements scroll into view, which
+ * fades + slides them into place. Honors `prefers-reduced-motion`.
  */
 
-.reveal {
+html.js-on .reveal {
   opacity: 0;
   transform: translateY(24px);
   transition:
@@ -17,7 +19,7 @@
   will-change: opacity, transform;
 }
 
-.reveal.is-visible {
+html.js-on .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
