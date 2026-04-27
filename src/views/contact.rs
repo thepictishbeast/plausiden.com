@@ -12,6 +12,7 @@
 //! `maxlength` attributes are convenience-only (they match the server
 //! limits to keep UX feedback honest).
 
+use loom_components::form::{InputType, Select, SelectOption, TextArea, TextInput};
 use maud::{Markup, PreEscaped, html};
 
 use super::layout::page;
@@ -22,15 +23,17 @@ const SVG_MAIL: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" hei
 
 const SVG_PIN: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-6 h-6 text-primary"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>"#;
 
-/// Standard `<input>` class string — matches the production shadcn-styled
-/// input visual exactly.
-const INPUT_CLASSES: &str = "flex w-full rounded-md border border-input px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:text-sm h-12 bg-slate-50";
-
-const TEXTAREA_CLASSES: &str = "flex w-full rounded-md border border-input px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:text-sm min-h-[150px] bg-slate-50 resize-none";
-
-const SELECT_CLASSES: &str = "flex w-full rounded-md border border-input px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:text-sm h-12 bg-slate-50";
-
-const LABEL_CLASSES: &str = "text-sm font-medium leading-none";
+const SERVICE_OPTIONS: &[SelectOption<'static>] = &[
+    SelectOption { value: "", label: "Select a service" },
+    SelectOption { value: "IT Operations", label: "IT Operations" },
+    SelectOption { value: "Cyber Security", label: "Cyber Security" },
+    SelectOption { value: "Artificial Intelligence", label: "Artificial Intelligence" },
+    SelectOption { value: "Industrial Automation", label: "Industrial Automation" },
+    SelectOption { value: "Software Development", label: "Software Development" },
+    SelectOption { value: "Hardware Solutions", label: "Hardware Solutions" },
+    SelectOption { value: "Networking", label: "Networking" },
+    SelectOption { value: "Other", label: "Other / General Inquiry" },
+];
 
 /// Render the contact page.
 #[must_use]
@@ -74,53 +77,62 @@ pub fn render() -> Markup {
                                 form action="/contact" method="post" class="space-y-6" {
 
                                     div class="grid grid-cols-1 md:grid-cols-2 gap-6" {
-                                        div class="space-y-2" {
-                                            label class=(LABEL_CLASSES) for="contact-name" { "Full Name" }
-                                            input type="text" id="contact-name" name="name"
-                                                class=(INPUT_CLASSES) placeholder="John Doe" maxlength="100";
-                                        }
-                                        div class="space-y-2" {
-                                            label class=(LABEL_CLASSES) for="contact-email" { "Email Address" }
-                                            input type="email" id="contact-email" name="email"
-                                                class=(INPUT_CLASSES) placeholder="john@company.com" maxlength="200" required;
-                                        }
+                                        (TextInput {
+                                            id: "contact-name",
+                                            name: "name",
+                                            label: "Full Name",
+                                            input_type: InputType::Text,
+                                            placeholder: Some("John Doe"),
+                                            max_length: Some(100),
+                                            required: false,
+                                        }.render())
+                                        (TextInput {
+                                            id: "contact-email",
+                                            name: "email",
+                                            label: "Email Address",
+                                            input_type: InputType::Email,
+                                            placeholder: Some("john@company.com"),
+                                            max_length: Some(200),
+                                            required: true,
+                                        }.render())
                                     }
 
                                     div class="grid grid-cols-1 md:grid-cols-2 gap-6" {
-                                        div class="space-y-2" {
-                                            label class=(LABEL_CLASSES) for="contact-phone" { "Phone Number" }
-                                            input type="tel" id="contact-phone" name="phone"
-                                                class=(INPUT_CLASSES) placeholder="(555) 000-0000" maxlength="50";
-                                        }
-                                        div class="space-y-2" {
-                                            label class=(LABEL_CLASSES) for="contact-company" { "Company Name" }
-                                            input type="text" id="contact-company" name="company"
-                                                class=(INPUT_CLASSES) placeholder="Your Business LLC" maxlength="200";
-                                        }
+                                        (TextInput {
+                                            id: "contact-phone",
+                                            name: "phone",
+                                            label: "Phone Number",
+                                            input_type: InputType::Tel,
+                                            placeholder: Some("(555) 000-0000"),
+                                            max_length: Some(50),
+                                            required: false,
+                                        }.render())
+                                        (TextInput {
+                                            id: "contact-company",
+                                            name: "company",
+                                            label: "Company Name",
+                                            input_type: InputType::Text,
+                                            placeholder: Some("Your Business LLC"),
+                                            max_length: Some(200),
+                                            required: false,
+                                        }.render())
                                     }
 
-                                    div class="space-y-2" {
-                                        label class=(LABEL_CLASSES) for="contact-service" { "Service Interest" }
-                                        select id="contact-service" name="service" class=(SELECT_CLASSES) {
-                                            option value="" { "Select a service" }
-                                            option value="IT Operations" { "IT Operations" }
-                                            option value="Cyber Security" { "Cyber Security" }
-                                            option value="Artificial Intelligence" { "Artificial Intelligence" }
-                                            option value="Industrial Automation" { "Industrial Automation" }
-                                            option value="Software Development" { "Software Development" }
-                                            option value="Hardware Solutions" { "Hardware Solutions" }
-                                            option value="Networking" { "Networking" }
-                                            option value="Other" { "Other / General Inquiry" }
-                                        }
-                                    }
+                                    (Select {
+                                        id: "contact-service",
+                                        name: "service",
+                                        label: "Service Interest",
+                                        options: SERVICE_OPTIONS,
+                                    }.render())
 
-                                    div class="space-y-2" {
-                                        label class=(LABEL_CLASSES) for="contact-message" { "Message" }
-                                        textarea id="contact-message" name="message"
-                                            class=(TEXTAREA_CLASSES)
-                                            placeholder="Tell us about your project or requirements..."
-                                            maxlength="5000" required {}
-                                    }
+                                    (TextArea {
+                                        id: "contact-message",
+                                        name: "message",
+                                        label: "Message",
+                                        placeholder: Some("Tell us about your project or requirements..."),
+                                        max_length: Some(5000),
+                                        required: true,
+                                    }.render())
 
                                     button type="submit"
                                         class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground border border-primary-border min-h-9 px-4 py-2 w-full h-12 text-lg font-semibold shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90" {
