@@ -41,7 +41,7 @@ fn shell(title: &str, preheader: &str, inner: &str) -> String {
     let title_safe = escape_html(title);
     let preheader_safe = escape_html(preheader);
     format!(
-        r##"<!DOCTYPE html>
+        r#"<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -78,7 +78,7 @@ fn shell(title: &str, preheader: &str, inner: &str) -> String {
 </table>
 </body>
 </html>
-"##
+"#
     )
 }
 
@@ -87,7 +87,7 @@ fn shell(title: &str, preheader: &str, inner: &str) -> String {
 pub fn magic_link_html(link: &str) -> String {
     let link_safe = escape_html(link);
     let inner = format!(
-        r##"<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:{BRAND_NAVY};font-weight:700;">Sign in to PlausiDen admin</h1>
+        r#"<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:{BRAND_NAVY};font-weight:700;">Sign in to PlausiDen admin</h1>
 <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:{TEXT_BODY};">
   Click the button below within <strong style="color:{BRAND_NAVY};">15 minutes</strong> to sign in. The link is single-use — once you click it, it can't be reused.
 </p>
@@ -102,7 +102,7 @@ pub fn magic_link_html(link: &str) -> String {
 </p>
 <p style="margin:0;font-size:13px;line-height:1.6;color:{TEXT_MUTED};">
   Didn't request this? You can safely ignore this email — the link will expire on its own.
-</p>"##
+</p>"#
     );
     shell(
         "Sign in to PlausiDen admin",
@@ -125,7 +125,11 @@ pub fn feedback_notification_html(
     let name_safe = escape_html(name);
     let company_safe = escape_html(company);
     let email_safe = escape_html(email);
-    let consent_safe = escape_html(if consent.is_empty() { "(none)" } else { consent });
+    let consent_safe = escape_html(if consent.is_empty() {
+        "(none)"
+    } else {
+        consent
+    });
 
     let mut sections_html = String::new();
     for (label, value) in sections {
@@ -134,19 +138,20 @@ pub fn feedback_notification_html(
         }
         let _ = write!(
             sections_html,
-            r##"<div style="margin:0 0 18px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:{TEXT_MUTED};margin-bottom:6px;">{label}</div><div style="font-size:14px;line-height:1.6;color:{TEXT_BODY};white-space:pre-line;">{value}</div></div>"##,
+            r#"<div style="margin:0 0 18px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:{TEXT_MUTED};margin-bottom:6px;">{label}</div><div style="font-size:14px;line-height:1.6;color:{TEXT_BODY};white-space:pre-line;">{value}</div></div>"#,
             label = escape_html(label),
             value = escape_html(value),
         );
     }
     if sections_html.is_empty() {
-        sections_html.push_str(&format!(
-            r##"<p style="font-size:14px;color:{TEXT_MUTED};font-style:italic;">No long-form answers provided.</p>"##
-        ));
+        let _ = write!(
+            sections_html,
+            r#"<p style="font-size:14px;color:{TEXT_MUTED};font-style:italic;">No long-form answers provided.</p>"#
+        );
     }
 
     let inner = format!(
-        r##"<h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;color:{BRAND_NAVY};font-weight:700;">New feedback · #{row_id}</h1>
+        r#"<h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;color:{BRAND_NAVY};font-weight:700;">New feedback · #{row_id}</h1>
 <p style="margin:0 0 24px;font-size:14px;color:{TEXT_MUTED};">
   Submitted via the public form on plausiden.com/feedback.
 </p>
@@ -163,7 +168,7 @@ pub fn feedback_notification_html(
 {sections_html}
 <p style="margin:24px 0 0;font-size:13px;color:{TEXT_MUTED};">
   <a href="https://plausiden.com/admin/feedback" style="color:{BRAND_PRIMARY};text-decoration:none;font-weight:600;">View in admin →</a>
-</p>"##
+</p>"#
     );
 
     shell(
@@ -191,7 +196,7 @@ pub fn inquiry_notification_html(
     let message_safe = escape_html(message);
 
     let inner = format!(
-        r##"<h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;color:{BRAND_NAVY};font-weight:700;">New encrypted inquiry</h1>
+        r#"<h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;color:{BRAND_NAVY};font-weight:700;">New encrypted inquiry</h1>
 <p style="margin:0 0 24px;font-size:14px;color:{TEXT_MUTED};">
   Submitted via the public form on plausiden.com/contact.
 </p>
@@ -207,7 +212,7 @@ pub fn inquiry_notification_html(
   </td></tr>
 </table>
 <div style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:{TEXT_MUTED};">Message</div>
-<div style="font-size:14px;line-height:1.6;color:{TEXT_BODY};white-space:pre-line;border-left:3px solid {BRAND_ACCENT};padding:8px 0 8px 14px;">{message_safe}</div>"##
+<div style="font-size:14px;line-height:1.6;color:{TEXT_BODY};white-space:pre-line;border-left:3px solid {BRAND_ACCENT};padding:8px 0 8px 14px;">{message_safe}</div>"#
     );
 
     shell(

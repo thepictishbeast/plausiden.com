@@ -138,7 +138,12 @@ impl FeedbackStore {
     ///
     /// # Errors
     /// Returns the underlying rusqlite error on insert failure.
-    pub async fn consume_token(&self, jti: &str, expires_at_rfc3339: &str) -> rusqlite::Result<bool> {
+    #[allow(clippy::significant_drop_tightening)]
+    pub async fn consume_token(
+        &self,
+        jti: &str,
+        expires_at_rfc3339: &str,
+    ) -> rusqlite::Result<bool> {
         let conn = self.conn.lock().await;
         // Opportunistically GC expired entries so the table stays bounded.
         // 14 days past expiry is enough headroom for any clock skew or audit

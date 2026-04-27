@@ -288,9 +288,7 @@ pub(crate) async fn submit(
             builder = builder.reply_to(rt);
         }
     }
-    let Ok(email) = builder.multipart(
-        MultiPart::alternative_plain_html(body, html),
-    ) else {
+    let Ok(email) = builder.multipart(MultiPart::alternative_plain_html(body, html)) else {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             ack_page("Server error composing the message. Try again later."),

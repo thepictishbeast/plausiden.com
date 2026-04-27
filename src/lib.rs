@@ -63,10 +63,13 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         )
         .route("/feedback/export", get(inquiry::feedback_export)) // COUPLING-EXEMPT: admin token-gated, never linked from UI
         .route("/admin", get(admin::admin_root))
-        .route("/admin/login", get(admin::login_form).post(admin::login_post))
-        .route("/admin/login/verify", get(admin::verify))
+        .route(
+            "/admin/login",
+            get(admin::login_form).post(admin::login_post),
+        )
+        .route("/admin/login/verify", get(admin::verify)) // COUPLING-EXEMPT: hit only via emailed magic link, not via a UI href
         .route("/admin/logout", axum::routing::post(admin::logout))
-        .route("/admin/feedback", get(admin::feedback_dashboard))
+        .route("/admin/feedback", get(admin::feedback_dashboard)) // COUPLING-EXEMPT: reached via /admin redirect after sign-in, not via a UI href
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
         .route("/og/blog/{slug}", get(handlers::og_blog)) // COUPLING-EXEMPT: rendered into per-post og:image meta, not clicked from UI
@@ -82,7 +85,7 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/pricing-transparency", get(handlers::pricing))
         .route("/sitemap.xml", get(handlers::sitemap_xml)) // COUPLING-EXEMPT: served to crawlers, not clicked from UI
         .route("/robots.txt", get(handlers::robots_txt)) // COUPLING-EXEMPT: served to crawlers, not clicked from UI
-        .route("/blog/rss.xml", get(handlers::blog_rss))
+        .route("/blog/rss.xml", get(handlers::blog_rss)) // COUPLING-EXEMPT: surfaced as a copyable absolute URL on /subscribe (not as a UI <a href>), and consumed by RSS readers, not clicked from the site
         .route("/privacy-directive", get(handlers::privacy))
         .route("/terms-of-service", get(handlers::terms))
         .route("/subscribe", get(handlers::subscribe))

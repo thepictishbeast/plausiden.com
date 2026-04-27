@@ -151,20 +151,24 @@ pub async fn blog_post(
 pub async fn og_blog(
     axum::extract::Path(slug_with_ext): axum::extract::Path<String>,
 ) -> impl IntoResponse {
+    use std::fmt::Write as _;
+
     let slug = slug_with_ext.strip_suffix(".svg").unwrap_or(&slug_with_ext);
     let Some(post) = crate::views::posts::by_slug(slug) else {
         return (
             StatusCode::NOT_FOUND,
-            [(axum::http::header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+            [(
+                axum::http::header::CONTENT_TYPE,
+                "text/plain; charset=utf-8",
+            )],
             String::from("not found\n"),
         );
     };
 
     let title_lines = wrap_for_og(post.title, 26);
     let mut title_blocks = String::new();
-    use std::fmt::Write as _;
     for (i, line) in title_lines.iter().enumerate() {
-        let y = 340 + (i as i32 * 70);
+        let y = 340 + i32::try_from(i).unwrap_or(0) * 70;
         let _ = write!(
             title_blocks,
             "<text x=\"80\" y=\"{y}\" font-family=\"system-ui, -apple-system, sans-serif\" font-size=\"60\" font-weight=\"700\" fill=\"#ffffff\">{line}</text>",
@@ -207,7 +211,10 @@ pub async fn og_blog(
 
     (
         StatusCode::OK,
-        [(axum::http::header::CONTENT_TYPE, "image/svg+xml; charset=utf-8")],
+        [(
+            axum::http::header::CONTENT_TYPE,
+            "image/svg+xml; charset=utf-8",
+        )],
         svg,
     )
 }
@@ -301,8 +308,7 @@ pub async fn sitemap_xml() -> impl IntoResponse {
     for (path, changefreq, priority) in SITEMAP_ROUTES {
         let _ = writeln!(
             out,
-            "  <url><loc>https://plausiden.com{path}</loc><lastmod>{date}</lastmod><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>",
-            date = latest_post_date,
+            "  <url><loc>https://plausiden.com{path}</loc><lastmod>{latest_post_date}</lastmod><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>",
         );
     }
     for post in crate::views::posts::POSTS {

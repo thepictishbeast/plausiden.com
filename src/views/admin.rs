@@ -136,11 +136,7 @@ pub fn feedback_dashboard(email: &str, rows: &[FeedbackRow]) -> Markup {
             }
         }
     };
-    page(
-        "Admin · Feedback — PlausiDen",
-        "/admin/feedback",
-        body,
-    )
+    page("Admin · Feedback — PlausiDen", "/admin/feedback", body)
 }
 
 fn feedback_card(row: &FeedbackRow) -> Markup {

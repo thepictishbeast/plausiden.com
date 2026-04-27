@@ -30,8 +30,8 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use blake3::Hash;
 use chrono::{TimeZone, Utc};
 use lettre::message::{Mailbox, Message, MultiPart};
-use lettre::{AsyncTransport, Tokio1Executor};
 use lettre::transport::smtp::AsyncSmtpTransport;
+use lettre::{AsyncTransport, Tokio1Executor};
 use rand::RngCore;
 use serde::Deserialize;
 
@@ -91,8 +91,7 @@ impl AdminState {
 fn unix_now() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
+        .map_or(0, |d| d.as_secs())
 }
 
 fn keyed_mac(secret: &str, payload: &str) -> Hash {
@@ -246,7 +245,7 @@ fn hex_encode(bytes: &[u8]) -> String {
     s
 }
 
-fn hex_char(n: u8) -> char {
+const fn hex_char(n: u8) -> char {
     match n {
         0..=9 => (b'0' + n) as char,
         _ => (b'a' + n - 10) as char,
@@ -298,10 +297,8 @@ pub(crate) async fn login_post(
     }
     let email = form.email.trim().to_string();
     if email.is_empty() || email.len() > 200 || !email.contains('@') {
-        return admin_views::login(Some(
-            "That doesn't look like an email address. Try again.",
-        ))
-        .into_response();
+        return admin_views::login(Some("That doesn't look like an email address. Try again."))
+            .into_response();
     }
 
     if state.admin.is_allowed(&email) {
@@ -352,9 +349,9 @@ pub(crate) async fn verify(
         // the verify must still refuse.
         return admin_views::login_error("That account is no longer authorized.").into_response();
     }
-    let exp_iso = Utc
-        .timestamp_opt(exp as i64, 0)
-        .single()
+    let exp_iso = i64::try_from(exp)
+        .ok()
+        .and_then(|s| Utc.timestamp_opt(s, 0).single())
         .map_or_else(|| Utc::now().to_rfc3339(), |dt| dt.to_rfc3339());
     match state.admin.feedback.consume_token(&jti, &exp_iso).await {
         Ok(true) => {}
@@ -381,15 +378,18 @@ pub(crate) async fn verify(
     if let Ok(v) = HeaderValue::from_str(&cookie_value) {
         headers.insert(header::SET_COOKIE, v);
     }
-    (StatusCode::SEE_OTHER, headers, Redirect::to("/admin/feedback")).into_response()
+    (
+        StatusCode::SEE_OTHER,
+        headers,
+        Redirect::to("/admin/feedback"),
+    )
+        .into_response()
 }
 
 /// `POST /admin/logout` — clear the session cookie.
 pub(crate) async fn logout() -> Response {
     let mut headers = HeaderMap::new();
-    let clear = format!(
-        "{SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
-    );
+    let clear = format!("{SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0");
     if let Ok(v) = HeaderValue::from_str(&clear) {
         headers.insert(header::SET_COOKIE, v);
     }
@@ -486,12 +486,10 @@ mod tests {
         let s = state();
         let (tok, _, _) = mint_magic_token(&s.secret, "admin@plausiden.com");
         // Flip a byte in the payload portion.
-        let mut bad = tok.clone();
-        let dot = bad.find('.').unwrap();
-        // Replace one byte just before the dot.
-        let mut bytes: Vec<u8> = bad.into_bytes();
+        let dot = tok.find('.').unwrap();
+        let mut bytes: Vec<u8> = tok.into_bytes();
         bytes[dot - 1] ^= 0x01;
-        bad = String::from_utf8(bytes).unwrap();
+        let bad = String::from_utf8(bytes).unwrap();
         assert!(verify_magic_token(&s.secret, &bad).is_err());
     }
 

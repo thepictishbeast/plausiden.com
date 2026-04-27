@@ -15,6 +15,7 @@ use loom_components::card::LinkCard;
 /// `<script type="application/ld+json">` block (which is HTML-CDATA-like
 /// at the parser level — but we still need real JSON validity).
 fn json_escape(s: &str) -> String {
+    use std::fmt::Write as _;
     let mut out = String::with_capacity(s.len() + 8);
     for c in s.chars() {
         match c {
@@ -26,7 +27,9 @@ fn json_escape(s: &str) -> String {
             '<' => out.push_str("\\u003c"),
             '>' => out.push_str("\\u003e"),
             '&' => out.push_str("\\u0026"),
-            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c if (c as u32) < 0x20 => {
+                let _ = write!(out, "\\u{:04x}", c as u32);
+            }
             c => out.push(c),
         }
     }

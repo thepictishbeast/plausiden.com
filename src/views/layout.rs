@@ -104,18 +104,16 @@ impl Default for PageMeta<'_> {
 /// over the site defaults.
 fn head_tag(meta: &PageMeta<'_>) -> Markup {
     let canonical = format!("{SITE_ORIGIN}{}", meta.current);
-    let og_image_url = meta
-        .og_image
-        .map_or_else(
-            || format!("{SITE_ORIGIN}/static/og-default.svg"),
-            |relative| {
-                if relative.starts_with("http") {
-                    relative.to_string()
-                } else {
-                    format!("{SITE_ORIGIN}{relative}")
-                }
-            },
-        );
+    let og_image_url = meta.og_image.map_or_else(
+        || format!("{SITE_ORIGIN}/static/og-default.svg"),
+        |relative| {
+            if relative.starts_with("http") {
+                relative.to_string()
+            } else {
+                format!("{SITE_ORIGIN}{relative}")
+            }
+        },
+    );
     html! {
         head {
             meta charset="utf-8";
