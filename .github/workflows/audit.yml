@@ -20,10 +20,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}
         run: |
-          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install cargo-audit (idempotent)
-        run: command -v cargo-audit || cargo install cargo-audit --locked
+      - name: Install cargo-audit (force latest; advisory-db ships CVSS 4.0)
+        run: cargo install --locked --force cargo-audit
       - name: Audit
         # Deny actual unmaintained / advisory matches; warnings (e.g.,
         # informational notices on transitive deps we can't directly
@@ -39,7 +45,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}
         run: |
-          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          if [ -d ../PlausiDen-Loom/.git ]; then
+            git -C ../PlausiDen-Loom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git"
+            git -C ../PlausiDen-Loom fetch --depth 1 origin
+            git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - name: Install cargo-deny (idempotent)
         run: command -v cargo-deny || cargo install cargo-deny --locked

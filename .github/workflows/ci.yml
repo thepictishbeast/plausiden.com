@@ -84,8 +84,8 @@ jobs:
           fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Install cargo-audit (idempotent)
-        run: command -v cargo-audit || cargo install --locked cargo-audit
+      - name: Install cargo-audit (force latest; advisory-db ships CVSS 4.0)
+        run: cargo install --locked --force cargo-audit
       - run: cargo audit --deny warnings
 
   deny:

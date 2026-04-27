@@ -55,8 +55,8 @@ pub async fn feedback() -> Markup {
 
 /// Render the operational status page (`GET /status`). Self-reports
 /// the running process's uptime + build identity. The route is
-/// public but COUPLING-EXEMPT in the audit since it's discovered
-/// out-of-band (status.plausiden.com when that subdomain ships).
+/// public but COUPLING-EXEMPT: discovered out-of-band (status.plausiden.com
+/// when that subdomain ships), not linked from the marketing UI.
 pub async fn status() -> Markup {
     crate::views::status::render()
 }
