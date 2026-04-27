@@ -69,6 +69,16 @@ pub async fn solutions_journalism() -> Markup {
     crate::views::solutions::journalism::render()
 }
 
+/// Render `/how-we-work` — engagement model + four commitments.
+pub async fn how_we_work() -> Markup {
+    crate::views::how_we_work::render()
+}
+
+/// Render `/pricing-transparency` — concrete rate ranges + posture.
+pub async fn pricing() -> Markup {
+    crate::views::pricing::render()
+}
+
 /// Render an individual blog post (`GET /blog/:slug`). Returns the
 /// styled 404 view for unknown slugs.
 ///
@@ -104,6 +114,8 @@ const SITEMAP_ROUTES: &[&str] = &[
     "/solutions/legal",
     "/solutions/healthcare",
     "/solutions/journalism",
+    "/how-we-work",
+    "/pricing-transparency",
     "/privacy-directive",
     "/terms-of-service",
 ];
