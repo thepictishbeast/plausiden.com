@@ -151,6 +151,13 @@ pub(crate) struct InquiryForm {
     #[serde(default)]
     pub(crate) service: String,
     pub(crate) message: String,
+    /// Honeypot — visually hidden in the rendered form, no real user
+    /// fills it. Filled means a naive bot scraped + replayed every
+    /// input. SECURITY: the field name is intentionally innocuous
+    /// (`website`) so a smarter bot might still skip it; the heuristic
+    /// in `is_likely_spam` is the second line of defense.
+    #[serde(default)]
+    pub(crate) website: String,
 }
 
 const MAX_PHONE_LEN: usize = 50;
@@ -161,6 +168,68 @@ const MAX_SERVICE_LEN: usize = 100;
 /// body readable when optional fields are blank.
 const fn or_omitted(s: &str) -> &str {
     if s.is_empty() { "(omitted)" } else { s }
+}
+
+/// Heuristic check for the contact-form-spam pattern: bots scraping a
+/// public form to advertise their own contact-form-spam-as-a-service.
+/// We've observed messages combining (a) Telegram + WhatsApp links, (b)
+/// Belarus / Russia / generic-VoIP phone numbers, (c) classic boilerplate
+/// phrases ("Our system sends messages through website contact forms",
+/// "found your website while checking", "free test"). A single signal is
+/// noise; ≥3 is a confident spam classification.
+///
+/// Returns `true` if the form should be silently dropped (no email, 202
+/// ack so the bot doesn't detect filtering and adapt).
+fn is_likely_spam(f: &InquiryForm) -> bool {
+    let msg = f.message.to_lowercase();
+    let phone = f.phone.replace(['(', ')', ' ', '-'], "");
+    let mut score = 0u32;
+
+    // Channel mentions — common for outreach-spam pushing the recipient
+    // to an off-form messenger they control.
+    if msg.contains("telegram") {
+        score += 1;
+    }
+    if msg.contains("whatsapp") {
+        score += 1;
+    }
+    // Direct messenger URLs in the body — harder to do innocently.
+    if msg.contains("t.me/") || msg.contains("wa.me/") {
+        score += 1;
+    }
+
+    // Boilerplate phrases lifted from the canonical contact-form-spam
+    // template. Each phrase scores low so that a single accidental
+    // overlap doesn't trip the filter; a real spam message has several.
+    for needle in [
+        "our system sends messages",
+        "found your website",
+        "checking different resources",
+        "free test",
+        "web outreach",
+        "contact form outreach",
+        "feel free to reach out",
+    ] {
+        if msg.contains(needle) {
+            score += 1;
+        }
+    }
+    // The "system sends messages through website contact forms" phrase
+    // is a very strong signal — bots reuse it nearly verbatim.
+    if msg.contains("messages through website contact forms")
+        || msg.contains("through website contact form")
+    {
+        score += 2;
+    }
+
+    // High-spam-volume country codes for contact-form abuse. Not a
+    // single-signal block — combined with the other heuristics it's
+    // confident; alone, a Belarusian customer should not be auto-rejected.
+    if phone.starts_with("+375") || phone.starts_with("375") {
+        score += 1;
+    }
+
+    score >= 3
 }
 
 /// Validate the form. Returns `Ok(())` if every field is within bounds and
@@ -221,6 +290,35 @@ pub(crate) async fn submit(
     ConnectInfo(_addr): ConnectInfo<std::net::SocketAddr>,
     Form(form): Form<InquiryForm>,
 ) -> Response {
+    // Honeypot — the `website` field is visually hidden in the rendered
+    // form. Real users don't see it; naive bots fill every input. If
+    // it's non-empty, drop silently (200-shape ack so the bot doesn't
+    // detect filtering and adapt) and skip all I/O.
+    if !form.website.trim().is_empty() {
+        tracing::warn!("inquiry honeypot tripped — silent drop");
+        return (
+            StatusCode::ACCEPTED,
+            ack_page(
+                "Your message has been delivered. We'll reply via the address you provided.",
+            ),
+        )
+            .into_response();
+    }
+
+    // Heuristic spam filter for contact-form-spam-as-a-service bots
+    // (Telegram/WhatsApp + boilerplate phrases). Same silent-drop shape
+    // — bots adapt to honest 4xx responses; they don't adapt to 202s.
+    if is_likely_spam(&form) {
+        tracing::warn!("inquiry classified as spam — silent drop");
+        return (
+            StatusCode::ACCEPTED,
+            ack_page(
+                "Your message has been delivered. We'll reply via the address you provided.",
+            ),
+        )
+            .into_response();
+    }
+
     if state.limiter.check().is_err() {
         tracing::warn!("inquiry rate-limited");
         return (
@@ -599,6 +697,7 @@ mod tests {
             company: String::new(),
             service: String::new(),
             message: String::new(),
+            website: String::new(),
         }
     }
 
@@ -627,5 +726,72 @@ mod tests {
         f.message = "hi".into();
         f.phone = "x".repeat(MAX_PHONE_LEN + 1);
         assert!(validate(&f).is_err());
+    }
+
+    /// The exact spam pattern observed 2026-04-28 on plausiden.com:
+    /// canned "Davidhes" outreach pushing Telegram + Belarus WhatsApp.
+    #[test]
+    fn spam_filter_catches_canonical_contact_form_spam() {
+        let mut f = empty_form();
+        f.name = "Davidhes".into();
+        f.reply_to = "no.reply.MarkWilliams@gmail.com".into();
+        f.phone = "83183834455".into();
+        f.company = "google".into();
+        f.service = "Other".into();
+        f.message = "Good morning! plausiden.com,\nI found your website while \
+                     checking different resources.\nOur system sends messages \
+                     through website contact forms instead of email.\nMany \
+                     companies use web outreach to find new partners.\nYou can \
+                     run a free test to understand how the system works.\nFeel \
+                     free to reach out if you want information.\n\n\
+                     Telegram - https://t.me/FeedbackFormEU\n\
+                     WhatsApp - +375259112693\n\
+                     WhatsApp https://wa.me/+375259112693"
+            .into();
+        assert!(is_likely_spam(&f), "should classify the canonical spam");
+    }
+
+    #[test]
+    fn spam_filter_does_not_flag_legit_whatsapp_mention() {
+        let mut f = empty_form();
+        f.message = "Hi — please reach me on WhatsApp when you have a moment, \
+                     I prefer it for quick scheduling. Thanks!"
+            .into();
+        assert!(
+            !is_likely_spam(&f),
+            "single-channel mention is not enough to flag"
+        );
+    }
+
+    #[test]
+    fn spam_filter_does_not_flag_legit_telegram_mention() {
+        let mut f = empty_form();
+        f.message = "We use Telegram for our team chat — happy to discuss \
+                     scope there if it's easier."
+            .into();
+        assert!(
+            !is_likely_spam(&f),
+            "single-channel mention is not enough to flag"
+        );
+    }
+
+    #[test]
+    fn spam_filter_flags_belarus_phone_plus_messenger_combo() {
+        let mut f = empty_form();
+        f.phone = "+375259112693".into();
+        f.message = "Reach me on Telegram t.me/foo or WhatsApp.".into();
+        assert!(is_likely_spam(&f));
+    }
+
+    #[test]
+    fn spam_filter_does_not_flag_normal_business_message() {
+        let mut f = empty_form();
+        f.name = "Jane Smith".into();
+        f.reply_to = "jane@acme.example".into();
+        f.message = "We're a 30-person law firm in Boston evaluating privacy- \
+                     respecting infrastructure for our client portal. Could we \
+                     schedule a call to discuss your DR offering?"
+            .into();
+        assert!(!is_likely_spam(&f));
     }
 }

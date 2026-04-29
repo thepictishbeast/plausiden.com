@@ -98,6 +98,19 @@ pub fn render() -> Markup {
 
                                 form action="/contact" method="post" class="space-y-6" {
 
+                                    // Honeypot — visually hidden via the project's
+                                    // `sr-only` utility (positioned off-screen, no
+                                    // inline style attribute so CSP stays strict).
+                                    // A naive contact-form-spam bot fills every input;
+                                    // server reads `website` and silently drops if
+                                    // non-empty. Field name is innocuous so the bot
+                                    // won't notice. COUPLING-EXEMPT: not a UI element
+                                    // for users; no nav link or backend route to audit.
+                                    div class="sr-only" aria-hidden="true" {
+                                        label for="contact-website" { "Leave this field empty" }
+                                        input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" value="";
+                                    }
+
                                     div class="grid grid-cols-1 md:grid-cols-2 gap-6" {
                                         (TextInput {
                                             id: "contact-name",
