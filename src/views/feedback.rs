@@ -17,9 +17,15 @@
 //! is intentionally CMS-shaped (typed fields per submission).
 //!
 //! Form chrome composed entirely from typed Loom primitives —
-//! Hero for the top band, TextInput / TextArea / Select for fields.
+//! Hero for the top band, TextInput / TextArea / Select for fields,
+//! Section for the form band, Heading + HelperText for in-form
+//! prose, Button(Submit) for the submit CTA.
 
-use loom_components::{Hero, HeroBackground, InputType, Select, SelectOption, TextArea, TextInput};
+use loom_components::{
+    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, HelperSize, HelperText, Hero, HeroBackground, InputType, Section,
+    SectionPadding, SectionTheme, SectionWidth, Select, SelectOption, TextArea, TextInput,
+};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -54,24 +60,18 @@ const ATTRIBUTION_OPTIONS: &[SelectOption<'static>] = &[
 /// Render the `/feedback` page.
 #[must_use]
 pub fn render() -> Markup {
-    let body = html! {
-        (Hero {
-            eyebrow: Some("For clients + collaborators"),
-            headline_lead: "Feedback +",
-            headline_accent: Some("testimonial."),
-            subheadline: "If you've worked with PlausiDen, your feedback shapes what we ship next. The first section is for any feedback; the second section is the optional testimonial questions if you're willing to be quoted. We read every response by hand. Nothing here is shared without your consent.",
-            cta: None,
-            background: HeroBackground::GridLight,
-        }.render())
+    let form_body = html! {
+        form method="post" action="/feedback" class="space-y-10" {
 
-        section class="py-12 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-2xl" {
-                form method="post" action="/feedback" class="space-y-10" {
-
-                    // --- Identity ---
-                    div class="space-y-4" {
-                        h2 class="font-display text-xl font-bold text-slate-900" { "Who you are" }
-                        (TextInput {
+            // --- Identity ---
+            div class="space-y-4" {
+                (Heading {
+                    text: "Who you are",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Sub,
+                    tone: HeadingTone::Ink,
+                }.render())
+                (TextInput {
                             id: "fb-name",
                             name: "name",
                             label: "Your name",
@@ -100,13 +100,20 @@ pub fn render() -> Markup {
                         }.render())
                     }
 
-                    // --- General feedback ---
-                    div class="space-y-4" {
-                        h2 class="font-display text-xl font-bold text-slate-900" { "General feedback" }
-                        p class="text-sm text-slate-500" {
-                            "Anything you want us to know. Keep it short, keep it honest. One sentence is fine."
-                        }
-                        (TextArea {
+            // --- General feedback ---
+            div class="space-y-4" {
+                (Heading {
+                    text: "General feedback",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Sub,
+                    tone: HeadingTone::Ink,
+                }.render())
+                (HelperText {
+                    text: "Anything you want us to know. Keep it short, keep it honest. One sentence is fine.",
+                    size: HelperSize::Default,
+                    tone: HeadingTone::Ink,
+                }.render())
+                (TextArea {
                             id: "fb-worked",
                             name: "worked_well",
                             label: "1. What worked well?",
@@ -124,13 +131,20 @@ pub fn render() -> Markup {
                         }.render())
                     }
 
-                    // --- Testimonial ---
-                    div class="space-y-4" {
-                        h2 class="font-display text-xl font-bold text-slate-900" { "Testimonial (optional)" }
-                        p class="text-sm text-slate-500" {
-                            "If you're willing to be quoted on our site, answer as many of these as you'd like. Short and honest beats long and tidy. We'll edit for length, never for voice — and we won't publish anything without your sign-off."
-                        }
-                        (Select {
+            // --- Testimonial ---
+            div class="space-y-4" {
+                (Heading {
+                    text: "Testimonial (optional)",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Sub,
+                    tone: HeadingTone::Ink,
+                }.render())
+                (HelperText {
+                    text: "If you're willing to be quoted on our site, answer as many of these as you'd like. Short and honest beats long and tidy. We'll edit for length, never for voice — and we won't publish anything without your sign-off.",
+                    size: HelperSize::Default,
+                    tone: HeadingTone::Ink,
+                }.render())
+                (Select {
                             id: "fb-consent",
                             name: "consent",
                             label: "3. How can we attribute you?",
@@ -178,18 +192,45 @@ pub fn render() -> Markup {
                         }.render())
                     }
 
-                    div class="pt-4" {
-                        button type="submit"
-                            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-semibold bg-primary text-primary-foreground border border-primary-border min-h-12 px-8 py-3 text-lg shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors" {
-                            "Send feedback"
-                        }
-                        p class="text-xs text-slate-500 mt-3" {
-                            "We'll read it. If you flagged a quote we can use, we'll email you the proposed wording before anything goes live."
-                        }
-                    }
+            div class="pt-4" {
+                (Button {
+                    label: "Send feedback",
+                    variant: ButtonVariant::Primary,
+                    size: ButtonSize::Lg,
+                    aria_label: None,
+                    icon: None,
+                    decoration: Decoration::SoftShadow,
+                    button_type: ButtonType::Submit,
+                }.render())
+                div class="mt-3" {
+                    (HelperText {
+                        text: "We'll read it. If you flagged a quote we can use, we'll email you the proposed wording before anything goes live.",
+                        size: HelperSize::Tiny,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
             }
         }
+    };
+
+    let form_section = Section {
+        body: &form_body,
+        theme: SectionTheme::Light,
+        width: SectionWidth::Narrow,
+        padding: SectionPadding::Tight,
+    }
+    .render();
+
+    let body = html! {
+        (Hero {
+            eyebrow: Some("For clients + collaborators"),
+            headline_lead: "Feedback +",
+            headline_accent: Some("testimonial."),
+            subheadline: "If you've worked with PlausiDen, your feedback shapes what we ship next. The first section is for any feedback; the second section is the optional testimonial questions if you're willing to be quoted. We read every response by hand. Nothing here is shared without your consent.",
+            cta: None,
+            background: HeroBackground::GridLight,
+        }.render())
+        (form_section)
     };
     page("Feedback + testimonial — PlausiDen", "/feedback", body)
 }
@@ -230,6 +271,6 @@ mod tests {
         // Spot-check that the input chrome came from loom-components,
         // not raw class strings. Loom inputs all carry h-12 + bg-slate-50.
         let s = render().into_string();
-        assert!(s.contains("h-12 bg-slate-50"));
+        assert!(s.contains("h-12 bg-slate-50")); // loom-allow: test-assertion literal of expected loom-components output
     }
 }
