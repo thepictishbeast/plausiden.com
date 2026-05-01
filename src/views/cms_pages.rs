@@ -20,6 +20,7 @@ use loom_components::{
     Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section as LoomSection,
     SectionPadding, SectionTheme as LoomSectionTheme, SectionWidth,
 };
+use loom_components::card::{Card, CardElevation, CardHover, CardPadding};
 use maud::{Markup, html};
 
 use super::layout::page;
@@ -70,12 +71,13 @@ fn render_block(b: &Block) -> Markup {
         BlockKind::PullQuote => render_pull_quote(b),
         BlockKind::Cta => render_cta(b),
         BlockKind::Markdown => render_markdown(b),
-        // Card grid, image, video are accepted in the schema but
-        // their renderers are deferred until the corresponding
-        // Loom primitives have a stable surface. They render as
-        // a placeholder note so an editor sees that the block
-        // exists but isn't yet visible.
-        BlockKind::CardGrid | BlockKind::Image | BlockKind::Video => render_placeholder(b),
+        BlockKind::CardGrid => render_card_grid(b),
+        // Image / Video are accepted in the schema but their
+        // renderers are deferred until the corresponding Loom
+        // primitives have a stable surface. They render as a
+        // placeholder note so an editor sees that the block exists
+        // but isn't yet visible.
+        BlockKind::Image | BlockKind::Video => render_placeholder(b),
     }
 }
 
@@ -164,6 +166,77 @@ fn render_markdown(b: &Block) -> Markup {
     }
 }
 
+fn render_card_grid(b: &Block) -> Markup {
+    // Optional grid heading + lede pair (renders above the grid).
+    let heading = text_field(b, "heading").unwrap_or("");
+    let lede = text_field(b, "lede").unwrap_or("");
+    // `card_titles` and `card_bodies` are two parallel lists walked
+    // in lockstep. A card grid with N entries needs both lists at
+    // length N; mismatched lengths render the shorter intersection.
+    // Optional `card_hrefs` makes each card a clickable link target.
+    let titles = list_field(b, "card_titles").unwrap_or_default();
+    let bodies = list_field(b, "card_bodies").unwrap_or_default();
+    let hrefs = list_field(b, "card_hrefs").unwrap_or_default();
+    let n = titles.len().min(bodies.len());
+
+    html! {
+        @if !heading.is_empty() {
+            div class="text-center max-w-3xl mx-auto mb-8" { // loom-allow: card-grid header — centred caption above the grid
+                div class="mb-4" {
+                    (Heading {
+                        text: heading,
+                        level: HeadingLevel::H2,
+                        variant: HeadingVariant::Sub,
+                        tone: HeadingTone::Ink,
+                    }.render())
+                }
+                @if !lede.is_empty() {
+                    (Lede { text: lede, tone: HeadingTone::Ink }.render())
+                }
+            }
+        }
+        // 1-up on phone, 2-up on tablet, 3-up on desktop. The shape
+        // matches the FeatureCard grids elsewhere in the site so a
+        // CMS-authored grid renders consistently with hand-coded
+        // pages.
+        div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" { // loom-allow: 3-up card grid — no Loom Grid primitive yet
+            @for i in 0..n {
+                @let title = &titles[i];
+                @let body = &bodies[i];
+                @let href = hrefs.get(i).map(String::as_str).unwrap_or("");
+                @if href.is_empty() {
+                    (card_body_for(title, body))
+                } @else {
+                    a href=(href) class="block hover:no-underline" { // loom-allow: anchor wrapping a Loom Card; future LinkCardWrapper primitive
+                        (card_body_for(title, body))
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn card_body_for(title: &str, body: &str) -> Markup {
+    let inner = html! {
+        div class="mb-2" { // loom-allow: spacing wrapper between Card heading and body
+            (Heading {
+                text: title,
+                level: HeadingLevel::H3,
+                variant: HeadingVariant::Card,
+                tone: HeadingTone::Ink,
+            }.render())
+        }
+        p class="text-slate-600 leading-relaxed" { (body) } // loom-allow: card body prose
+    };
+    Card {
+        body: &inner,
+        elevation: CardElevation::Soft,
+        padding: CardPadding::Comfortable,
+        hover: CardHover::Lift,
+    }
+    .render()
+}
+
 fn render_placeholder(b: &Block) -> Markup {
     let kind = match b.kind {
         BlockKind::CardGrid => "card grid",
@@ -192,6 +265,25 @@ fn text_field<'a>(b: &'a Block, key: &str) -> Option<&'a str> {
         FieldValue::Text(s) | FieldValue::Url(s) => Some(s.as_str()),
         _ => None,
     }
+}
+
+/// Read a list of strings from a block field. Non-string entries
+/// are skipped (defensive: bad TOML shouldn't 500 the renderer).
+/// Returns `None` when the field is missing entirely so the caller
+/// can pick a sensible default.
+fn list_field(b: &Block, key: &str) -> Option<Vec<String>> {
+    let FieldValue::List(items) = b.fields.get(key)? else {
+        return None;
+    };
+    Some(
+        items
+            .iter()
+            .filter_map(|v| match v {
+                FieldValue::Text(s) | FieldValue::Url(s) => Some(s.clone()),
+                _ => None,
+            })
+            .collect(),
+    )
 }
 
 #[cfg(test)]
@@ -315,14 +407,107 @@ mod tests {
 
     #[test]
     fn unrendered_kinds_show_placeholder() {
+        // CardGrid now renders properly; only Image / Video stay placeholder.
         let p = page_with_blocks(vec![Section {
             anchor: None,
             theme: SectionTheme::Light,
-            blocks: vec![block(BlockKind::CardGrid, &[])],
+            blocks: vec![block(BlockKind::Image, &[])],
         }]);
         let s = render(&p, "/docs/test").into_string();
-        assert!(s.contains("card grid"));
+        assert!(s.contains("image"));
         assert!(s.contains("renderer pending"));
+    }
+
+    #[test]
+    fn card_grid_renders_paired_titles_and_bodies() {
+        let mut fields = BTreeMap::new();
+        fields.insert(
+            "card_titles".into(),
+            FieldValue::List(vec![
+                FieldValue::Text("Card A".into()),
+                FieldValue::Text("Card B".into()),
+            ]),
+        );
+        fields.insert(
+            "card_bodies".into(),
+            FieldValue::List(vec![
+                FieldValue::Text("Body of card A.".into()),
+                FieldValue::Text("Body of card B.".into()),
+            ]),
+        );
+        let p = page_with_blocks(vec![Section {
+            anchor: None,
+            theme: SectionTheme::Light,
+            blocks: vec![Block {
+                kind: BlockKind::CardGrid,
+                fields,
+            }],
+        }]);
+        let s = render(&p, "/docs/test").into_string();
+        assert!(s.contains("Card A"));
+        assert!(s.contains("Card B"));
+        assert!(s.contains("Body of card A."));
+        assert!(s.contains("Body of card B."));
+    }
+
+    #[test]
+    fn card_grid_with_hrefs_emits_clickable_anchors() {
+        let mut fields = BTreeMap::new();
+        fields.insert(
+            "card_titles".into(),
+            FieldValue::List(vec![FieldValue::Text("Engine".into())]),
+        );
+        fields.insert(
+            "card_bodies".into(),
+            FieldValue::List(vec![FieldValue::Text("Substrate decisions.".into())]),
+        );
+        fields.insert(
+            "card_hrefs".into(),
+            FieldValue::List(vec![FieldValue::Url("/docs/engine".into())]),
+        );
+        let p = page_with_blocks(vec![Section {
+            anchor: None,
+            theme: SectionTheme::Light,
+            blocks: vec![Block {
+                kind: BlockKind::CardGrid,
+                fields,
+            }],
+        }]);
+        let s = render(&p, "/docs/test").into_string();
+        assert!(s.contains("href=\"/docs/engine\""));
+        assert!(s.contains("Engine"));
+    }
+
+    #[test]
+    fn card_grid_mismatched_lengths_render_intersection() {
+        let mut fields = BTreeMap::new();
+        fields.insert(
+            "card_titles".into(),
+            FieldValue::List(vec![
+                FieldValue::Text("First".into()),
+                FieldValue::Text("Second".into()),
+                FieldValue::Text("Third".into()),
+            ]),
+        );
+        fields.insert(
+            "card_bodies".into(),
+            FieldValue::List(vec![
+                FieldValue::Text("Only one body.".into()),
+            ]),
+        );
+        let p = page_with_blocks(vec![Section {
+            anchor: None,
+            theme: SectionTheme::Light,
+            blocks: vec![Block {
+                kind: BlockKind::CardGrid,
+                fields,
+            }],
+        }]);
+        let s = render(&p, "/docs/test").into_string();
+        // Only the first card renders (intersection of lengths).
+        assert!(s.contains("First"));
+        assert!(!s.contains(">Second<"));
+        assert!(!s.contains(">Third<"));
     }
 
     #[test]

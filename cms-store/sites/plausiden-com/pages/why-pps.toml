@@ -49,6 +49,26 @@ You will not need every layer. You will need the layers your threat model says y
 """
 
 [[sections]]
+theme = "light"
+anchor = "the-layers"
+
+[[sections.blocks]]
+kind = "card_grid"
+
+[sections.blocks.fields]
+heading = "The PPS layers."
+lede = "Each layer is independently auditable, shippable, and replaceable. Compose only the ones your threat model needs."
+card_titles = ["Engine", "Inject", "Purge", "Tidy", "Shard", "Swarm"]
+card_bodies = [
+    "Substrate decisions — what gets stored, what doesn't, where the load-bearing data lives.",
+    "Plausible cover traffic where bare absence would itself be probative.",
+    "Removes residual artefacts in a way the file system cannot reconstruct.",
+    "Keeps the working set clean — the data on disk matches the data you mean to have.",
+    "Separates what must be kept from what must not co-locate.",
+    "Distributes what should not centralise. The substrate has no single point of subpoena.",
+]
+
+[[sections]]
 theme = "muted"
 
 [[sections.blocks]]
