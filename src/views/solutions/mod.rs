@@ -10,3 +10,4 @@ pub mod healthcare;
 pub mod journalism;
 pub mod legal;
 pub mod nonprofit;
+pub mod template;
