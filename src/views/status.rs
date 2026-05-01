@@ -13,7 +13,9 @@
 use std::sync::OnceLock;
 use std::time::Instant;
 
-use loom_components::{Badge, BadgeSize, BadgeTone};
+use loom_components::{
+    Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+};
 use maud::{Markup, html};
 
 use super::layout::page;
@@ -53,48 +55,54 @@ pub fn render() -> Markup {
     let uptime_str = format!("{days}d {hours}h {minutes}m {seconds}s");
 
     let body = html! {
-        section class="pt-32 pb-16 md:pt-44 md:pb-20 bg-slate-50" {
-            div class="container mx-auto px-4 md:px-6 max-w-3xl" {
+        section class="pt-32 pb-16 md:pt-44 md:pb-20 bg-slate-50" { // loom-allow: hero band — pt-32/44 cadence sits below Loom Section padding scale
+            div class="container mx-auto px-4 md:px-6 max-w-3xl" { // loom-allow: hero container max-w-3xl
                 div class="mb-6" { (Badge { label: "Operational", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
-                h1 class="font-display text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] mb-4" {
-                    "Status"
+                div class="mb-4" {
+                    (Heading {
+                        text: "Status",
+                        level: HeadingLevel::H1,
+                        variant: HeadingVariant::Display,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-lg text-slate-600 max-w-2xl leading-relaxed" {
-                    "Self-reported by the running plausiden.com process. External probes (TLS grade, DNS health, mail deliverability) run on a separate cadence; see external-monitors in the CI logs."
-                }
+                (Lede {
+                    text: "Self-reported by the running plausiden.com process. External probes (TLS grade, DNS health, mail deliverability) run on a separate cadence; see external-monitors in the CI logs.",
+                    tone: HeadingTone::Ink,
+                }.render())
             }
         }
 
-        section class="py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-2xl" {
-                div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 mb-8" {
-                    div class="flex items-center gap-3" {
-                        div class="w-3 h-3 rounded-full bg-emerald-500" {}
-                        p class="text-sm text-emerald-900 font-semibold" {
+        section class="py-16 bg-white" { // loom-allow: status-detail band — py-16 + max-w-2xl don't fit Loom Section
+            div class="container mx-auto px-4 md:px-6 max-w-2xl" { // loom-allow: tight container scope
+                div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 mb-8" { // loom-allow: emerald status panel — semantic colour for "operational"; no Loom StatusPanel primitive
+                    div class="flex items-center gap-3" { // loom-allow: status indicator row chrome
+                        div class="w-3 h-3 rounded-full bg-emerald-500" {} // loom-allow: 12px solid status dot
+                        p class="text-sm text-emerald-900 font-semibold" { // loom-allow: status label — bolded emerald
                             "All systems operational"
                         }
                     }
-                    p class="text-xs text-emerald-800 mt-2" {
+                    p class="text-xs text-emerald-800 mt-2" { // loom-allow: status footnote — small muted emerald
                         "If you can read this page, the request handler, the renderer, and the security-headers middleware are all up."
                     }
                 }
 
-                dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm" {
+                dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm" { // loom-allow: 2-column dl meta grid — no Loom MetaGrid primitive
                     div {
-                        dt class="text-slate-500 font-medium" { "Uptime since process start" }
-                        dd class="text-slate-900 font-mono mt-1" { (uptime_str) }
+                        dt class="text-slate-500 font-medium" { "Uptime since process start" } // loom-allow: dl term — muted
+                        dd class="text-slate-900 font-mono mt-1" { (uptime_str) } // loom-allow: dl definition — mono ink
                     }
                     div {
-                        dt class="text-slate-500 font-medium" { "Build profile" }
-                        dd class="text-slate-900 font-mono mt-1" { (BUILD_PROFILE) }
+                        dt class="text-slate-500 font-medium" { "Build profile" } // loom-allow: dl term — muted
+                        dd class="text-slate-900 font-mono mt-1" { (BUILD_PROFILE) } // loom-allow: dl definition — mono ink
                     }
                     div {
-                        dt class="text-slate-500 font-medium" { "Commit" }
-                        dd class="text-slate-900 font-mono mt-1" { (GIT_SHA) }
+                        dt class="text-slate-500 font-medium" { "Commit" } // loom-allow: dl term — muted
+                        dd class="text-slate-900 font-mono mt-1" { (GIT_SHA) } // loom-allow: dl definition — mono ink
                     }
                     div {
-                        dt class="text-slate-500 font-medium" { "Hostname" }
-                        dd class="text-slate-900 font-mono mt-1" { "plausiden.com" }
+                        dt class="text-slate-500 font-medium" { "Hostname" } // loom-allow: dl term — muted
+                        dd class="text-slate-900 font-mono mt-1" { "plausiden.com" } // loom-allow: dl definition — mono ink
                     }
                 }
             }
