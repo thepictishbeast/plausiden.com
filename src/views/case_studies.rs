@@ -6,7 +6,10 @@
 //! time; the page never serves a client name without their explicit
 //! written sign-off.
 
-use loom_components::{Badge, BadgeSize, BadgeTone};
+use loom_components::{
+    Badge, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonVariant, Decoration,
+    Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -56,65 +59,106 @@ const CASE_STUDIES: &[CaseStudy] = &[
 /// Render `/case-studies`, wrapped in shared site chrome.
 #[must_use]
 pub fn render() -> Markup {
+    let cta_button = Button {
+        label: "Start the conversation",
+        variant: ButtonVariant::Primary,
+        size: ButtonSize::Lg,
+        aria_label: None,
+        icon: None,
+        decoration: Decoration::SoftShadow,
+        button_type: ButtonType::Button,
+    }
+    .render();
+
     let body = html! {
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" {
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
+        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: hero band — pt-32/44 + pb-16/24 cadence below Loom Section padding scale
+            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl
                 div class="mb-6" { (Badge { label: "Selected work", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
-                h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-6" {
-                    "Case studies"
+                div class="mb-6" {
+                    (Heading {
+                        text: "Case studies",
+                        level: HeadingLevel::H1,
+                        variant: HeadingVariant::Display,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed" {
-                    "Sanitized engagement summaries from our active practice. Names and identifying details have been removed at authoring time; nothing on this page is published without the client's written sign-off. If a study reads like your situation, the contact form is the right next step."
-                }
+                (Lede {
+                    text: "Sanitized engagement summaries from our active practice. Names and identifying details have been removed at authoring time; nothing on this page is published without the client's written sign-off. If a study reads like your situation, the contact form is the right next step.",
+                    tone: HeadingTone::Ink,
+                }.render())
             }
         }
 
         @for (i, c) in CASE_STUDIES.iter().enumerate() {
-            section class=(if i % 2 == 0 { "py-16 bg-white" } else { "py-16 bg-slate-50" }) {
-                div class="container mx-auto px-4 md:px-6 max-w-3xl" {
-                    span class="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-xs mb-4 border border-primary/20" {
-                        (c.industry)
+            section class=(if i % 2 == 0 { "py-16 bg-white" } else { "py-16 bg-slate-50" }) { // loom-allow: alternating zebra band — branchy class needs raw form
+                div class="container mx-auto px-4 md:px-6 max-w-3xl" { // loom-allow: case-study container max-w-3xl
+                    div class="mb-4" {
+                        (Badge { label: c.industry, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
                     }
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-6" {
-                        (c.scope)
+                    div class="mb-6" {
+                        (Heading {
+                            text: c.scope,
+                            level: HeadingLevel::H2,
+                            variant: HeadingVariant::Sub,
+                            tone: HeadingTone::Ink,
+                        }.render())
                     }
-                    div class="space-y-6" {
+                    div class="space-y-6" { // loom-allow: vertical rhythm between case-study sub-sections
                         div {
-                            h3 class="font-display text-lg font-semibold text-slate-900 mb-2" {
-                                "What mattered"
+                            div class="mb-2" {
+                                (Heading {
+                                    text: "What mattered",
+                                    level: HeadingLevel::H3,
+                                    variant: HeadingVariant::Card,
+                                    tone: HeadingTone::Ink,
+                                }.render())
                             }
-                            p class="text-slate-600 leading-relaxed" { (c.what_mattered) }
+                            p class="text-slate-600 leading-relaxed" { (c.what_mattered) } // loom-allow: case-study prose paragraph; Lede is for hero openers
                         }
                         div {
-                            h3 class="font-display text-lg font-semibold text-slate-900 mb-2" {
-                                "What we shipped"
+                            div class="mb-2" {
+                                (Heading {
+                                    text: "What we shipped",
+                                    level: HeadingLevel::H3,
+                                    variant: HeadingVariant::Card,
+                                    tone: HeadingTone::Ink,
+                                }.render())
                             }
-                            p class="text-slate-600 leading-relaxed" { (c.what_we_did) }
+                            p class="text-slate-600 leading-relaxed" { (c.what_we_did) } // loom-allow: case-study prose paragraph
                         }
                         div {
-                            h3 class="font-display text-lg font-semibold text-slate-900 mb-2" {
-                                "Outcome"
+                            div class="mb-2" {
+                                (Heading {
+                                    text: "Outcome",
+                                    level: HeadingLevel::H3,
+                                    variant: HeadingVariant::Card,
+                                    tone: HeadingTone::Ink,
+                                }.render())
                             }
-                            p class="text-slate-600 leading-relaxed" { (c.outcome) }
+                            p class="text-slate-600 leading-relaxed" { (c.outcome) } // loom-allow: case-study prose paragraph
                         }
                     }
                 }
             }
         }
 
-        section class="py-20 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 text-center max-w-2xl" {
-                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" {
-                    "Recognize your situation in any of these?"
+        section class="py-20 bg-primary/5" { // loom-allow: tinted CTA band — py-20 cadence + primary/5 tint, not exactly Loom Section::Tinted
+            div class="container mx-auto px-4 md:px-6 text-center max-w-2xl" { // loom-allow: centred CTA container max-w-2xl
+                div class="mb-6" {
+                    (Heading {
+                        text: "Recognize your situation in any of these?",
+                        level: HeadingLevel::H2,
+                        variant: HeadingVariant::Sub,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-slate-600 text-lg mb-8" {
-                    "The first conversation is free, the NDA is mutual, and we'll tell you if we're not the right fit before either of us has invested an hour."
+                div class="mb-8" {
+                    (Lede {
+                        text: "The first conversation is free, the NDA is mutual, and we'll tell you if we're not the right fit before either of us has invested an hour.",
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                a href="/contact" {
-                    button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all" {
-                        "Start the conversation"
-                    }
-                }
+                a href="/contact" { (cta_button) }
             }
         }
     };
