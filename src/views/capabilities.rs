@@ -10,7 +10,10 @@
 //! continuously and copy goes stale faster than the publishing
 //! cadence.
 
-use loom_components::{Badge, BadgeSize, BadgeTone};
+use loom_components::{
+    Badge, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonVariant, Decoration,
+    Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -74,50 +77,76 @@ const CAPABILITIES: &[Capability] = &[
 /// Render `/capabilities` wrapped in the shared site chrome.
 #[must_use]
 pub fn render() -> Markup {
+    let cta_button = Button {
+        label: "Start the conversation",
+        variant: ButtonVariant::Primary,
+        size: ButtonSize::Lg,
+        aria_label: None,
+        icon: None,
+        decoration: Decoration::SoftShadow,
+        button_type: ButtonType::Button,
+    }
+    .render();
+
     let body = html! {
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" {
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
+        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: hero band — pt-32/44 cadence below Loom Section padding scale
+            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl
                 div class="mb-6" { (Badge { label: "What we run, not just what we sell", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
-                h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-6" {
-                    "Capabilities."
+                div class="mb-6" {
+                    (Heading {
+                        text: "Capabilities.",
+                        level: HeadingLevel::H1,
+                        variant: HeadingVariant::Display,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed" {
-                    "Most consultancies depend on a stack of third-party SaaS to run their own operations. We don't. We build and operate the tools we recommend — mail, outbound, CMS, design system, AI surface, mail client, audit machinery — and the engagements we sell are backed by the same infrastructure we trust ourselves with."
-                }
-                p class="text-base text-slate-500 mt-4 max-w-2xl leading-relaxed" {
+                (Lede {
+                    text: "Most consultancies depend on a stack of third-party SaaS to run their own operations. We don't. We build and operate the tools we recommend — mail, outbound, CMS, design system, AI surface, mail client, audit machinery — and the engagements we sell are backed by the same infrastructure we trust ourselves with.",
+                    tone: HeadingTone::Ink,
+                }.render())
+                p class="text-base text-slate-500 mt-4 max-w-2xl leading-relaxed" { // loom-allow: hero footnote — smaller than Lede, doesn't fit any Loom variant
                     "The list below is intentionally general. Tools mature continuously, and we'd rather show what we cover than commit copy to a feature list that's wrong by the time the page is read."
                 }
             }
         }
 
         @for (i, c) in CAPABILITIES.iter().enumerate() {
-            section class=(if i % 2 == 0 { "py-16 bg-white" } else { "py-16 bg-slate-50" }) {
-                div class="container mx-auto px-4 md:px-6 max-w-3xl" {
-                    span class="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-xs mb-4 border border-primary/20" {
-                        (c.eyebrow)
+            section class=(if i % 2 == 0 { "py-16 bg-white" } else { "py-16 bg-slate-50" }) { // loom-allow: alternating zebra band
+                div class="container mx-auto px-4 md:px-6 max-w-3xl" { // loom-allow: capability container max-w-3xl
+                    div class="mb-4" {
+                        (Badge { label: c.eyebrow, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
                     }
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-6" {
-                        (c.heading)
+                    div class="mb-6" {
+                        (Heading {
+                            text: c.heading,
+                            level: HeadingLevel::H2,
+                            variant: HeadingVariant::Sub,
+                            tone: HeadingTone::Ink,
+                        }.render())
                     }
-                    p class="text-slate-600 leading-relaxed mb-4" { (c.blurb_1) }
-                    p class="text-slate-600 leading-relaxed" { (c.blurb_2) }
+                    p class="text-slate-600 leading-relaxed mb-4" { (c.blurb_1) } // loom-allow: capability prose paragraph
+                    p class="text-slate-600 leading-relaxed" { (c.blurb_2) } // loom-allow: capability prose paragraph
                 }
             }
         }
 
-        section class="py-20 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 text-center max-w-2xl" {
-                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" {
-                    "Want any of this for your firm?"
+        section class="py-20 bg-primary/5" { // loom-allow: tinted CTA band — py-20 + primary/5 tint, not exactly Loom Section::Tinted
+            div class="container mx-auto px-4 md:px-6 text-center max-w-2xl" { // loom-allow: centred CTA container max-w-2xl
+                div class="mb-6" {
+                    (Heading {
+                        text: "Want any of this for your firm?",
+                        level: HeadingLevel::H2,
+                        variant: HeadingVariant::Sub,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-slate-600 text-lg mb-8" {
-                    "The tools we operate ourselves are the tools we deploy for clients. The engagement model is in /services; the contact form is the start."
+                div class="mb-8" {
+                    (Lede {
+                        text: "The tools we operate ourselves are the tools we deploy for clients. The engagement model is in /services; the contact form is the start.",
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                a href="/contact" {
-                    button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all" {
-                        "Start the conversation"
-                    }
-                }
+                a href="/contact" { (cta_button) }
             }
         }
     };
