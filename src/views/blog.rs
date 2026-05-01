@@ -9,8 +9,10 @@ use maud::{Markup, html};
 use super::layout::{PageMeta, page, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
-use loom_components::{Badge, BadgeSize, BadgeTone};
-use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
+use loom_components::{
+    Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    TextLink, TextLinkSize, TextLinkVariant,
+};
 
 /// JSON escape a string for safe embedding inside a JSON literal in the
 /// Article schema. Covers the characters Maud doesn't escape inside a
@@ -42,17 +44,25 @@ fn json_escape(s: &str) -> String {
 #[must_use]
 pub fn index() -> Markup {
     let body = html! {
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
+        section class="relative pt-32 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-slate-50" { // loom-allow: grid-fleck hero shell — pt-32/44 cadence + fleck overlay don't fit Loom Section
+            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — decorative pattern, no Loom primitive
+            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl with z-10 fleck stacking
                 div class="mb-6" { (Badge { label: "Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
-                h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-4" {
-                    "Notes from the build floor."
+                div class="mb-4" {
+                    (Heading {
+                        text: "Notes from the build floor.",
+                        level: HeadingLevel::H1,
+                        variant: HeadingVariant::Display,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-lg text-slate-600 max-w-2xl leading-relaxed mb-4" {
-                    "How we think about privacy, infrastructure, and shipping. The thesis behind the work — sanitized so we can talk about it without exposing client systems."
+                div class="mb-4" {
+                    (Lede {
+                        text: "How we think about privacy, infrastructure, and shipping. The thesis behind the work — sanitized so we can talk about it without exposing client systems.",
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-sm text-slate-500" {
+                p class="text-sm text-slate-500" { // loom-allow: subscribe sub-line; HelperText{Default} doesn't support inline TextLink children
                     "Get new posts in your reader of choice — "
                     (TextLink { label: "subscribe instructions", href: "/subscribe", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     "."
@@ -60,15 +70,15 @@ pub fn index() -> Markup {
             }
         }
 
-        section class="py-16 md:py-20 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-4xl" {
+        section class="py-16 md:py-20 bg-white" { // loom-allow: posts-grid band with custom py-16/20 cadence; not Section::Default
+            div class="container mx-auto px-4 md:px-6 max-w-4xl" { // loom-allow: posts-grid container max-w-4xl
                 @if POSTS.is_empty() {
-                    p class="text-slate-600" {
+                    p class="text-slate-600" { // loom-allow: empty-state prose with inline TextLink
                         "No published posts yet — we're drafting. "
                         (TextLink { label: "Tell us what you'd want to read.", href: "/contact", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     }
                 } @else {
-                    div class="grid gap-8" {
+                    div class="grid gap-8" { // loom-allow: card-stack grid spacing — no Loom Stack primitive yet
                         @for post in POSTS {
                             (post_card(post))
                         }
@@ -86,33 +96,39 @@ pub fn index() -> Markup {
 pub fn post(slug: &str) -> Option<Markup> {
     let post = by_slug(slug)?;
     let body = html! {
-        section class="relative pt-32 pb-12 md:pt-40 md:pb-16 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" {
-                a href="/blog" class="text-sm text-slate-500 hover:text-primary transition-colors" {
-                    "← Field Notes"
-                }
+        section class="relative pt-32 pb-12 md:pt-40 md:pb-16 overflow-hidden bg-slate-50" { // loom-allow: post-hero shell — pt-32/40 cadence + grid fleck don't fit Loom Section
+            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — same pattern as index hero
+            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: post-hero container max-w-3xl with fleck stacking
+                (TextLink {
+                    label: "← Field Notes",
+                    href: "/blog",
+                    variant: TextLinkVariant::Subtle,
+                    size: TextLinkSize::Small,
+                }.render())
                 div class="mt-6" {
-                    span class="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-xs border border-primary/20" {
-                        (post.category)
+                    (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
+                    div class="mt-4 mb-4" { // loom-allow: spacing wrapper between Badge eyebrow and Heading
+                        (Heading {
+                            text: post.title,
+                            level: HeadingLevel::H1,
+                            variant: HeadingVariant::Display,
+                            tone: HeadingTone::Ink,
+                        }.render())
                     }
-                    h1 class="font-display text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] mt-4 mb-4" {
-                        (post.title)
-                    }
-                    p class="text-sm text-slate-500" {
+                    p class="text-sm text-slate-500" { // loom-allow: post meta line — date · read-time, no Loom Meta primitive
                         (post.published) " · " (post.read_time)
                     }
                 }
             }
         }
 
-        article class="py-12 md:py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6" {
-                div class="prose prose-slate max-w-2xl mx-auto leading-relaxed text-slate-700" {
+        article class="py-12 md:py-16 bg-white" { // loom-allow: post-body article shell — py-12 cadence + prose container scope, not Loom Section
+            div class="container mx-auto px-4 md:px-6" { // loom-allow: container chrome wrapping prose
+                div class="prose prose-slate max-w-2xl mx-auto leading-relaxed text-slate-700" { // loom-allow: long-form prose container — Tailwind typography plugin scope, no Loom equivalent
                     ((post.render)())
                 }
-                div class="max-w-2xl mx-auto mt-16 pt-8 border-t border-slate-200" {
-                    p class="text-slate-600" {
+                div class="max-w-2xl mx-auto mt-16 pt-8 border-t border-slate-200" { // loom-allow: post-footer divider chrome
+                    p class="text-slate-600" { // loom-allow: post-footer prose with inline TextLink
                         "Working on something where this kind of thinking matters? "
                         (TextLink { label: "Get in touch.", href: "/contact", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     }
@@ -147,26 +163,24 @@ pub fn post(slug: &str) -> Option<Markup> {
 fn post_card(post: &Post) -> Markup {
     let href = format!("/blog/{}", post.slug);
     let body = html! {
-        div class="flex items-center gap-3 text-xs text-slate-500" {
-            span class="inline-block px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20" {
-                (post.category)
-            }
+        div class="flex items-center gap-3 text-xs text-slate-500" { // loom-allow: card meta-row chrome — eyebrow + dot-separated dates
+            (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
             span { (post.published) }
-            span class="text-slate-300" { "·" }
+            span class="text-slate-300" { "·" } // loom-allow: meta dot separator
             span { (post.read_time) }
         }
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-3 group-hover:text-primary transition-colors" {
+        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-3 group-hover:text-primary transition-colors" { // loom-allow: card-headline; Heading{Sub} omits group-hover hook for hover-state coupling with the surrounding LinkCard
             (post.title)
         }
-        p class="text-slate-600 mt-3 leading-relaxed" {
+        p class="text-slate-600 mt-3 leading-relaxed" { // loom-allow: card excerpt prose; Lede is for hero openers
             (post.excerpt)
         }
-        p class="mt-4 text-primary font-semibold text-sm" {
+        p class="mt-4 text-primary font-semibold text-sm" { // loom-allow: read-more affordance; visual-only, no link target (the whole card is the link)
             "Read more →"
         }
     };
     html! {
-        div class="reveal" {
+        div class="reveal" { // loom-allow: scroll-reveal animation hook
             (LinkCard { href: &href, body: &body }.render())
         }
     }
