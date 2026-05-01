@@ -3,6 +3,10 @@
 //! Tailwind/shadcn stylesheet at `/static/index-CWVVhmVm.css`.
 
 use loom_components::card::{FeatureCard, FeatureCardStyle};
+use loom_components::{
+    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
+};
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
@@ -24,6 +28,46 @@ fn check_line(text: &str) -> Markup {
             span class="text-lg text-slate-200" { (text) }
         }
     }
+}
+
+/// Final CTA band — tinted Loom Section + Heading + Lede + Button.
+fn final_cta_band() -> Markup {
+    let cta_button = Button {
+        label: "Start Your Journey",
+        variant: ButtonVariant::Primary,
+        size: ButtonSize::Lg,
+        aria_label: None,
+        icon: None,
+        decoration: Decoration::SoftShadow,
+        button_type: ButtonType::Button,
+    }
+    .render();
+    let body = html! {
+        div class="text-center reveal" {
+            div class="mb-6" {
+                (Heading {
+                    text: "Ready to elevate your IT strategy?",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Section,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            div class="mb-8 max-w-2xl mx-auto" { // loom-allow: centered narrow paragraph wrapper
+                (Lede {
+                    text: "Contact us today for a free consultation and discover how we can optimize your operations.",
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            a href="/contact" { (cta_button) }
+        }
+    };
+    Section {
+        body: &body,
+        theme: SectionTheme::Tinted,
+        width: SectionWidth::Default,
+        padding: SectionPadding::Loose,
+    }
+    .render()
 }
 
 /// Render the homepage body. Produces the production React site's DOM
@@ -145,20 +189,7 @@ pub fn render() -> Markup {
             }
         }
 
-        // ---------- Final CTA band ----------
-        section class="py-20 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 text-center reveal" {
-                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" { "Ready to elevate your IT strategy?" }
-                p class="text-slate-600 text-lg mb-8 max-w-2xl mx-auto" {
-                    "Contact us today for a free consultation and discover how we can optimize your operations."
-                }
-                a href="/contact" {
-                    button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20" {
-                        "Start Your Journey"
-                    }
-                }
-            }
-        }
+        (final_cta_band())
     };
     page(
         "PlausiDen — Comprehensive IT for the Modern Enterprise",
