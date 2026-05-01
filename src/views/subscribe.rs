@@ -7,6 +7,7 @@
 //! gives the feed URL prominently so anyone who already knows the
 //! drill can copy it.
 
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -146,7 +147,7 @@ pub fn render() -> Markup {
                 }
                 p class="text-slate-600 leading-relaxed mb-6" {
                     "If a reader app sounds like more setup than it's worth, bookmark "
-                    a href="/blog" class="text-primary font-semibold underline" { "the Field Notes index" }
+                    (TextLink { label: "the Field Notes index", href: "/blog", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     " and check back when the mood strikes. New posts go up at the top."
                 }
                 a href="/blog" {

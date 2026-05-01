@@ -9,6 +9,7 @@
 //! the rest.
 
 use loom_components::hero::{Hero, HeroBackground};
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
@@ -206,9 +207,9 @@ pub fn render() -> Markup {
                 }
                 p class="text-slate-300 mt-8" {
                     "Read more in "
-                    a href="/how-we-work" class="text-primary font-semibold underline" { "how we work" }
+                    (TextLink { label: "how we work", href: "/how-we-work", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     " or check our "
-                    a href="/pricing-transparency" class="text-primary font-semibold underline" { "pricing posture" }
+                    (TextLink { label: "pricing posture", href: "/pricing-transparency", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     "."
                 }
             }
@@ -230,7 +231,7 @@ pub fn render() -> Markup {
                 }
                 p class="text-slate-500 text-sm mt-6" {
                     "Or write to "
-                    a href="mailto:team@plausiden.com" class="text-primary font-medium" { "team@plausiden.com" }
+                    (TextLink { label: "team@plausiden.com", href: "mailto:team@plausiden.com", variant: TextLinkVariant::PrimaryMedium, size: TextLinkSize::Default }.render())
                     " · 978-351-6495"
                 }
             }

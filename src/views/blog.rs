@@ -9,6 +9,7 @@ use maud::{Markup, html};
 use super::layout::{PageMeta, page, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 
 /// JSON escape a string for safe embedding inside a JSON literal in the
 /// Article schema. Covers the characters Maud doesn't escape inside a
@@ -52,7 +53,7 @@ pub fn index() -> Markup {
                 }
                 p class="text-sm text-slate-500" {
                     "Get new posts in your reader of choice — "
-                    a href="/subscribe" class="text-primary font-semibold underline" { "subscribe instructions" }
+                    (TextLink { label: "subscribe instructions", href: "/subscribe", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     "."
                 }
             }
@@ -63,7 +64,7 @@ pub fn index() -> Markup {
                 @if POSTS.is_empty() {
                     p class="text-slate-600" {
                         "No published posts yet — we're drafting. "
-                        a href="/contact" class="text-primary font-semibold underline" { "Tell us what you'd want to read." }
+                        (TextLink { label: "Tell us what you'd want to read.", href: "/contact", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     }
                 } @else {
                     div class="grid gap-8" {
@@ -112,7 +113,7 @@ pub fn post(slug: &str) -> Option<Markup> {
                 div class="max-w-2xl mx-auto mt-16 pt-8 border-t border-slate-200" {
                     p class="text-slate-600" {
                         "Working on something where this kind of thinking matters? "
-                        a href="/contact" class="text-primary font-semibold underline" { "Get in touch." }
+                        (TextLink { label: "Get in touch.", href: "/contact", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     }
                 }
             }

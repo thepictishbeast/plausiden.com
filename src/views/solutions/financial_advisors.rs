@@ -2,6 +2,7 @@
 //! RIAs and wealth-management practices.
 
 use loom_components::card::FeatureCard;
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 use loom_components::hero::{Hero, HeroBackground};
 use loom_icons as icons;
 use maud::{Markup, html};
@@ -130,7 +131,7 @@ pub fn render() -> Markup {
                 }
                 p class="text-slate-500 text-sm mt-6" {
                     "Or write to "
-                    a href="mailto:team@plausiden.com" class="text-primary font-medium" { "team@plausiden.com" }
+                    (TextLink { label: "team@plausiden.com", href: "mailto:team@plausiden.com", variant: TextLinkVariant::PrimaryMedium, size: TextLinkSize::Default }.render())
                     " · 978-351-6495"
                 }
             }

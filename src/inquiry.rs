@@ -30,6 +30,7 @@ use lettre::message::{Mailbox, Message, MultiPart};
 use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{AsyncTransport, Tokio1Executor};
 use loom_components::hero::{Hero, HeroBackground};
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 use maud::{Markup, html};
 use serde::Deserialize;
 
@@ -261,7 +262,12 @@ fn validate(f: &InquiryForm) -> Result<(), &'static str> {
 
 fn ack_page(message: &str) -> Markup {
     let cta = html! {
-        a href="/" class="text-primary font-semibold" { "← Back home" }
+        (TextLink {
+            label: "← Back home",
+            href: "/",
+            variant: TextLinkVariant::PrimaryBold,
+            size: TextLinkSize::Default,
+        }.render())
     };
     let body = html! {
         (Hero {
@@ -492,7 +498,12 @@ fn validate_feedback(f: &FeedbackForm) -> Result<(), &'static str> {
 
 fn feedback_ack(message: &str) -> Markup {
     let cta = html! {
-        a href="/" class="text-primary font-semibold" { "← Back home" }
+        (TextLink {
+            label: "← Back home",
+            href: "/",
+            variant: TextLinkVariant::PrimaryBold,
+            size: TextLinkSize::Default,
+        }.render())
     };
     let body = html! {
         (Hero {

@@ -6,6 +6,7 @@
 //! grid.
 
 use loom_components::hero::{Hero, HeroBackground};
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 use maud::{Markup, html};
 
 use super::layout::page;
@@ -74,7 +75,12 @@ pub fn login_error(message: &str) -> Markup {
 #[must_use]
 pub fn magic_link_sent(email: &str) -> Markup {
     let cta = html! {
-        a href="/" class="text-primary font-semibold" { "← Back home" }
+        (TextLink {
+            label: "← Back home",
+            href: "/",
+            variant: TextLinkVariant::PrimaryBold,
+            size: TextLinkSize::Default,
+        }.render())
     };
     let subline = format!(
         "If {email} is authorized, a sign-in link is on its way. Check your inbox — and your spam folder, just in case."
@@ -110,8 +116,18 @@ pub fn feedback_dashboard(email: &str, rows: &[FeedbackRow]) -> Markup {
                         }
                     }
                     div class="flex items-center gap-3" {
-                        a href="/feedback/export?format=json" class="text-sm text-primary font-semibold underline" { "Export JSON" }
-                        a href="/feedback/export?format=csv" class="text-sm text-primary font-semibold underline" { "Export CSV" }
+                        (TextLink {
+                            label: "Export JSON",
+                            href: "/feedback/export?format=json",
+                            variant: TextLinkVariant::Underlined,
+                            size: TextLinkSize::Small,
+                        }.render())
+                        (TextLink {
+                            label: "Export CSV",
+                            href: "/feedback/export?format=csv",
+                            variant: TextLinkVariant::Underlined,
+                            size: TextLinkSize::Small,
+                        }.render())
                         form method="post" action="/admin/logout" class="inline" {
                             button type="submit" class="text-sm text-slate-500 underline hover:text-slate-700" { "Sign out" }
                         }
@@ -152,7 +168,13 @@ fn feedback_card(row: &FeedbackRow) -> Markup {
                     }
                     @if !row.email.is_empty() {
                         span class="text-slate-400" { " · " }
-                        a href={"mailto:" (row.email)} class="text-primary underline" { (row.email) }
+                        @let mailto = format!("mailto:{}", row.email);
+                        (TextLink {
+                            label: &row.email,
+                            href: &mailto,
+                            variant: TextLinkVariant::PrimaryUnderlined,
+                            size: TextLinkSize::Default,
+                        }.render())
                     }
                 }
                 div class="text-xs text-slate-500" {
