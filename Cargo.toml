@@ -53,6 +53,10 @@ loom-components = { path = "../PlausiDen-Loom/loom-components", version = "0.1" 
 loom-icons = { path = "../PlausiDen-Loom/loom-icons", version = "0.1" }
 loom-tokens = { path = "../PlausiDen-Loom/loom-tokens", version = "0.1" }
 
+# PlausiDen-CMS — typed page substrate. Backs `/docs/{slug}` from
+# `${PLAUSIDEN_CMS_ROOT:-./cms-store}` via the FsStorage adapter.
+cms-core = { path = "../PlausiDen-CMS/cms-core" }
+
 # Leave stubbed; activate after landlock has baked:
 # seccompiler = "0.5"
 
@@ -62,6 +66,8 @@ loom-tokens = { path = "../PlausiDen-Loom/loom-tokens", version = "0.1" }
 # which forces a human glance before a layout regression ships.
 insta = { version = "1", features = ["yaml", "filters"] }
 http-body-util = "0.1"
+# Throwaway directories for the CMS storage tests in `src/cms.rs`.
+tempfile = "3"
 # Microbenchmarks for the render hot path. Criterion's HTML reports
 # land under target/criterion; run via `cargo bench`. A lib-target
 # refactor of this crate is a prerequisite for the bench to actually

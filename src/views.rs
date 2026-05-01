@@ -12,6 +12,7 @@ pub mod admin;
 pub mod blog;
 pub mod capabilities;
 pub mod case_studies;
+pub mod cms_pages;
 pub mod contact;
 pub mod email;
 pub mod feedback;

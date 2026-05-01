@@ -1,0 +1,74 @@
+id = "c2460240-7fdc-492c-8581-a55acf5d7bef"
+slug = "why-pps"
+title = "Why Plausible Privacy Software"
+description = "Plausible deniability is a posture, not a product. Here's why we build it as software you can audit, run, and trust."
+status = "published"
+created_at = "2026-04-30T00:00:00Z"
+updated_at = "2026-04-30T00:00:00Z"
+
+[[sections]]
+theme = "light"
+
+[[sections.blocks]]
+kind = "hero"
+
+[sections.blocks.fields]
+headline = "Why Plausible Privacy Software."
+lede = "Plausible deniability isn't a feature you bolt on. It's a posture the architecture either holds or it doesn't. Plausible Privacy Software is the suite we build to hold that posture by construction — for you, for your team, and for the people who depend on you to not be the source of their exposure."
+
+[[sections]]
+theme = "muted"
+anchor = "the-shape-of-the-problem"
+
+[[sections.blocks]]
+kind = "heading_body"
+
+[sections.blocks.fields]
+heading = "The shape of the problem."
+body = """
+Most "privacy" software protects the channel. PPS protects the substrate. The distinction is the difference between a courier in a locked car and a courier who never carried the package in the first place.
+
+Channel protection — TLS, end-to-end encryption, encrypted storage — is necessary. It is not sufficient. Once the substrate exists, the substrate becomes the target: subpoena, settlement-induced disclosure, downstream breach, AI-trained-on-your-data, model-inversion. The substrate is what gets pulled.
+
+Substrate protection means designing the system so the load-bearing data either does not exist, does not persist, does not centralise, or carries no probative weight when it does. That is what PPS is for.
+"""
+
+[[sections]]
+theme = "light"
+anchor = "what-is-in-the-suite"
+
+[[sections.blocks]]
+kind = "heading_body"
+
+[sections.blocks.fields]
+heading = "What's in the suite."
+body = """
+PPS is a small set of tools that compose: an Engine that does the substrate decisions; an Inject layer that places plausible cover traffic where bare absence would itself be probative; a Purge layer that removes residual artefacts in a way the file system cannot reconstruct; a Tidy layer that keeps the working set clean; a Shard layer that separates what must be kept from what must not co-locate; a Swarm layer that distributes what should not centralise; and a USB layer for the airgap path when the network itself is the threat.
+
+You will not need every layer. You will need the layers your threat model says you need. The point of building it as a suite — not a monolith — is that the layers compose without coupling. Every one is independently auditable, independently shippable, and independently replaceable.
+"""
+
+[[sections]]
+theme = "muted"
+
+[[sections.blocks]]
+kind = "pull_quote"
+
+[sections.blocks.fields]
+quote = "The substrate is what gets pulled."
+attribution = "PPS engineering note, internal"
+
+[[sections]]
+theme = "tinted"
+
+[[sections.blocks]]
+kind = "cta"
+
+[sections.blocks.fields]
+heading = "Want to talk about your substrate?"
+body = "First conversation is free, the NDA is mutual, and if PPS isn't the right shape we'll say so before either of us has invested an hour."
+label = "Start the conversation"
+href = "/contact"
+
+[meta]
+"why_published" = "2026-04-30 — first CMS-backed page on plausiden.com; demo of the read-side wiring."

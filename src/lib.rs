@@ -21,8 +21,10 @@
 use std::time::Duration;
 
 use axum::Router;
+use axum::extract::FromRef;
 
 pub mod admin;
+pub mod cms;
 pub mod components;
 pub mod feedback_store;
 pub mod handlers;
@@ -34,8 +36,46 @@ pub mod views;
 /// Request processing timeout. Matches the `TimeoutLayer` installed below.
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 
+/// Aggregate axum state. Holds every per-process resource a handler
+/// might need (currently inquiry-form rate limiter + SMTP transport,
+/// CMS storage). Each substate is exposed via `FromRef` so a
+/// handler extracts only what it depends on.
+///
+/// Manual `Debug` (no derive) because `InquiryState` carries an SMTP
+/// transport that does not implement `Debug`.
+#[derive(Clone)]
+pub struct AppState {
+    /// Inquiry-form state (rate limiter, SMTP transport, feedback store).
+    pub inquiry: inquiry::InquiryState,
+    /// CMS storage state. `CmsState::default()` when no store is
+    /// configured; `/docs/*` then 404s.
+    pub cms: cms::CmsState,
+}
+
+impl std::fmt::Debug for AppState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AppState")
+            .field("cms", &self.cms)
+            .finish_non_exhaustive()
+    }
+}
+
+impl FromRef<AppState> for inquiry::InquiryState {
+    fn from_ref(s: &AppState) -> Self {
+        s.inquiry.clone()
+    }
+}
+
+impl FromRef<AppState> for cms::CmsState {
+    fn from_ref(s: &AppState) -> Self {
+        s.cms.clone()
+    }
+}
+
 /// Construct the fully-wired router. Exposed at crate scope so tests can hit
-/// the same graph the production binary serves.
+/// the same graph the production binary serves. CMS state is taken from
+/// `PLAUSIDEN_CMS_ROOT` env var; tests that need to point CMS at a fixture
+/// directory call [`build_router_with_state`] directly.
 ///
 /// BUG ASSUMPTION: Layer ordering matters — compression must not run before the
 /// security headers are installed, or the headers could disappear from errored
@@ -46,6 +86,15 @@ const REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 /// headers. The static file service is nested under `/static` and cannot
 /// traverse outside that directory (see [`tower_http::services::ServeDir`]).
 pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
+    build_router_with_state(AppState {
+        inquiry: inquiry_state,
+        cms: cms::CmsState::from_env(),
+    })
+}
+
+/// Construct the router with an explicit [`AppState`]. Used by integration
+/// tests that need to inject a CMS storage pointed at a fixture directory.
+pub fn build_router_with_state(state: AppState) -> Router {
     use axum::http::StatusCode;
     use axum::routing::get;
     use tower_http::{compression::CompressionLayer, timeout::TimeoutLayer, trace::TraceLayer};
@@ -91,6 +140,11 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
         .route("/subscribe", get(handlers::subscribe))
         .route("/healthz", get(handlers::healthz)) // COUPLING-EXEMPT: internal liveness probe, never advertised
         .route("/status", get(handlers::status)) // COUPLING-EXEMPT: discovered via status.plausiden.com out-of-band, not via in-site nav
+        // CMS-backed content. The store is opened lazily (see
+        // [`crate::cms`]); when not configured the route 404s, so
+        // adding it costs nothing on a deployment that doesn't yet
+        // ship CMS pages.
+        .route("/docs/{slug}", get(cms::serve_doc))
         .nest_service(
             "/static",
             // Long-cache the static dir. CSS bundle name + favicon are
@@ -105,7 +159,7 @@ pub fn build_router(inquiry_state: inquiry::InquiryState) -> Router {
                 )
                 .service(tower_http::services::ServeDir::new("static")),
         )
-        .with_state(inquiry_state)
+        .with_state(state)
         .layer(security::headers_layer())
         .layer(CompressionLayer::new())
         .layer(TimeoutLayer::with_status_code(
@@ -408,6 +462,65 @@ mod tests {
         // Article JSON-LD
         assert!(s.contains(r#""@type":"Article""#));
         assert!(s.contains(r#""datePublished":"2026-04-26""#));
+    }
+
+    /// `/docs/{slug}` round-trip — the seeded `why-pps` page renders a 200
+    /// with hero + heading-body + cta content visible.
+    ///
+    /// The CMS state is constructed explicitly from the manifest-relative
+    /// fixture directory so the test does not race the production env-var
+    /// path. No `unsafe_code` — the state is injected through axum, not
+    /// pulled from process-global state.
+    #[tokio::test]
+    async fn docs_slug_serves_published_page() {
+        let app = build_router_with_state(cms_test_state());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/docs/why-pps")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = to_bytes(resp.into_body(), 64 * 1024).await.unwrap();
+        let s = std::str::from_utf8(&body).unwrap();
+        assert!(s.contains("Why Plausible Privacy Software"));
+        assert!(s.contains("substrate"));
+        assert!(s.contains("Start the conversation"));
+    }
+
+    /// Unknown CMS slugs return 404 with the styled not-found view.
+    #[tokio::test]
+    async fn docs_unknown_slug_returns_styled_404() {
+        let app = build_router_with_state(cms_test_state());
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/docs/never-published")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+        let body = to_bytes(resp.into_body(), 32 * 1024).await.unwrap();
+        assert!(std::str::from_utf8(&body).unwrap().contains("Nothing here"));
+    }
+
+    /// Build an [`AppState`] whose CMS layer is opened on the
+    /// manifest-relative `cms-store/` fixture. Cargo runs tests with
+    /// `CARGO_MANIFEST_DIR` set to the crate root so the path
+    /// resolves without an absolute base.
+    fn cms_test_state() -> AppState {
+        AppState {
+            inquiry: crate::inquiry::InquiryState::new(),
+            cms: crate::cms::CmsState::from_root(std::path::Path::new(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/cms-store"
+            ))),
+        }
     }
 
     /// `/blog/<unknown-slug>` returns 404 with the styled not-found.
