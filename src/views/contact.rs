@@ -13,6 +13,10 @@
 //! limits to keep UX feedback honest).
 
 use loom_components::form::{InputType, Select, SelectOption, TextArea, TextInput};
+use loom_components::{
+    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, Lede,
+};
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
@@ -61,28 +65,38 @@ const SERVICE_OPTIONS: &[SelectOption<'static>] = &[
 #[must_use]
 pub fn render() -> Markup {
     let body = html! {
-        div class="pt-20 min-h-screen bg-slate-50" {
+        div class="pt-20 min-h-screen bg-slate-50" { // loom-allow: outer scroll-container with fixed-nav offset; not a Loom band
             // Header band
-            div class="bg-slate-900 text-white py-16" {
-                div class="container mx-auto px-4 md:px-6 text-center" {
-                    h1 class="font-display text-4xl md:text-5xl font-bold mb-4" { "Contact Us" }
-                    p class="text-xl text-slate-300" { "Reach out for a quote and free consultation today." }
+            div class="bg-slate-900 text-white py-16" { // loom-allow: dark-band header — bg-slate-900 hard-coded so the -mt-10 grid below floats over it
+                div class="container mx-auto px-4 md:px-6 text-center" { // loom-allow: centred container scope
+                    div class="mb-4" {
+                        (Heading {
+                            text: "Contact Us",
+                            level: HeadingLevel::H1,
+                            variant: HeadingVariant::Display,
+                            tone: HeadingTone::OnDark,
+                        }.render())
+                    }
+                    (Lede {
+                        text: "Reach out for a quote and free consultation today.",
+                        tone: HeadingTone::OnDark,
+                    }.render())
                 }
             }
 
-            div class="container mx-auto px-4 md:px-6 py-16 -mt-10" {
-                div class="grid grid-cols-1 lg:grid-cols-3 gap-8" {
+            div class="container mx-auto px-4 md:px-6 py-16 -mt-10" { // loom-allow: grid container with -mt-10 to float over dark band
+                div class="grid grid-cols-1 lg:grid-cols-3 gap-8" { // loom-allow: 1/3+2/3 split layout — no Loom 1+2 grid primitive
 
                     // Left card — contact details
-                    div class="lg:col-span-1 space-y-6 reveal" {
-                        div class="shadcn-card rounded-xl border border-card-border text-card-foreground border-none shadow-xl bg-white overflow-hidden" {
-                            div class="bg-primary p-6" {
-                                h3 class="text-white font-display text-xl font-bold" { "Get in touch" }
-                                p class="text-primary-foreground/80 mt-2 text-sm" {
+                    div class="lg:col-span-1 space-y-6 reveal" { // loom-allow: 1/3 column with scroll-reveal hook
+                        div class="shadcn-card rounded-xl border border-card-border text-card-foreground border-none shadow-xl bg-white overflow-hidden" { // loom-allow: inset card chrome with overflow-hidden for primary-band header
+                            div class="bg-primary p-6" { // loom-allow: primary-bg card-header band
+                                h3 class="text-white font-display text-xl font-bold" { "Get in touch" } // loom-allow: card-internal heading on primary band; Heading{Sub,OnDark} would re-introduce text-slate-* defaults
+                                p class="text-primary-foreground/80 mt-2 text-sm" { // loom-allow: card sub-line on primary band
                                     "We're here to answer any questions about our IT solutions."
                                 }
                             }
-                            div class="p-8 space-y-8" {
+                            div class="p-8 space-y-8" { // loom-allow: card body padding + vertical rhythm between contact rows
                                 (contact_row(&icons::PHONE.render(), "Phone", "tel:9783516495", "978-351-6495"))
                                 (contact_row(&icons::MAIL.render(), "Email", "mailto:team@plausiden.com", "team@plausiden.com"))
                                 (contact_row_text(&icons::MAP_PIN.render(), "Location", "Massachusetts, USA"))
@@ -91,10 +105,17 @@ pub fn render() -> Markup {
                     }
 
                     // Right card — the actual form
-                    div class="lg:col-span-2 reveal" {
-                        div class="shadcn-card rounded-xl border bg-card border-card-border text-card-foreground border-none shadow-xl" {
-                            div class="p-8 md:p-10" {
-                                h2 class="font-display text-2xl font-bold text-slate-900 mb-6" { "Send us a message" }
+                    div class="lg:col-span-2 reveal" { // loom-allow: 2/3 form column with scroll-reveal hook
+                        div class="shadcn-card rounded-xl border bg-card border-card-border text-card-foreground border-none shadow-xl" { // loom-allow: form card chrome
+                            div class="p-8 md:p-10" { // loom-allow: form-card padding
+                                div class="mb-6" {
+                                    (Heading {
+                                        text: "Send us a message",
+                                        level: HeadingLevel::H2,
+                                        variant: HeadingVariant::Sub,
+                                        tone: HeadingTone::Ink,
+                                    }.render())
+                                }
 
                                 form action="/contact" method="post" class="space-y-6" {
 
@@ -111,7 +132,7 @@ pub fn render() -> Markup {
                                         input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" value="";
                                     }
 
-                                    div class="grid grid-cols-1 md:grid-cols-2 gap-6" {
+                                    div class="grid grid-cols-1 md:grid-cols-2 gap-6" { // loom-allow: 2-up form-field row — no Loom FieldRow primitive yet
                                         (TextInput {
                                             id: "contact-name",
                                             name: "name",
@@ -132,7 +153,7 @@ pub fn render() -> Markup {
                                         }.render())
                                     }
 
-                                    div class="grid grid-cols-1 md:grid-cols-2 gap-6" {
+                                    div class="grid grid-cols-1 md:grid-cols-2 gap-6" { // loom-allow: 2-up form-field row — no Loom FieldRow primitive yet
                                         (TextInput {
                                             id: "contact-phone",
                                             name: "phone",
@@ -169,9 +190,16 @@ pub fn render() -> Markup {
                                         required: true,
                                     }.render())
 
-                                    button type="submit"
-                                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground border border-primary-border min-h-9 px-4 py-2 w-full h-12 text-lg font-semibold shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90" {
-                                        "Send Message"
+                                    div class="w-full" { // loom-allow: full-width wrapper around Loom Button (Button has no Block variant yet)
+                                        (Button {
+                                            label: "Send Message",
+                                            variant: ButtonVariant::Primary,
+                                            size: ButtonSize::Lg,
+                                            aria_label: None,
+                                            icon: None,
+                                            decoration: Decoration::SoftShadow,
+                                            button_type: ButtonType::Submit,
+                                        }.render())
                                     }
                                 }
                             }
@@ -186,11 +214,11 @@ pub fn render() -> Markup {
 
 fn contact_row(svg: &str, label: &str, href: &str, text: &str) -> Markup {
     html! {
-        div class="flex items-start gap-4" {
-            div class="bg-primary/10 p-3 rounded-lg" { (PreEscaped(svg)) }
+        div class="flex items-start gap-4" { // loom-allow: icon-row layout — icon left + label/value right
+            div class="bg-primary/10 p-3 rounded-lg" { (PreEscaped(svg)) } // loom-allow: tinted icon-bg square
             div {
-                p class="font-semibold text-slate-900" { (label) }
-                a href=(href) class="text-slate-600 hover:text-primary transition-colors" { (text) }
+                p class="font-semibold text-slate-900" { (label) } // loom-allow: row label — bolded ink
+                a href=(href) class="text-slate-600 hover:text-primary transition-colors" { (text) } // loom-allow: linkified row value — TextLink omits the explicit text-slate-600 default-state
             }
         }
     }
@@ -198,11 +226,11 @@ fn contact_row(svg: &str, label: &str, href: &str, text: &str) -> Markup {
 
 fn contact_row_text(svg: &str, label: &str, text: &str) -> Markup {
     html! {
-        div class="flex items-start gap-4" {
-            div class="bg-primary/10 p-3 rounded-lg" { (PreEscaped(svg)) }
+        div class="flex items-start gap-4" { // loom-allow: icon-row layout — same as contact_row but plain text value
+            div class="bg-primary/10 p-3 rounded-lg" { (PreEscaped(svg)) } // loom-allow: tinted icon-bg square
             div {
-                p class="font-semibold text-slate-900" { (label) }
-                p class="text-slate-600" { (text) }
+                p class="font-semibold text-slate-900" { (label) } // loom-allow: row label — bolded ink
+                p class="text-slate-600" { (text) } // loom-allow: row value — plain prose
             }
         }
     }
