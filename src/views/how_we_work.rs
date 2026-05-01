@@ -14,10 +14,11 @@ use super::layout::page_with_description;
 
 const HWW_DESCRIPTION: &str = "How PlausiDen engages, ships, and hands off. Written-down doctrine, in-writing proposals, scope-limited access, audit-ready documentation. The operating posture behind every deliverable.";
 
-const ICON_DOC: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>"#;
-const ICON_SHIELD: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>"#;
-const ICON_AUDIT: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>"#;
-const ICON_USERS: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>"#;
+// loom-allow: inline-SVG icon string — w-6 h-6 text-primary lives inside the SVG `class=` attribute, not as a Maud-emitted utility chain
+const ICON_DOC: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>"#; // loom-allow: SVG class attribute, see comment above
+const ICON_SHIELD: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>"#; // loom-allow: SVG class attribute
+const ICON_AUDIT: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>"#; // loom-allow: SVG class attribute
+const ICON_USERS: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>"#; // loom-allow: SVG class attribute
 
 struct Commitment<'a> {
     icon: &'a str,
@@ -71,10 +72,8 @@ const STEPS: &[Step<'_>] = &[
 fn step_item(n: usize, step: &Step<'_>) -> Markup {
     let label = format!("{n}");
     html! {
-        // loom-allow: numbered-step row; same shape as solutions/template — pending shared StepRow primitive.
-        li class="flex gap-4" {
-            // loom-allow: circular badge; same StepNumber follow-up.
-            span class="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white font-bold flex items-center justify-center text-sm" { (label) }
+        li class="flex gap-4" { // loom-allow: numbered-step row; pending shared StepRow primitive
+            span class="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white font-bold flex items-center justify-center text-sm" { (label) } // loom-allow: circular step badge; pending StepNumber primitive
             div {
                 p class="font-semibold text-slate-900 mb-1" { (step.title) } // loom-allow: row-title pattern
                 p class="text-slate-600" { (step.description) } // loom-allow: in-row body
@@ -101,8 +100,7 @@ pub fn render() -> Markup {
                 tone: HeadingTone::Ink,
             }.render())
         }
-        // loom-allow: 2-col commitments grid; Loom doesn't ship a Grid primitive.
-        div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal reveal-delay-1" {
+        div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal reveal-delay-1" { // loom-allow: 2-col commitments grid; Loom doesn't ship a Grid primitive
             @for c in COMMITMENTS {
                 (FeatureCard {
                     icon_svg: c.icon,
@@ -112,10 +110,9 @@ pub fn render() -> Markup {
             }
         }
     };
-    // loom-allow: capability grid wraps in a wider container than Loom Wide (max-w-6xl) — same as solutions template
     let commitments_section = html! {
-        section class="py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-6xl" {
+        section class="py-16 bg-white" { // loom-allow: capability band — py-16 cadence, not Loom Section
+            div class="container mx-auto px-4 md:px-6 max-w-6xl" { // loom-allow: capability container — max-w-6xl wider than Loom Wide
                 (commitments_body)
             }
         }
@@ -137,7 +134,7 @@ pub fn render() -> Markup {
                     tone: HeadingTone::Ink,
                 }.render())
             }
-            ol class="space-y-6 text-slate-700" {
+            ol class="space-y-6 text-slate-700" { // loom-allow: numbered-step list — vertical rhythm + base prose colour
                 @for (i, step) in STEPS.iter().enumerate() {
                     (step_item(i + 1, step))
                 }
@@ -160,7 +157,7 @@ pub fn render() -> Markup {
                 variant: HeadingVariant::Section,
                 tone: HeadingTone::OnDark,
             }.render())
-            div class="mt-6 space-y-4" {
+            div class="mt-6 space-y-4" { // loom-allow: spacer + vertical rhythm between dark-band Lede paragraphs
                 (Lede {
                     text: "We don't pretend to be a fit for every problem. If your situation calls for a 50-person managed-service provider with a 24/7 NOC, we'll say so. If you'd be better served by a single senior contractor for the next quarter, we'll say so. The intake conversation is meant to surface that — and we'd rather lose a sale than take an engagement we can't finish well.",
                     tone: HeadingTone::OnDark,

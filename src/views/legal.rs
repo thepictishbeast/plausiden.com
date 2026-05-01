@@ -7,39 +7,48 @@
 //! the real policies are drafted. Tests below guard that the routes render
 //! 200 and surface the "under review" disclaimer.
 
-use loom_components::{Badge, BadgeSize, BadgeTone};
+use loom_components::{
+    Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+};
 use maud::{Markup, html};
 
 use super::layout::page;
 
 fn legal_shell(title: &str, current: &str, heading: &str, subheading: &str) -> Markup {
     let body = html! {
-        section class="relative pt-32 pb-16 md:pt-48 md:pb-20 overflow-hidden bg-slate-50" {
-            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
-            div class="container relative mx-auto px-4 md:px-6 z-10" {
-                div class="max-w-3xl" {
+        section class="relative pt-32 pb-16 md:pt-48 md:pb-20 overflow-hidden bg-slate-50" { // loom-allow: hero band — pt-32/48 cadence below Loom Section padding scale
+            div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — same pattern as blog hero
+            div class="container relative mx-auto px-4 md:px-6 z-10" { // loom-allow: hero container with z-10 fleck stacking
+                div class="max-w-3xl" { // loom-allow: hero content max-w-3xl
                     div class="mb-6" { (Badge { label: "Legal", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
-                    h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-4" { (heading) }
-                    p class="text-lg text-slate-600 max-w-2xl leading-relaxed" { (subheading) }
+                    div class="mb-4" {
+                        (Heading {
+                            text: heading,
+                            level: HeadingLevel::H1,
+                            variant: HeadingVariant::Display,
+                            tone: HeadingTone::Ink,
+                        }.render())
+                    }
+                    (Lede { text: subheading, tone: HeadingTone::Ink }.render())
                 }
             }
         }
 
-        section class="py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6" {
-                div class="max-w-3xl mx-auto" {
-                    div class="rounded-xl border border-amber-200 bg-amber-50 p-6 mb-10" {
-                        p class="text-sm text-amber-900 font-medium mb-2" { "Placeholder page — under legal review" }
-                        p class="text-sm text-amber-800 leading-relaxed" {
+        section class="py-16 bg-white" { // loom-allow: legal-body band — py-16 cadence
+            div class="container mx-auto px-4 md:px-6" { // loom-allow: container scope
+                div class="max-w-3xl mx-auto" { // loom-allow: legal-body container max-w-3xl
+                    div class="rounded-xl border border-amber-200 bg-amber-50 p-6 mb-10" { // loom-allow: amber placeholder-disclaimer panel — semantic warn colour, no Loom WarnPanel primitive
+                        p class="text-sm text-amber-900 font-medium mb-2" { "Placeholder page — under legal review" } // loom-allow: panel title — bolded amber
+                        p class="text-sm text-amber-800 leading-relaxed" { // loom-allow: panel body prose with inline link
                             "This document is being drafted with counsel. Until it's published, the operative "
                             "policy is: we collect nothing from site visitors (no cookies, no analytics, no tracking), "
                             "and we engage with clients under written agreements executed per engagement. For the "
                             "specific terms of an engagement or a data-handling question, "
-                            a href="/contact" class="underline hover:text-amber-700" { "contact us" }
+                            a href="/contact" class="underline hover:text-amber-700" { "contact us" } // loom-allow: in-amber-band link — not a generic TextLink target
                             "."
                         }
                     }
-                    p class="text-slate-600 text-base leading-relaxed" {
+                    p class="text-slate-600 text-base leading-relaxed" { // loom-allow: legal-body prose paragraph with inline mailto
                         "Last updated: placeholder. A complete " (title) " will be published here once "
                         "reviewed. If you need the current terms for a specific engagement, write to "
                         a href="mailto:team@plausiden.com" { "team@plausiden.com" }
