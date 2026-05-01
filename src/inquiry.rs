@@ -304,9 +304,7 @@ pub(crate) async fn submit(
         tracing::warn!("inquiry honeypot tripped — silent drop");
         return (
             StatusCode::ACCEPTED,
-            ack_page(
-                "Your message has been delivered. We'll reply via the address you provided.",
-            ),
+            ack_page("Your message has been delivered. We'll reply via the address you provided."),
         )
             .into_response();
     }
@@ -318,9 +316,7 @@ pub(crate) async fn submit(
         tracing::warn!("inquiry classified as spam — silent drop");
         return (
             StatusCode::ACCEPTED,
-            ack_page(
-                "Your message has been delivered. We'll reply via the address you provided.",
-            ),
+            ack_page("Your message has been delivered. We'll reply via the address you provided."),
         )
             .into_response();
     }
