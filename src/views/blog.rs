@@ -181,8 +181,7 @@ fn post_card(post: &Post) -> Markup {
         }
     };
     html! {
-        // loom-allow: post-card wrapper — adds vertical-lift + shadow-grow hover affordance and accent-stripe-on-hover. The reveal class layers in scroll-fade animation on top.
-        div class="reveal group relative transition-all duration-300 hover:-translate-y-1" {
+        div class="reveal group relative transition-all duration-300 hover:-translate-y-1" { // loom-allow: post-card wrapper — vertical-lift + shadow-grow hover + accent-stripe; scroll-fade reveal layered on top
             // Decorative accent stripe — invisible by default, animates in on hover from left edge, ties the hover state to the brand color.
             div class="absolute left-0 top-6 bottom-6 w-1 bg-primary rounded-full origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ease-out" {} // loom-allow: positioned accent stripe — animates scaleY 0→1 on parent group hover
             (LinkCard { href: &href, body: &body }.render())

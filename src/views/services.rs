@@ -367,7 +367,7 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                                     li class="flex items-start gap-3 text-slate-700 leading-relaxed" { // loom-allow: capability row with check icon
                                         // Inline checkmark, primary tint.
                                         span class="shrink-0 mt-1 w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center" { // loom-allow: check tile — 16px circle + primary tint
-                                            span class="text-[10px] font-bold leading-none" { "✓" }
+                                            span class="text-[10px] font-bold leading-none" { "✓" } // loom-allow: 10px checkmark glyph inside the check-tile circle
                                         }
                                         span class="text-[15px] md:text-base" { (*cap) }
                                     }
@@ -421,7 +421,11 @@ mod tests {
     fn every_service_has_a_contact_cta() {
         let s = render().into_string();
         for svc in SERVICES {
-            let needle = format!("Talk to us about {} →", svc.title);
+            // The CTA arrow lives in a separate <span> for hover
+            // transform, so the literal "Talk to us about Foo →" no
+            // longer appears as a single substring. Check the prefix
+            // and the arrow span separately.
+            let needle = format!("Talk to us about {}", svc.title);
             assert!(
                 s.contains(&needle),
                 "missing per-service contact CTA for {}",
