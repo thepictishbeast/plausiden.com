@@ -220,9 +220,11 @@ pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
                         (Lede { text: para, tone: HeadingTone::OnDark }.render())
                     }
                 }
-                div class="mt-8 space-y-4" { // loom-allow: structural margin + spacer
-                    @for line in cfg.posture_check_lines {
-                        (check_line(line))
+                @if !cfg.posture_check_lines.is_empty() {
+                    div class="mt-8 space-y-4" { // loom-allow: structural margin + spacer
+                        @for line in cfg.posture_check_lines {
+                            (check_line(line))
+                        }
                     }
                 }
             }
@@ -308,6 +310,7 @@ pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
     }
     .render();
 
+    let show_engagement = !cfg.engagement_steps.is_empty();
     let body = html! {
         (Hero {
             eyebrow: Some(cfg.hero_eyebrow),
@@ -320,7 +323,9 @@ pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
         (pain_section)
         (capability_grid)
         (posture_band)
-        (engagement_section)
+        @if show_engagement {
+            (engagement_section)
+        }
         (cta_section)
     };
 
