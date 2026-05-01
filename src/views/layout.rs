@@ -201,6 +201,14 @@ const FOOTER_COMPANY: &[FooterItem<'static>] = &[
         href: "/case-studies",
         label: "Case Studies",
     },
+    // CMS-backed page (see [`crate::cms`]). Surfaced in the footer
+    // so the substrate is discoverable without crawling the sitemap.
+    // BUG ASSUMPTION: depends on cms-store/sites/plausiden-com/pages/why-pps.toml
+    // being present and Published; the route 404s otherwise.
+    FooterItem::Link {
+        href: "/docs/why-pps",
+        label: "Why PPS",
+    },
     FooterItem::Link {
         href: "/blog",
         label: "Field Notes",
