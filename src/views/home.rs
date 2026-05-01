@@ -3,6 +3,7 @@
 //! Tailwind/shadcn stylesheet at `/static/index-CWVVhmVm.css`.
 
 use loom_components::card::{FeatureCard, FeatureCardStyle};
+use loom_components::{Badge, BadgeSize, BadgeTone};
 use loom_components::{
     Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
     HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
@@ -94,7 +95,7 @@ pub fn render() -> Markup {
             div class="container relative mx-auto px-4 md:px-6 z-10" {
                 div class="max-w-3xl" {
                     div {
-                        span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20 animate-fade-in-up" { "Professional IT Solutions" }
+                        div class="mb-6 animate-fade-in-up" { (Badge { label: "Professional IT Solutions", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
                         h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" {
                             "Comprehensive IT for the " span class="text-primary" { "Modern Enterprise" }
                         }

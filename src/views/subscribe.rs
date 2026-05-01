@@ -8,9 +8,9 @@
 //! drill can copy it.
 
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
-    HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth, TextLink,
-    TextLinkSize, TextLinkVariant,
+    Badge, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonVariant, Decoration,
+    Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
+    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
 
@@ -74,9 +74,7 @@ pub fn render() -> Markup {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" {
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: hero container max-w-3xl with z-10 stacking
                 // loom-allow: eyebrow pill — recurring badge pattern; future Badge::Eyebrow primitive.
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" {
-                    "Following Field Notes"
-                }
+                div class="mb-6" { (Badge { label: "Following Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
                 div class="mb-4" {
                     (Heading {
                         text: "Subscribe.",

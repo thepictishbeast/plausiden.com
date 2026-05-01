@@ -9,6 +9,7 @@ use maud::{Markup, html};
 use super::layout::{PageMeta, page, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
+use loom_components::{Badge, BadgeSize, BadgeTone};
 use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 
 /// JSON escape a string for safe embedding inside a JSON literal in the
@@ -44,7 +45,7 @@ pub fn index() -> Markup {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-slate-50" {
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" { "Field Notes" }
+                div class="mb-6" { (Badge { label: "Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
                 h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-4" {
                     "Notes from the build floor."
                 }

@@ -6,6 +6,7 @@
 //! time; the page never serves a client name without their explicit
 //! written sign-off.
 
+use loom_components::{Badge, BadgeSize, BadgeTone};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -58,9 +59,7 @@ pub fn render() -> Markup {
     let body = html! {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" {
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" {
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" {
-                    "Selected work"
-                }
+                div class="mb-6" { (Badge { label: "Selected work", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
                 h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-6" {
                     "Case studies"
                 }

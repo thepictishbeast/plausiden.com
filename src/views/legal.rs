@@ -7,6 +7,7 @@
 //! the real policies are drafted. Tests below guard that the routes render
 //! 200 and surface the "under review" disclaimer.
 
+use loom_components::{Badge, BadgeSize, BadgeTone};
 use maud::{Markup, html};
 
 use super::layout::page;
@@ -17,7 +18,7 @@ fn legal_shell(title: &str, current: &str, heading: &str, subheading: &str) -> M
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {}
             div class="container relative mx-auto px-4 md:px-6 z-10" {
                 div class="max-w-3xl" {
-                    span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" { "Legal" }
+                    div class="mb-6" { (Badge { label: "Legal", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
                     h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] mb-4" { (heading) }
                     p class="text-lg text-slate-600 max-w-2xl leading-relaxed" { (subheading) }
                 }

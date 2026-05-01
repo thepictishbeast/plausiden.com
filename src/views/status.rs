@@ -13,6 +13,7 @@
 use std::sync::OnceLock;
 use std::time::Instant;
 
+use loom_components::{Badge, BadgeSize, BadgeTone};
 use maud::{Markup, html};
 
 use super::layout::page;
@@ -54,9 +55,7 @@ pub fn render() -> Markup {
     let body = html! {
         section class="pt-32 pb-16 md:pt-44 md:pb-20 bg-slate-50" {
             div class="container mx-auto px-4 md:px-6 max-w-3xl" {
-                span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" {
-                    "Operational"
-                }
+                div class="mb-6" { (Badge { label: "Operational", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
                 h1 class="font-display text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] mb-4" {
                     "Status"
                 }
