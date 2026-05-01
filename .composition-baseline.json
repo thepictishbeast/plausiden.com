@@ -1,0 +1,18 @@
+{
+  "schema": "composition-baseline/1",
+  "comment": "Snapshot of pre-existing composition findings. Committed so the CI gate fails only on NEW findings. Re-snapshot via `python3 .github/scripts/composition.py baseline .`",
+  "suppressed": [
+    "dry-duplicate-block|.github/workflows/ci.yml|3+ identical-line block recurs 7 times across 3 files",
+    "dry-duplicate-block|.github/workflows/coverage.yml|3+ identical-line block recurs 8 times across 4 files",
+    "dry-duplicate-block|src/handlers.rs|3+ identical-line block recurs 3 times across 3 files",
+    "dry-duplicate-block|src/views/capabilities.rs|3+ identical-line block recurs 3 times across 3 files",
+    "dry-duplicate-block|src/views/how_we_work.rs|3+ identical-line block recurs 3 times across 3 files",
+    "dry-duplicate-block|src/views/how_we_work.rs|3+ identical-line block recurs 4 times across 4 files",
+    "dry-duplicate-block|src/views/services.rs|3+ identical-line block recurs 4 times across 4 files",
+    "dry-duplicate-block|src/views/services.rs|3+ identical-line block recurs 6 times across 6 files",
+    "dry-duplicate-block|src/views/solutions/journalism.rs|3+ identical-line block recurs 3 times across 3 files",
+    "dry-duplicate-block|src/views/solutions/legal.rs|3+ identical-line block recurs 3 times across 3 files",
+    "dry-duplicate-block|src/views/solutions/legal.rs|3+ identical-line block recurs 5 times across 5 files",
+    "rust-manual-derivable|src/inquiry.rs|manual impl Default for InquiryState (trivial body)"
+  ]
+}
