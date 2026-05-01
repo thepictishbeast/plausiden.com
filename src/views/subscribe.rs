@@ -7,7 +7,11 @@
 //! gives the feed URL prominently so anyone who already knows the
 //! drill can copy it.
 
-use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
+use loom_components::{
+    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth, TextLink,
+    TextLinkSize, TextLinkVariant,
+};
 use maud::{Markup, html};
 
 use crate::views::layout::page;
@@ -60,103 +64,189 @@ const READERS: &[Reader] = &[
 /// Render `/subscribe`.
 #[must_use]
 pub fn render() -> Markup {
-    let body = html! {
+    // Custom hero band — eyebrow pill + h1 + lede sit inside a
+    // grid-flecked slate-50 surface that diverges from Loom Hero
+    // (which expects a two-tone two-line headline + CTA pair).
+    // Migrate the inner typography to Loom; leave the hero shell
+    // raw with annotations.
+    let hero_band = html! {
+        // loom-allow: custom hero shell — pt-32 pb-16 md:pt-44 md:pb-24 doesn't fit Loom Section padding scale; eyebrow badge is its own variant.
         section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" {
-            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" {
+            div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: hero container max-w-3xl with z-10 stacking
+                // loom-allow: eyebrow pill — recurring badge pattern; future Badge::Eyebrow primitive.
                 span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20" {
                     "Following Field Notes"
                 }
-                h1 class="font-display text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] mb-4" {
-                    "Subscribe."
+                div class="mb-4" {
+                    (Heading {
+                        text: "Subscribe.",
+                        level: HeadingLevel::H1,
+                        variant: HeadingVariant::Display,
+                        tone: HeadingTone::Ink,
+                    }.render())
                 }
-                p class="text-lg text-slate-600 max-w-2xl leading-relaxed" {
-                    "Field Notes ships as an RSS feed — a small file your computer or phone checks for new posts so you don't have to. There's no account, no email signup, no analytics tracking who's reading what. Pick a reader app, paste in the feed link, done."
-                }
+                (Lede {
+                    text: "Field Notes ships as an RSS feed — a small file your computer or phone checks for new posts so you don't have to. There's no account, no email signup, no analytics tracking who's reading what. Pick a reader app, paste in the feed link, done.",
+                    tone: HeadingTone::Ink,
+                }.render())
             }
         }
+    };
 
-        section class="py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-3xl" {
-                h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" {
-                    "The feed link"
-                }
-                p class="text-slate-600 leading-relaxed mb-4" {
-                    "Copy this URL and paste it into your reader of choice:"
-                }
-                div class="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm break-all select-all" {
-                    "https://plausiden.com/blog/rss.xml"
-                }
-                p class="text-sm text-slate-500 mt-3" {
-                    "If you click it directly, your browser will probably show raw XML — that's normal. Browsers don't render feeds; reader apps do."
-                }
-            }
+    // The four content sections share the same container shape
+    // (`max-w-3xl`, py-16). Compose each with Loom Section::Article.
+    let feed_link_body = html! {
+        div class="mb-4" {
+            (Heading {
+                text: "The feed link",
+                level: HeadingLevel::H2,
+                variant: HeadingVariant::Sub,
+                tone: HeadingTone::Ink,
+            }.render())
         }
+        div class="mb-4" {
+            (Lede {
+                text: "Copy this URL and paste it into your reader of choice:",
+                tone: HeadingTone::Ink,
+            }.render())
+        }
+        // loom-allow: copyable monospace URL block — recurring code-snippet pattern; future CodeBlock primitive.
+        div class="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm break-all select-all" {
+            "https://plausiden.com/blog/rss.xml"
+        }
+        p class="text-sm text-slate-500 mt-3" { // loom-allow: helper note pattern; HelperText{Default} omits mt-3
+            "If you click it directly, your browser will probably show raw XML — that's normal. Browsers don't render feeds; reader apps do."
+        }
+    };
+    let feed_link_section = Section {
+        body: &feed_link_body,
+        theme: SectionTheme::Light,
+        width: SectionWidth::Article,
+        padding: SectionPadding::Default,
+    }
+    .render();
 
-        section class="py-16 bg-slate-50" {
-            div class="container mx-auto px-4 md:px-6 max-w-3xl" {
-                h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" {
-                    "If you don't already use a reader"
-                }
-                p class="text-slate-600 leading-relaxed mb-8" {
-                    "Any of these will work. Pick one that fits the platforms you actually use; they all do the same fundamental thing — pull the feed periodically and show you new posts."
-                }
-                div class="space-y-4" {
-                    @for r in READERS {
-                        div class="rounded-lg border border-slate-200 bg-white p-5" {
-                            div class="flex items-baseline justify-between gap-4 mb-2" {
-                                h3 class="font-display text-lg font-bold text-slate-900" { (r.name) }
-                                span class="text-xs text-slate-500" { (r.cost) }
-                            }
-                            p class="text-sm text-slate-600 leading-relaxed mb-1" { (r.pitch) }
-                            p class="text-xs text-slate-500" {
-                                strong { "Runs on: " } (r.platforms)
-                            }
-                        }
+    let readers_body = html! {
+        div class="mb-4" {
+            (Heading {
+                text: "If you don't already use a reader",
+                level: HeadingLevel::H2,
+                variant: HeadingVariant::Sub,
+                tone: HeadingTone::Ink,
+            }.render())
+        }
+        div class="mb-8" {
+            (Lede {
+                text: "Any of these will work. Pick one that fits the platforms you actually use; they all do the same fundamental thing — pull the feed periodically and show you new posts.",
+                tone: HeadingTone::Ink,
+            }.render())
+        }
+        div class="space-y-4" { // loom-allow: vertical rhythm between reader cards
+            @for r in READERS {
+                // loom-allow: reader-card chrome; future ReaderCard primitive when this shape recurs elsewhere.
+                div class="rounded-lg border border-slate-200 bg-white p-5" {
+                    // loom-allow: card-row chrome — title left, cost right.
+                    div class="flex items-baseline justify-between gap-4 mb-2" {
+                        h3 class="font-display text-lg font-bold text-slate-900" { (r.name) } // loom-allow: card-title pattern
+                        span class="text-xs text-slate-500" { (r.cost) } // loom-allow: micro-meta label
+                    }
+                    p class="text-sm text-slate-600 leading-relaxed mb-1" { (r.pitch) } // loom-allow: card-body small
+                    p class="text-xs text-slate-500" { // loom-allow: micro-meta line
+                        strong { "Runs on: " } (r.platforms)
                     }
                 }
-                p class="text-sm text-slate-500 mt-6" {
-                    "Not endorsements — these are mainstream readers we've seen work. Any RSS or Atom-compatible reader will read the feed; the format is a published standard, not a vendor-specific protocol."
-                }
             }
         }
-
-        section class="py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-3xl" {
-                h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" {
-                    "How to add the feed (most readers)"
-                }
-                ol class="space-y-3 text-slate-600 leading-relaxed list-decimal pl-6" {
-                    li { "Install one of the readers above." }
-                    li { "Open it. Find the option labeled \"Add feed,\" \"Add subscription,\" \"+\" or similar." }
-                    li {
-                        "Paste in: "
-                        code class="text-primary font-mono text-sm" { "https://plausiden.com/blog/rss.xml" }
-                    }
-                    li { "The reader will fetch the feed and show the existing posts. New posts will appear automatically as they ship." }
-                }
-                p class="text-sm text-slate-500 mt-6" {
-                    "We don't see who subscribed, when they fetched the feed, or which posts they read. The feed is a static file; readers fetch it directly. No tracking pixels, no per-reader URLs, nothing logged on our end beyond a generic web hit."
-                }
-            }
+        p class="text-sm text-slate-500 mt-6" { // loom-allow: footer-note pattern
+            "Not endorsements — these are mainstream readers we've seen work. Any RSS or Atom-compatible reader will read the feed; the format is a published standard, not a vendor-specific protocol."
         }
+    };
+    let readers_section = Section {
+        body: &readers_body,
+        theme: SectionTheme::Muted,
+        width: SectionWidth::Article,
+        padding: SectionPadding::Default,
+    }
+    .render();
 
-        section class="py-16 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 max-w-2xl text-center" {
-                h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" {
-                    "Or just bookmark the page"
-                }
-                p class="text-slate-600 leading-relaxed mb-6" {
+    let how_to_body = html! {
+        div class="mb-4" {
+            (Heading {
+                text: "How to add the feed (most readers)",
+                level: HeadingLevel::H2,
+                variant: HeadingVariant::Sub,
+                tone: HeadingTone::Ink,
+            }.render())
+        }
+        ol class="space-y-3 text-slate-600 leading-relaxed list-decimal pl-6" { // loom-allow: numbered prose list; future BodyList primitive
+            li { "Install one of the readers above." }
+            li { "Open it. Find the option labeled \"Add feed,\" \"Add subscription,\" \"+\" or similar." }
+            li {
+                "Paste in: "
+                code class="text-primary font-mono text-sm" { "https://plausiden.com/blog/rss.xml" } // loom-allow: inline code; future InlineCode primitive
+            }
+            li { "The reader will fetch the feed and show the existing posts. New posts will appear automatically as they ship." }
+        }
+        p class="text-sm text-slate-500 mt-6" { // loom-allow: footer-note pattern
+            "We don't see who subscribed, when they fetched the feed, or which posts they read. The feed is a static file; readers fetch it directly. No tracking pixels, no per-reader URLs, nothing logged on our end beyond a generic web hit."
+        }
+    };
+    let how_to_section = Section {
+        body: &how_to_body,
+        theme: SectionTheme::Light,
+        width: SectionWidth::Article,
+        padding: SectionPadding::Default,
+    }
+    .render();
+
+    let cta_button = Button {
+        label: "See the latest posts",
+        variant: ButtonVariant::Primary,
+        size: ButtonSize::Lg,
+        aria_label: None,
+        icon: None,
+        decoration: Decoration::SoftShadow,
+        button_type: ButtonType::Button,
+    }
+    .render();
+    let cta_body = html! {
+        div class="text-center" {
+            div class="mb-4" {
+                (Heading {
+                    text: "Or just bookmark the page",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Sub,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            div class="mb-6" {
+                (Lede {
+                    text: "",
+                    tone: HeadingTone::Ink,
+                }.render())
+                p class="text-slate-600 leading-relaxed" { // loom-allow: prose with inline link; standard BodyText doesn't support inline children
                     "If a reader app sounds like more setup than it's worth, bookmark "
                     (TextLink { label: "the Field Notes index", href: "/blog", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     " and check back when the mood strikes. New posts go up at the top."
                 }
-                a href="/blog" {
-                    button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all" {
-                        "See the latest posts"
-                    }
-                }
             }
+            a href="/blog" { (cta_button) }
         }
+    };
+    let cta_section = Section {
+        body: &cta_body,
+        theme: SectionTheme::Tinted,
+        width: SectionWidth::Narrow,
+        padding: SectionPadding::Default,
+    }
+    .render();
+
+    let body = html! {
+        (hero_band)
+        (feed_link_section)
+        (readers_section)
+        (how_to_section)
+        (cta_section)
     };
     page("Subscribe — PlausiDen", "/subscribe", body)
 }
