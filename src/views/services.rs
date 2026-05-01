@@ -204,13 +204,10 @@ pub fn render() -> Markup {
 /// page doesn't depend on that module.
 fn posture_band() -> Markup {
     html! {
-        // loom-allow: dark posture band — slate-900 with decorative blur exceeds Loom Section{Dark} skeleton.
-        section class="py-20 bg-slate-900 text-white relative overflow-hidden" {
-            // loom-allow: positioned decorative blur element.
-            div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" {}
+        section class="py-20 bg-slate-900 text-white relative overflow-hidden" { // loom-allow: dark posture band — slate-900 with decorative blur exceeds Loom Section{Dark} skeleton
+            div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" {} // loom-allow: positioned decorative primary-blob blur
             div class="container relative mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: container exceeds Loom Wide
-                // loom-allow: glass-morphism eyebrow badge — same shape as solutions/template; pending Badge::Eyebrow.
-                span class="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" {
+                span class="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" { // loom-allow: glass-morphism eyebrow badge — pending Badge::Eyebrow with Compact size
                     "How we approach every engagement"
                 }
                 (Heading {
@@ -219,7 +216,7 @@ fn posture_band() -> Markup {
                     variant: HeadingVariant::Section,
                     tone: HeadingTone::OnDark,
                 }.render())
-                div class="mt-6 space-y-6" {
+                div class="mt-6 space-y-6" { // loom-allow: spacer + vertical rhythm between dark-band Lede paragraphs
                     (Lede {
                         text: "Whether the engagement is a $1,500 discovery, a $9,500/mo retainer, or a $60,000 fixed-scope project, the operating posture is identical: written proposals, scope-limited access, audit-ready documentation, and a real handoff path.",
                         tone: HeadingTone::OnDark,
@@ -307,45 +304,45 @@ fn service_section(svc: &Service, light_band: bool) -> Markup {
     } else {
         "bg-slate-50"
     };
-    let icon_svg = svc.icon.render_with_class("w-7 h-7 text-primary");
+    let icon_svg = svc.icon.render_with_class("w-7 h-7 text-primary"); // loom-allow: SVG class attribute, not Maud-emitted utility chain
     html! {
-        section class=(format!("py-8 md:py-10 {bg}")) {
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" {
-                details class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow" {
-                    summary class="flex items-start gap-4 p-5 md:p-6 cursor-pointer" {
-                        div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0" {
+        section class=(format!("py-8 md:py-10 {bg}")) { // loom-allow: <details> card band — alternating zebra background controlled by light_band
+            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: <details> container with scroll-reveal hook
+                details class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive (only consumer is services.rs)
+                    summary class="flex items-start gap-4 p-5 md:p-6 cursor-pointer" { // loom-allow: collapsible header row chrome
+                        div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0" { // loom-allow: tinted icon-tile, 48px square
                             (PreEscaped(icon_svg))
                         }
-                        div class="flex-1 min-w-0" {
-                            h2 class="font-display text-xl md:text-2xl font-bold text-slate-900" {
+                        div class="flex-1 min-w-0" { // loom-allow: flex grow-fill column inside summary row
+                            h2 class="font-display text-xl md:text-2xl font-bold text-slate-900" { // loom-allow: collapsible title — Heading{Sub} omits md:text-2xl scaling
                                 (svc.title)
                             }
-                            p class="text-slate-600 text-sm md:text-base leading-relaxed mt-2" { (svc.lede) }
-                            p class="text-xs text-primary mt-3 font-semibold" { "Read more →" }
+                            p class="text-slate-600 text-sm md:text-base leading-relaxed mt-2" { (svc.lede) } // loom-allow: collapsible lede — smaller than Loom Lede on phones
+                            p class="text-xs text-primary mt-3 font-semibold" { "Read more →" } // loom-allow: collapse-affordance hint
                         }
                     }
-                    div class="px-5 md:px-6 pb-6 pt-2 border-t border-slate-100" {
-                        p class="text-slate-600 leading-relaxed mb-5" { (svc.practice) }
+                    div class="px-5 md:px-6 pb-6 pt-2 border-t border-slate-100" { // loom-allow: collapsible body chrome — top-bordered drawer
+                        p class="text-slate-600 leading-relaxed mb-5" { (svc.practice) } // loom-allow: practice-statement prose
 
-                        p class="font-semibold text-slate-900 mb-2" { "Capabilities" }
-                        ul class="list-disc list-inside space-y-1.5 mb-6 text-slate-700" {
+                        p class="font-semibold text-slate-900 mb-2" { "Capabilities" } // loom-allow: in-drawer subheading — smaller than Heading{Card}
+                        ul class="list-disc list-inside space-y-1.5 mb-6 text-slate-700" { // loom-allow: bulleted capabilities list — no Loom BulletList primitive
                             @for cap in svc.capabilities {
                                 li { (*cap) }
                             }
                         }
 
-                        div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" {
-                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" {
-                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Who we typically work with" }
-                                p class="text-slate-600 text-sm leading-relaxed" { (svc.audience) }
+                        div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" { // loom-allow: 2-up audience/sample sub-cards
+                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" { // loom-allow: tinted sub-card chrome
+                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Who we typically work with" } // loom-allow: sub-card title
+                                p class="text-slate-600 text-sm leading-relaxed" { (svc.audience) } // loom-allow: sub-card body
                             }
-                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" {
-                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Sample engagement" }
-                                p class="text-slate-600 text-sm leading-relaxed" { (svc.sample) }
+                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" { // loom-allow: tinted sub-card chrome
+                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Sample engagement" } // loom-allow: sub-card title
+                                p class="text-slate-600 text-sm leading-relaxed" { (svc.sample) } // loom-allow: sub-card body
                             }
                         }
 
-                        a href="/contact" class="inline-flex items-center gap-2 text-primary font-semibold" {
+                        a href="/contact" class="inline-flex items-center gap-2 text-primary font-semibold" { // loom-allow: in-drawer CTA link — primary-coloured, no underline
                             "Talk to us about " (svc.title) " →"
                         }
                     }
