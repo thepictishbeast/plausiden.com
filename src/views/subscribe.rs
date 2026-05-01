@@ -70,8 +70,7 @@ pub fn render() -> Markup {
     // Migrate the inner typography to Loom; leave the hero shell
     // raw with annotations.
     let hero_band = html! {
-        // loom-allow: custom hero shell — pt-32 pb-16 md:pt-44 md:pb-24 doesn't fit Loom Section padding scale; eyebrow badge is its own variant.
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" {
+        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: custom hero shell — pt-32/44 cadence below Loom Section padding scale
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: hero container max-w-3xl with z-10 stacking
                 // loom-allow: eyebrow pill — recurring badge pattern; future Badge::Eyebrow primitive.
                 div class="mb-6" { (Badge { label: "Following Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
@@ -108,8 +107,7 @@ pub fn render() -> Markup {
                 tone: HeadingTone::Ink,
             }.render())
         }
-        // loom-allow: copyable monospace URL block — recurring code-snippet pattern; future CodeBlock primitive.
-        div class="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm break-all select-all" {
+        div class="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm break-all select-all" { // loom-allow: copyable mono URL block — pending CodeBlock primitive
             "https://plausiden.com/blog/rss.xml"
         }
         p class="text-sm text-slate-500 mt-3" { // loom-allow: helper note pattern; HelperText{Default} omits mt-3
@@ -141,10 +139,8 @@ pub fn render() -> Markup {
         }
         div class="space-y-4" { // loom-allow: vertical rhythm between reader cards
             @for r in READERS {
-                // loom-allow: reader-card chrome; future ReaderCard primitive when this shape recurs elsewhere.
-                div class="rounded-lg border border-slate-200 bg-white p-5" {
-                    // loom-allow: card-row chrome — title left, cost right.
-                    div class="flex items-baseline justify-between gap-4 mb-2" {
+                div class="rounded-lg border border-slate-200 bg-white p-5" { // loom-allow: reader-card shell — pending ReaderCard primitive when shape recurs
+                    div class="flex items-baseline justify-between gap-4 mb-2" { // loom-allow: card meta-row — title left, cost right
                         h3 class="font-display text-lg font-bold text-slate-900" { (r.name) } // loom-allow: card-title pattern
                         span class="text-xs text-slate-500" { (r.cost) } // loom-allow: micro-meta label
                     }

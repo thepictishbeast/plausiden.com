@@ -243,7 +243,7 @@ pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
             div class="mt-6 mb-8" { // loom-allow: structural margin
                 (Lede { text: cfg.engagement_intro, tone: HeadingTone::Ink }.render())
             }
-            ol class="space-y-6 text-slate-700" {
+            ol class="space-y-6 text-slate-700" { // loom-allow: numbered-step list — vertical rhythm + base prose colour
                 @for (i, step) in cfg.engagement_steps.iter().enumerate() {
                     (engagement_step_item(i + 1, step.title, step.description))
                 }
@@ -339,9 +339,7 @@ pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
 fn engagement_step_item(n: usize, title: &str, description: &str) -> Markup {
     let label = format!("{n}");
     html! {
-        // loom-allow: numbered-step glyph; will graduate to a StepNumber primitive when used outside this template.
-        li class="flex gap-4" {
-            // loom-allow: circular badge with bg-primary; same StepNumber follow-up.
+        li class="flex gap-4" { // loom-allow: numbered-step row — pending shared StepRow primitive
             span class="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white font-bold flex items-center justify-center text-sm" { (label) } // loom-allow: circular numbered glyph; future StepNumber primitive
             div {
                 p class="font-semibold text-slate-900 mb-1" { (title) } // loom-allow: row-title pattern; HelperBold primitive on the to-do list.

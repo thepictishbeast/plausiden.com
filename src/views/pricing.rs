@@ -14,7 +14,7 @@ use super::layout::page_with_description;
 
 const PRICING_DESCRIPTION: &str = "How PlausiDen prices engagements. Hourly + retainer + fixed-scope ranges, plain English, no bait-and-switch. We'd rather you know up front whether we're affordable than waste your time on a sales call.";
 
-const ICON_CHECK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>"#;
+const ICON_CHECK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>"#; // loom-allow: SVG class attribute, not Maud-emitted utility chain
 
 /// One pricing tier. The four tiers (hourly / retainer / fixed-scope /
 /// discovery) share the same shape and only differ in copy.
@@ -89,9 +89,7 @@ fn tier_card(tier: &Tier<'_>) -> Markup {
             div class="mb-4" {
                 (Lede { text: tier.lede, tone: HeadingTone::Ink }.render())
             }
-            // loom-allow: large display-priced figure; bound to a recurring
-            // 4-card pattern that doesn't fit any current Loom typography step.
-            p class="text-slate-900 font-semibold text-2xl mb-2" { (tier.price) }
+            p class="text-slate-900 font-semibold text-2xl mb-2" { (tier.price) } // loom-allow: large display-priced figure — text-2xl semibold doesn't fit any Loom typography step
             (HelperText {
                 text: tier.helper,
                 size: HelperSize::Default,
