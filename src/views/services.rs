@@ -9,7 +9,11 @@
 //! the rest.
 
 use loom_components::hero::{Hero, HeroBackground};
-use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
+use loom_components::{
+    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth, TextLink,
+    TextLinkSize, TextLinkVariant,
+};
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
@@ -189,23 +193,43 @@ pub fn render() -> Markup {
             (service_section(svc, i % 2 == 0))
         }
 
-        // -------- How we approach IT (cross-cutting principles) --------
+        (posture_band())
+        (final_cta())
+    };
+    page("Services — PlausiDen", "/services", body)
+}
+
+/// Cross-cutting "how we approach every engagement" band — same dark
+/// shape used by the solutions/* template, replicated here so this
+/// page doesn't depend on that module.
+fn posture_band() -> Markup {
+    html! {
+        // loom-allow: dark posture band — slate-900 with decorative blur exceeds Loom Section{Dark} skeleton.
         section class="py-20 bg-slate-900 text-white relative overflow-hidden" {
+            // loom-allow: positioned decorative blur element.
             div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" {}
-            div class="container relative mx-auto px-4 md:px-6 max-w-4xl reveal" {
+            div class="container relative mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: container exceeds Loom Wide
+                // loom-allow: glass-morphism eyebrow badge — same shape as solutions/template; pending Badge::Eyebrow.
                 span class="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" {
                     "How we approach every engagement"
                 }
-                h2 class="font-display text-3xl md:text-4xl font-bold mb-6 leading-tight" {
-                    "Different shapes, same posture."
+                (Heading {
+                    text: "Different shapes, same posture.",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Section,
+                    tone: HeadingTone::OnDark,
+                }.render())
+                div class="mt-6 space-y-6" {
+                    (Lede {
+                        text: "Whether the engagement is a $1,500 discovery, a $9,500/mo retainer, or a $60,000 fixed-scope project, the operating posture is identical: written proposals, scope-limited access, audit-ready documentation, and a real handoff path.",
+                        tone: HeadingTone::OnDark,
+                    }.render())
+                    (Lede {
+                        text: "We aim for engagements that produce documentation a competent successor can use to take over. The next vendor — yours or ours — should be able to read what we built, understand why, and run it without us. That's what \"compose, don't compromise\" means at the engagement level.",
+                        tone: HeadingTone::OnDark,
+                    }.render())
                 }
-                p class="text-slate-400 text-lg leading-relaxed mb-6" {
-                    "Whether the engagement is a $1,500 discovery, a $9,500/mo retainer, or a $60,000 fixed-scope project, the operating posture is identical: written proposals, scope-limited access, audit-ready documentation, and a real handoff path."
-                }
-                p class="text-slate-400 text-lg leading-relaxed" {
-                    "We aim for engagements that produce documentation a competent successor can use to take over. The next vendor — yours or ours — should be able to read what we built, understand why, and run it without us. That's what \"compose, don't compromise\" means at the engagement level."
-                }
-                p class="text-slate-300 mt-8" {
+                p class="text-slate-300 mt-8" { // loom-allow: prose with two inline links; standard BodyText doesn't take inline children
                     "Read more in "
                     (TextLink { label: "how we work", href: "/how-we-work", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     " or check our "
@@ -214,30 +238,58 @@ pub fn render() -> Markup {
                 }
             }
         }
+    }
+}
 
-        // -------- Final CTA --------
-        section class="py-20 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 text-center max-w-3xl reveal" {
-                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" {
-                    "Not sure where to start?"
-                }
-                p class="text-slate-600 text-lg mb-8" {
-                    "The intake conversation is free, the NDA is mutual, and we'll tell you if we're not the right fit. Tell us what's on your plate — even if you're not sure whether it's an IT problem yet."
-                }
-                a href="/contact" {
-                    button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all" {
-                        "Schedule an intake call"
-                    }
-                }
-                p class="text-slate-500 text-sm mt-6" {
-                    "Or write to "
-                    (TextLink { label: "team@plausiden.com", href: "mailto:team@plausiden.com", variant: TextLinkVariant::PrimaryMedium, size: TextLinkSize::Default }.render())
-                    " · 978-351-6495"
-                }
+fn final_cta() -> Markup {
+    let cta_button = Button {
+        label: "Schedule an intake call",
+        variant: ButtonVariant::Primary,
+        size: ButtonSize::Lg,
+        aria_label: None,
+        icon: None,
+        decoration: Decoration::SoftShadow,
+        button_type: ButtonType::Button,
+    }
+    .render();
+    let mailto_link = TextLink {
+        label: "team@plausiden.com",
+        href: "mailto:team@plausiden.com",
+        variant: TextLinkVariant::PrimaryMedium,
+        size: TextLinkSize::Default,
+    }
+    .render();
+    let body = html! {
+        div class="text-center reveal" {
+            div class="mb-6" {
+                (Heading {
+                    text: "Not sure where to start?",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Section,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            div class="mb-8" {
+                (Lede {
+                    text: "The intake conversation is free, the NDA is mutual, and we'll tell you if we're not the right fit. Tell us what's on your plate — even if you're not sure whether it's an IT problem yet.",
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            a href="/contact" { (cta_button) }
+            p class="text-slate-500 text-sm mt-6" { // loom-allow: prose with inline link
+                "Or write to "
+                (mailto_link)
+                " · 978-351-6495"
             }
         }
     };
-    page("Services — PlausiDen", "/services", body)
+    Section {
+        body: &body,
+        theme: SectionTheme::Tinted,
+        width: SectionWidth::Article,
+        padding: SectionPadding::Loose,
+    }
+    .render()
 }
 
 /// Render one service as a condensed card with `<details>` for the
