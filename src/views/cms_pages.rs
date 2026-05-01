@@ -72,12 +72,11 @@ fn render_block(b: &Block) -> Markup {
         BlockKind::Cta => render_cta(b),
         BlockKind::Markdown => render_markdown(b),
         BlockKind::CardGrid => render_card_grid(b),
-        // Image / Video are accepted in the schema but their
-        // renderers are deferred until the corresponding Loom
-        // primitives have a stable surface. They render as a
-        // placeholder note so an editor sees that the block exists
-        // but isn't yet visible.
-        BlockKind::Image | BlockKind::Video => render_placeholder(b),
+        BlockKind::Image => render_image(b),
+        // Video is accepted in the schema but the renderer is
+        // deferred — needs a vetted no-tracking embed strategy
+        // (no autoplay, no third-party loaders).
+        BlockKind::Video => render_placeholder(b),
     }
 }
 
@@ -235,6 +234,38 @@ fn card_body_for(title: &str, body: &str) -> Markup {
         hover: CardHover::Lift,
     }
     .render()
+}
+
+fn render_image(b: &Block) -> Markup {
+    let src = text_field(b, "src").unwrap_or("");
+    let alt = text_field(b, "alt").unwrap_or("");
+    let caption = text_field(b, "caption").unwrap_or("");
+    // SECURITY: refuse external src — only `/static/...` paths are
+    // allowed. CMS authors must pre-upload assets to the static dir;
+    // this prevents authoring an external `<img src>` that would
+    // leak the visitor's IP to a third-party CDN.
+    let safe_src = if src.starts_with("/static/") || src.is_empty() {
+        src
+    } else {
+        ""
+    };
+    if safe_src.is_empty() {
+        // No valid src — render the placeholder note so an editor
+        // sees their block but the page doesn't ship a broken image.
+        return html! {
+            div class="rounded-lg border border-amber-200 bg-amber-50 p-4 my-4 text-sm text-amber-900" { // loom-allow: editor-facing placeholder for blocks with missing/external src
+                "[image — src missing or external (CMS only allows /static/* paths); see authoring docs]"
+            }
+        };
+    }
+    html! {
+        figure class="my-8" { // loom-allow: image figure with caption — recurring CMS-content shape
+            img src=(safe_src) alt=(alt) class="w-full h-auto rounded-lg border border-slate-200"; // loom-allow: full-width responsive image with subtle border
+            @if !caption.is_empty() {
+                figcaption class="text-sm text-slate-500 mt-2 text-center italic" { (caption) } // loom-allow: figure caption — centred italic muted
+            }
+        }
+    }
 }
 
 fn render_placeholder(b: &Block) -> Markup {
@@ -407,14 +438,14 @@ mod tests {
 
     #[test]
     fn unrendered_kinds_show_placeholder() {
-        // CardGrid now renders properly; only Image / Video stay placeholder.
+        // CardGrid + Image now render properly; only Video stays placeholder.
         let p = page_with_blocks(vec![Section {
             anchor: None,
             theme: SectionTheme::Light,
-            blocks: vec![block(BlockKind::Image, &[])],
+            blocks: vec![block(BlockKind::Video, &[])],
         }]);
         let s = render(&p, "/docs/test").into_string();
-        assert!(s.contains("image"));
+        assert!(s.contains("video"));
         assert!(s.contains("renderer pending"));
     }
 
@@ -508,6 +539,47 @@ mod tests {
         assert!(s.contains("First"));
         assert!(!s.contains(">Second<"));
         assert!(!s.contains(">Third<"));
+    }
+
+    #[test]
+    fn image_block_renders_local_static_src() {
+        let p = page_with_blocks(vec![Section {
+            anchor: None,
+            theme: SectionTheme::Light,
+            blocks: vec![block(
+                BlockKind::Image,
+                &[
+                    ("src", "/static/images/hero-team.jpg"),
+                    ("alt", "Team collaboration photo"),
+                    ("caption", "The build floor in 2026."),
+                ],
+            )],
+        }]);
+        let s = render(&p, "/docs/test").into_string();
+        assert!(s.contains("src=\"/static/images/hero-team.jpg\""));
+        assert!(s.contains("alt=\"Team collaboration photo\""));
+        assert!(s.contains("The build floor in 2026."));
+    }
+
+    #[test]
+    fn image_block_rejects_external_src() {
+        // SECURITY: external image URLs would leak visitor IP to
+        // third-party CDNs. The renderer must drop them and surface
+        // the placeholder instead of emitting an external <img>.
+        let p = page_with_blocks(vec![Section {
+            anchor: None,
+            theme: SectionTheme::Light,
+            blocks: vec![block(
+                BlockKind::Image,
+                &[
+                    ("src", "https://images.unsplash.com/evil.jpg"),
+                    ("alt", "External"),
+                ],
+            )],
+        }]);
+        let s = render(&p, "/docs/test").into_string();
+        assert!(!s.contains("unsplash"), "external src must not appear in rendered output");
+        assert!(s.contains("missing or external"));
     }
 
     #[test]
