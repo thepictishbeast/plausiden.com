@@ -674,4 +674,36 @@ mod snapshots {
     snap_route!(sitemap, "/sitemap.xml");
     snap_route!(robots, "/robots.txt");
     snap_route!(blog_rss, "/blog/rss.xml");
+
+    /// CMS-backed page snapshot. Distinct from `snap_route!` because
+    /// it threads an explicit [`crate::AppState`] with a fixture-rooted
+    /// CMS state — the macro form would call `from_env` and depend
+    /// on the test process's cwd matching the manifest dir.
+    #[tokio::test]
+    async fn cms_doc_why_pps() {
+        use axum::body::to_bytes;
+        use axum::http::{Request, StatusCode};
+        use tower::ServiceExt;
+        let state = crate::AppState {
+            inquiry: crate::inquiry::InquiryState::new(),
+            cms: crate::cms::CmsState::from_root(std::path::Path::new(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/cms-store"
+            ))),
+        };
+        let app = crate::build_router_with_state(state);
+        let resp = app
+            .oneshot(
+                Request::builder()
+                    .uri("/docs/why-pps")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = to_bytes(resp.into_body(), 256 * 1024).await.unwrap();
+        let s = String::from_utf8(body.to_vec()).unwrap();
+        insta::assert_snapshot!("cms_doc_why_pps", s);
+    }
 }

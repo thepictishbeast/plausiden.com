@@ -44,7 +44,44 @@ pub struct CmsState {
     storage: Option<Arc<FsStorage>>,
 }
 
+/// One published-page summary for sitemap enumeration. Holds just
+/// enough to emit a `<url>` entry — slug + `lastmod` ISO date.
+#[derive(Debug, Clone)]
+pub struct SitemapEntry {
+    /// Page slug; becomes the `/docs/{slug}` path component.
+    pub slug: String,
+    /// Last update timestamp, formatted as `YYYY-MM-DD` for the
+    /// sitemap `<lastmod>` element.
+    pub updated_at: String,
+}
+
 impl CmsState {
+    /// Enumerate every Published page in the configured site. Used
+    /// by the sitemap builder so search engines discover CMS-backed
+    /// docs. Returns an empty Vec when no store is configured or
+    /// the read fails — the sitemap stays valid either way.
+    #[must_use]
+    pub fn published_entries(&self) -> Vec<SitemapEntry> {
+        let Some(storage) = self.storage.as_deref() else {
+            return Vec::new();
+        };
+        let pages = match storage.list_pages(SITE_SLUG) {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::warn!("cms: list_pages failed during sitemap build: {e}");
+                return Vec::new();
+            }
+        };
+        pages
+            .into_iter()
+            .filter(|p| matches!(p.status, PageStatus::Published))
+            .map(|p| SitemapEntry {
+                slug: p.slug,
+                updated_at: p.updated_at.format("%Y-%m-%d").to_string(),
+            })
+            .collect()
+    }
+
     /// Construct from the `PLAUSIDEN_CMS_ROOT` env var (or
     /// `./cms-store` when unset). Returns a state with `None`
     /// storage if the directory is missing or fails to open.

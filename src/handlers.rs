@@ -294,8 +294,11 @@ const SITEMAP_ROUTES: &[(&str, &str, &str)] = &[
 ];
 
 /// `GET /sitemap.xml` — auto-generated from `SITEMAP_ROUTES` + every
-/// blog-post slug. Search engines fetch this; humans don't.
-pub async fn sitemap_xml() -> impl IntoResponse {
+/// blog-post slug + every CMS-backed published page under
+/// `/docs/{slug}`. Search engines fetch this; humans don't.
+pub async fn sitemap_xml(
+    axum::extract::State(cms): axum::extract::State<crate::cms::CmsState>,
+) -> impl IntoResponse {
     use std::fmt::Write as _;
     let latest_post_date = crate::views::posts::POSTS
         .first()
@@ -317,6 +320,17 @@ pub async fn sitemap_xml() -> impl IntoResponse {
             "  <url><loc>https://plausiden.com/blog/{slug}</loc><lastmod>{date}</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>",
             slug = post.slug,
             date = post.published,
+        );
+    }
+    // CMS-backed pages — only the Published ones get sitemap entries.
+    // Drafts / Reviewed / Archived are excluded by construction so an
+    // accidental publish-by-sitemap-listing is impossible.
+    for entry in cms.published_entries() {
+        let _ = writeln!(
+            out,
+            "  <url><loc>https://plausiden.com/docs/{slug}</loc><lastmod>{date}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>",
+            slug = entry.slug,
+            date = entry.updated_at,
         );
     }
     out.push_str("</urlset>\n");

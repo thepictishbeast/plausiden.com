@@ -1,5 +1,6 @@
 ---
 source: src/lib.rs
+assertion_line: 674
 expression: body
 ---
 <?xml version="1.0" encoding="UTF-8"?>
@@ -27,4 +28,5 @@ expression: body
   <url><loc>https://plausiden.com/blog/provable-privacy</loc><lastmod>2026-04-27</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
   <url><loc>https://plausiden.com/blog/avp-doctrine</loc><lastmod>2026-04-27</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
   <url><loc>https://plausiden.com/blog/federated-rule-learning</loc><lastmod>2026-04-26</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://plausiden.com/docs/why-pps</loc><lastmod>2026-04-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
