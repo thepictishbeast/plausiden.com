@@ -15,7 +15,7 @@ use loom_components::{
     TextLinkSize, TextLinkVariant,
 };
 use loom_icons as icons;
-use maud::{Markup, PreEscaped, html};
+use maud::{html, Markup, PreEscaped};
 
 use super::layout::page;
 
@@ -190,7 +190,7 @@ pub fn render() -> Markup {
         }.render())
 
         @for (i, svc) in SERVICES.iter().enumerate() {
-            (service_section(svc, i % 2 == 0))
+            (service_section(svc, i + 1, i % 2 == 0))
         }
 
         (posture_band())
@@ -289,61 +289,115 @@ fn final_cta() -> Markup {
     .render()
 }
 
-/// Render one service as a condensed card with `<details>` for the
-/// depth. The summary panel — icon + title + lede — is always
-/// visible; clicking expands into practice + full capabilities +
-/// audience + sample + the per-service CTA.
+/// Render one service as a richly-styled `<details>` card.
+///
+/// The summary panel — large numbered prefix + icon tile + eyebrow +
+/// bold title + lede — is always visible; clicking expands into
+/// practice + capabilities (now rendered with checkmark icons rather
+/// than disc bullets) + audience + sample sub-cards + per-service CTA.
 ///
 /// Native `<details>` was chosen over a JS toggle: it works without
 /// JS, is keyboard accessible by default, and survives reduced-
 /// motion / no-JS / RSS-reader / accessibility-tree consumption.
 /// `light_band` toggles the background so adjacent cards alternate.
-fn service_section(svc: &Service, light_band: bool) -> Markup {
+/// `index` (1-based) drives the numeric prefix for visual sequencing.
+fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
     let bg = if light_band {
         "bg-white"
     } else {
         "bg-slate-50"
     };
-    let icon_svg = svc.icon.render_with_class("w-7 h-7 text-primary"); // loom-allow: SVG class attribute, not Maud-emitted utility chain
+    let icon_svg = svc.icon.render_with_class("w-8 h-8 text-primary"); // loom-allow: SVG class attribute, not Maud-emitted utility chain
+    let number = format!("{index:02}");
     html! {
-        section class=(format!("py-8 md:py-10 {bg}")) { // loom-allow: <details> card band — alternating zebra background controlled by light_band
+        section class=(format!("py-10 md:py-14 {bg}")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background
             div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: <details> container with scroll-reveal hook
-                details class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive (only consumer is services.rs)
-                    summary class="flex items-start gap-4 p-5 md:p-6 cursor-pointer" { // loom-allow: collapsible header row chrome
-                        div class="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0" { // loom-allow: tinted icon-tile, 48px square
+                details class="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 open:shadow-xl open:border-primary/30" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive; adds hover-lift + accent border on open
+                    summary class="flex items-start gap-5 md:gap-7 p-7 md:p-9 cursor-pointer list-none" { // loom-allow: collapsible header row — bigger padding (p-7/p-9) + list-none to suppress disclosure marker
+                        // Numbered prefix — light weight against bold title for typographic contrast.
+                        div class="hidden md:flex flex-col items-end shrink-0 pt-1 select-none" { // loom-allow: numbered-prefix column, hidden on phones to keep card compact
+                            span class="font-display text-5xl font-extralight text-slate-300 tabular-nums leading-none" { // loom-allow: extra-light large numeral; tabular-nums for column alignment
+                                (number)
+                            }
+                            span class="mt-2 text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { // loom-allow: micro-label under the number
+                                "Service"
+                            }
+                        }
+                        // Icon tile — bigger (64px) than v1 (48px), softer glow.
+                        div class="bg-gradient-to-br from-primary/10 to-primary/5 ring-1 ring-primary/15 w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center shrink-0" { // loom-allow: tinted icon-tile, 56-64px with soft inner gradient and ring
                             (PreEscaped(icon_svg))
                         }
+                        // Title + lede column.
                         div class="flex-1 min-w-0" { // loom-allow: flex grow-fill column inside summary row
-                            h2 class="font-display text-xl md:text-2xl font-bold text-slate-900" { // loom-allow: collapsible title — Heading{Sub} omits md:text-2xl scaling
+                            div class="md:hidden text-[10px] uppercase tracking-[0.2em] font-bold text-primary mb-1" { // loom-allow: phone-only number eyebrow, mirrors the desktop numbered prefix
+                                "Service · " (number)
+                            }
+                            span class="hidden md:inline-block text-[11px] uppercase tracking-[0.18em] font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full mb-2" { // loom-allow: pill-shaped eyebrow tag — desktop only; primary tint + rounded-full
                                 (svc.title)
                             }
-                            p class="text-slate-600 text-sm md:text-base leading-relaxed mt-2" { (svc.lede) } // loom-allow: collapsible lede — smaller than Loom Lede on phones
-                            p class="text-xs text-primary mt-3 font-semibold" { "Read more →" } // loom-allow: collapse-affordance hint
+                            h2 class="font-display text-2xl md:text-[1.875rem] lg:text-[2.125rem] font-bold text-slate-900 leading-[1.15] tracking-tight md:hidden" { // loom-allow: phone-only title — desktop has the eyebrow showing the title; mobile shows it as h2
+                                (svc.title)
+                            }
+                            h2 class="hidden md:block font-display text-2xl md:text-[1.875rem] lg:text-[2.125rem] font-bold text-slate-900 leading-[1.15] tracking-tight mt-1" { // loom-allow: desktop-only headline — same font but separate from mobile h2 above
+                                (svc.title)
+                            }
+                            p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light mt-3 md:mt-4" { // loom-allow: collapsible lede — light-weight prose for typographic contrast against bold headline
+                                (svc.lede)
+                            }
+                            p class="mt-4 inline-flex items-center gap-1.5 text-primary text-xs md:text-sm font-bold tracking-wide" { // loom-allow: collapse-affordance hint with chevron rotation tied to open state
+                                span { "Open service detail" }
+                                span class="inline-block transition-transform duration-300 group-open:rotate-90" { "›" }
+                            }
                         }
                     }
-                    div class="px-5 md:px-6 pb-6 pt-2 border-t border-slate-100" { // loom-allow: collapsible body chrome — top-bordered drawer
-                        p class="text-slate-600 leading-relaxed mb-5" { (svc.practice) } // loom-allow: practice-statement prose
-
-                        p class="font-semibold text-slate-900 mb-2" { "Capabilities" } // loom-allow: in-drawer subheading — smaller than Heading{Card}
-                        ul class="list-disc list-inside space-y-1.5 mb-6 text-slate-700" { // loom-allow: bulleted capabilities list — no Loom BulletList primitive
-                            @for cap in svc.capabilities {
-                                li { (*cap) }
+                    // Drawer — opens on click. Padded generously, with an internal divider band.
+                    div class="px-7 md:px-9 pb-9 pt-2" { // loom-allow: collapsible body chrome — wider drawer padding
+                        div class="border-t border-slate-100 pt-7" { // loom-allow: drawer top divider
+                            // Practice statement — display-italic for typographic variety.
+                            p class="text-slate-700 text-base md:text-lg leading-relaxed font-light italic mb-8 border-l-2 border-primary/40 pl-5" { // loom-allow: practice-statement prose with brand-accent left rule + italic display weight
+                                (svc.practice)
                             }
-                        }
 
-                        div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" { // loom-allow: 2-up audience/sample sub-cards
-                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" { // loom-allow: tinted sub-card chrome
-                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Who we typically work with" } // loom-allow: sub-card title
-                                p class="text-slate-600 text-sm leading-relaxed" { (svc.audience) } // loom-allow: sub-card body
+                            // Capabilities — replaces disc bullets with check icons + heavier label.
+                            div class="text-[11px] uppercase tracking-[0.18em] font-bold text-primary mb-4" { // loom-allow: capabilities subheading eyebrow
+                                "Capabilities · " (svc.capabilities.len()) " areas"
                             }
-                            div class="rounded-lg bg-slate-50 border border-slate-200 p-4" { // loom-allow: tinted sub-card chrome
-                                p class="font-semibold text-slate-900 mb-1 text-sm" { "Sample engagement" } // loom-allow: sub-card title
-                                p class="text-slate-600 text-sm leading-relaxed" { (svc.sample) } // loom-allow: sub-card body
+                            ul class="space-y-3 mb-9" { // loom-allow: bulleted capabilities list — no Loom BulletList primitive
+                                @for cap in svc.capabilities {
+                                    li class="flex items-start gap-3 text-slate-700 leading-relaxed" { // loom-allow: capability row with check icon
+                                        // Inline checkmark, primary tint.
+                                        span class="shrink-0 mt-1 w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center" { // loom-allow: check tile — 16px circle + primary tint
+                                            span class="text-[10px] font-bold leading-none" { "✓" }
+                                        }
+                                        span class="text-[15px] md:text-base" { (*cap) }
+                                    }
+                                }
                             }
-                        }
 
-                        a href="/contact" class="inline-flex items-center gap-2 text-primary font-semibold" { // loom-allow: in-drawer CTA link — primary-coloured, no underline
-                            "Talk to us about " (svc.title) " →"
+                            // Audience + Sample two-up — bigger, more distinct cards.
+                            div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mb-8" { // loom-allow: 2-up audience/sample sub-cards — wider gap
+                                div class="rounded-xl bg-slate-50/80 border border-slate-200/80 p-5 md:p-6" { // loom-allow: tinted sub-card chrome — bigger padding + softer surface
+                                    div class="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-3" { // loom-allow: sub-card eyebrow
+                                        "Who we work with"
+                                    }
+                                    p class="text-slate-700 text-[15px] leading-relaxed font-light" { // loom-allow: sub-card body — light weight
+                                        (svc.audience)
+                                    }
+                                }
+                                div class="rounded-xl bg-primary/5 border border-primary/15 p-5 md:p-6" { // loom-allow: sample sub-card — primary-tinted to distinguish from audience card
+                                    div class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary mb-3" { // loom-allow: sample eyebrow
+                                        "Sample engagement"
+                                    }
+                                    p class="text-slate-700 text-[15px] leading-relaxed font-light" { // loom-allow: sub-card body
+                                        (svc.sample)
+                                    }
+                                }
+                            }
+
+                            a href="/contact" class="inline-flex items-center gap-2 text-primary font-bold text-base group/cta" { // loom-allow: in-drawer CTA link — bold + arrow micro-interaction
+                                "Talk to us about " (svc.title)
+                                span class="inline-block transition-transform duration-300 group-hover/cta:translate-x-1" { "→" }
+                            }
                         }
                     }
                 }

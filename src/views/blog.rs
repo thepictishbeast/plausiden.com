@@ -4,10 +4,10 @@
 //! tighter prose container. No CMS, no markdown engine; posts are Maud
 //! functions registered in [`crate::views::posts`].
 
-use maud::{Markup, html};
+use maud::{html, Markup};
 
-use super::layout::{PageMeta, page, page_with_meta};
-use super::posts::{POSTS, Post, by_slug};
+use super::layout::{page, page_with_meta, PageMeta};
+use super::posts::{by_slug, Post, POSTS};
 use loom_components::card::LinkCard;
 use loom_components::{
     Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
@@ -163,24 +163,28 @@ pub fn post(slug: &str) -> Option<Markup> {
 fn post_card(post: &Post) -> Markup {
     let href = format!("/blog/{}", post.slug);
     let body = html! {
-        div class="flex items-center gap-3 text-xs text-slate-500" { // loom-allow: card meta-row chrome — eyebrow + dot-separated dates
+        div class="flex items-center gap-3 text-xs uppercase tracking-wider font-semibold text-slate-500" { // loom-allow: card meta-row chrome — eyebrow + dot-separated dates with stronger letter-spacing for "label" feel
             (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
-            span { (post.published) }
+            span class="font-medium tracking-normal normal-case text-slate-500" { (post.published) } // loom-allow: nested meta date — overrides parent uppercase chrome
             span class="text-slate-300" { "·" } // loom-allow: meta dot separator
-            span { (post.read_time) }
+            span class="font-medium tracking-normal normal-case text-slate-500" { (post.read_time) } // loom-allow: nested read-time — overrides parent uppercase chrome
         }
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-3 group-hover:text-primary transition-colors" { // loom-allow: card-headline; Heading{Sub} omits group-hover hook for hover-state coupling with the surrounding LinkCard
+        h2 class="font-display text-2xl md:text-3xl lg:text-[2rem] font-bold text-slate-900 mt-4 leading-[1.2] tracking-tight group-hover:text-primary transition-colors duration-200" { // loom-allow: card-headline with tighter tracking + lg breakpoint scaling; Heading{Sub} omits group-hover hook for hover-state coupling with surrounding LinkCard
             (post.title)
         }
-        p class="text-slate-600 mt-3 leading-relaxed" { // loom-allow: card excerpt prose; Lede is for hero openers
+        p class="text-slate-600 mt-4 leading-relaxed text-[15px] md:text-base font-light" { // loom-allow: card excerpt — light-weight prose for typographic contrast against bold headline; Lede is for hero openers
             (post.excerpt)
         }
-        p class="mt-4 text-primary font-semibold text-sm" { // loom-allow: read-more affordance; visual-only, no link target (the whole card is the link)
-            "Read more →"
+        div class="mt-5 flex items-center gap-2 text-primary font-semibold text-sm" { // loom-allow: read-more affordance with arrow that animates on hover
+            span { "Read more" }
+            span class="inline-block transition-transform duration-300 group-hover:translate-x-1" { "→" } // loom-allow: arrow translate-on-hover micro-interaction
         }
     };
     html! {
-        div class="reveal" { // loom-allow: scroll-reveal animation hook
+        // loom-allow: post-card wrapper — adds vertical-lift + shadow-grow hover affordance and accent-stripe-on-hover. The reveal class layers in scroll-fade animation on top.
+        div class="reveal group relative transition-all duration-300 hover:-translate-y-1" {
+            // Decorative accent stripe — invisible by default, animates in on hover from left edge, ties the hover state to the brand color.
+            div class="absolute left-0 top-6 bottom-6 w-1 bg-primary rounded-full origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ease-out" {} // loom-allow: positioned accent stripe — animates scaleY 0→1 on parent group hover
             (LinkCard { href: &href, body: &body }.render())
         }
     }
