@@ -152,6 +152,10 @@ fn head_tag(meta: &PageMeta<'_>) -> Markup {
             link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png";
             link rel="manifest" href="/static/site.webmanifest";
             link rel="stylesheet" href="/static/self-hosted-fonts.css";
+            // loom-tokens.css must precede the Tailwind bundle so
+            // overrides via `var(--loom-color-*)` win the cascade
+            // when a custom rule references the token.
+            link rel="stylesheet" href="/static/loom-tokens.css";
             link rel="stylesheet" href="/static/index-CWVVhmVm.css";
             link rel="stylesheet" href="/static/animations.css";
             script src="/static/menu.js" defer {}
