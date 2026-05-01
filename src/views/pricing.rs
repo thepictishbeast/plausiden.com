@@ -3,6 +3,11 @@
 //! until a sales call.
 
 use loom_components::hero::{Hero, HeroBackground};
+use loom_components::{
+    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, HelperSize, HelperText, Lede, Section, SectionPadding, SectionTheme,
+    SectionWidth,
+};
 use maud::{Markup, PreEscaped, html};
 
 use super::layout::page_with_description;
@@ -11,12 +16,193 @@ const PRICING_DESCRIPTION: &str = "How PlausiDen prices engagements. Hourly + re
 
 const ICON_CHECK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>"#;
 
+/// One pricing tier. The four tiers (hourly / retainer / fixed-scope /
+/// discovery) share the same shape and only differ in copy.
+struct Tier<'a> {
+    title: &'a str,
+    lede: &'a str,
+    price: &'a str,
+    helper: &'a str,
+}
+
+const TIERS: &[Tier<'_>] = &[
+    Tier {
+        title: "Hourly engagements",
+        lede: "For ongoing work without a fixed scope: configuration changes, incident response, ad-hoc audits.",
+        price: "$185 – $275 / hour",
+        helper: "Senior engineer rate. Higher end for after-hours / weekend / on-call. Tracked in 15-minute increments. Invoiced monthly with itemized work log.",
+    },
+    Tier {
+        title: "Retainer engagements",
+        lede: "Predictable monthly cost for ongoing operational support — patching, monitoring, periodic audit prep.",
+        price: "$2,500 – $9,500 / month",
+        helper: "Sized to staff count + service surface. Includes a fixed hour bucket; overflow at the standard hourly rate. 30-day cancellation; no long-term lock-in.",
+    },
+    Tier {
+        title: "Fixed-scope projects",
+        lede: "For one-time deliverables with a clear shape: cloud migration, mail server self-hosting, security audit + remediation, vertical-specific compliance posture.",
+        price: "$8,000 – $60,000 per project",
+        helper: "Quoted after a paid discovery (typically $1,500 – $3,000, credited toward the project if you hire us). Discovery deliverable is yours regardless — you can take it elsewhere.",
+    },
+    Tier {
+        title: "Discovery / scoping",
+        lede: "When the shape is unclear or you're shopping vendors. We produce a written assessment of your current state, top three risks, and a recommended next-step plan.",
+        price: "$1,500 – $3,000, fixed",
+        helper: "Two-week turnaround. Yours to keep regardless of next steps.",
+    },
+];
+
+const PROMISES: &[(&str, &str)] = &[
+    (
+        "No \"call for pricing.\" ",
+        "If we're a bad fit on price, you should know in 30 seconds, not three phone calls.",
+    ),
+    (
+        "No bait-and-switch. ",
+        "The proposal we send is what you pay; scope changes require a written change order with a new price.",
+    ),
+    (
+        "No long-term lock-in. ",
+        "Retainers are 30-day cancellable. We'd rather earn renewal than collect a termination fee.",
+    ),
+    (
+        "No referral kickbacks. ",
+        "When we recommend a third-party tool or vendor, we are not paid to do so. Recommendations are based on fit.",
+    ),
+    (
+        "No license-arbitrage markup. ",
+        "If we resell software (Microsoft 365, etc.) we pass through at cost.",
+    ),
+];
+
+fn tier_card(tier: &Tier<'_>) -> Markup {
+    html! {
+        div class="reveal" {
+            div class="mb-4" {
+                (Heading {
+                    text: tier.title,
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Sub,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            div class="mb-4" {
+                (Lede { text: tier.lede, tone: HeadingTone::Ink }.render())
+            }
+            // loom-allow: large display-priced figure; bound to a recurring
+            // 4-card pattern that doesn't fit any current Loom typography step.
+            p class="text-slate-900 font-semibold text-2xl mb-2" { (tier.price) }
+            (HelperText {
+                text: tier.helper,
+                size: HelperSize::Default,
+                tone: HeadingTone::Ink,
+            }.render())
+        }
+    }
+}
+
 /// Render `/pricing-transparency`.
 #[must_use]
-#[allow(clippy::too_many_lines)] // Single composed page; logically one view.
 pub fn render() -> Markup {
-    let body = html! {
+    let tiers_body = html! {
+        div class="space-y-12" { // loom-allow: vertical rhythm between the 4 tier cards
+            @for tier in TIERS {
+                (tier_card(tier))
+            }
+        }
+    };
+    let tiers_section = Section {
+        body: &tiers_body,
+        theme: SectionTheme::Light,
+        width: SectionWidth::Wide,
+        padding: SectionPadding::Default,
+    }
+    .render();
 
+    let promises_body = html! {
+        div class="reveal" {
+            div class="mb-6" {
+                (Heading {
+                    text: "What we don't do",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Section,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            ul class="space-y-3 text-slate-700 text-lg" { // loom-allow: list rhythm + body-size; ul-specific not in Loom
+                @for (lead, body) in PROMISES {
+                    li class="flex items-start gap-3" { // loom-allow: check-row pattern; future CheckRow primitive
+                        (PreEscaped(ICON_CHECK))
+                        span { strong { (lead) } (body) }
+                    }
+                }
+            }
+        }
+    };
+    let promises_section = Section {
+        body: &promises_body,
+        theme: SectionTheme::Muted,
+        width: SectionWidth::Wide,
+        padding: SectionPadding::Default,
+    }
+    .render();
+
+    let dark_body = html! {
+        div class="reveal" {
+            (Heading {
+                text: "If our rates don't fit, we'll tell you who does.",
+                level: HeadingLevel::H2,
+                variant: HeadingVariant::Section,
+                tone: HeadingTone::OnDark,
+            }.render())
+            div class="mt-6" {
+                (Lede {
+                    text: "We're not a fit for every budget. If you're a 1-2 person practice that needs $50/month tier IT support, you should hire someone other than us — and we'll happily refer. The intake conversation is a free filter that protects your time as much as ours.",
+                    tone: HeadingTone::OnDark,
+                }.render())
+            }
+        }
+    };
+    let dark_section = Section {
+        body: &dark_body,
+        theme: SectionTheme::Dark,
+        width: SectionWidth::Wide,
+        padding: SectionPadding::Loose,
+    }
+    .render();
+
+    let cta_button = Button {
+        label: "Schedule an intake call",
+        variant: ButtonVariant::Primary,
+        size: ButtonSize::Lg,
+        aria_label: None,
+        icon: None,
+        decoration: Decoration::SoftShadow,
+        button_type: ButtonType::Button,
+    }
+    .render();
+    let cta_body = html! {
+        div class="text-center reveal" {
+            div class="mb-6" {
+                (Heading {
+                    text: "Ready to talk numbers?",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Section,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            a href="/contact" { (cta_button) }
+        }
+    };
+    let cta_section = Section {
+        body: &cta_body,
+        theme: SectionTheme::Tinted,
+        width: SectionWidth::Article,
+        padding: SectionPadding::Loose,
+    }
+    .render();
+
+    let body = html! {
         (Hero {
             eyebrow: Some("Pricing"),
             headline_lead: "What it costs,",
@@ -25,106 +211,12 @@ pub fn render() -> Markup {
             cta: None,
             background: HeroBackground::GridLight,
         }.render())
-
-        section class="py-16 bg-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-4xl space-y-12" {
-
-                div class="reveal" {
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" { "Hourly engagements" }
-                    p class="text-slate-600 text-lg leading-relaxed mb-4" {
-                        "For ongoing work without a fixed scope: configuration changes, incident response, ad-hoc audits."
-                    }
-                    p class="text-slate-900 font-semibold text-2xl mb-2" { "$185 – $275 / hour" }
-                    p class="text-slate-500 text-sm" {
-                        "Senior engineer rate. Higher end for after-hours / weekend / on-call. Tracked in 15-minute increments. Invoiced monthly with itemized work log."
-                    }
-                }
-
-                div class="reveal" {
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" { "Retainer engagements" }
-                    p class="text-slate-600 text-lg leading-relaxed mb-4" {
-                        "Predictable monthly cost for ongoing operational support — patching, monitoring, periodic audit prep."
-                    }
-                    p class="text-slate-900 font-semibold text-2xl mb-2" { "$2,500 – $9,500 / month" }
-                    p class="text-slate-500 text-sm" {
-                        "Sized to staff count + service surface. Includes a fixed hour bucket; overflow at the standard hourly rate. 30-day cancellation; no long-term lock-in."
-                    }
-                }
-
-                div class="reveal" {
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" { "Fixed-scope projects" }
-                    p class="text-slate-600 text-lg leading-relaxed mb-4" {
-                        "For one-time deliverables with a clear shape: cloud migration, mail server self-hosting, security audit + remediation, vertical-specific compliance posture."
-                    }
-                    p class="text-slate-900 font-semibold text-2xl mb-2" { "$8,000 – $60,000 per project" }
-                    p class="text-slate-500 text-sm" {
-                        "Quoted after a paid discovery (typically $1,500 – $3,000, credited toward the project if you hire us). Discovery deliverable is yours regardless — you can take it elsewhere."
-                    }
-                }
-
-                div class="reveal" {
-                    h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-4" { "Discovery / scoping" }
-                    p class="text-slate-600 text-lg leading-relaxed mb-4" {
-                        "When the shape is unclear or you're shopping vendors. We produce a written assessment of your current state, top three risks, and a recommended next-step plan."
-                    }
-                    p class="text-slate-900 font-semibold text-2xl mb-2" { "$1,500 – $3,000, fixed" }
-                    p class="text-slate-500 text-sm" {
-                        "Two-week turnaround. Yours to keep regardless of next steps."
-                    }
-                }
-            }
-        }
-
-        section class="py-16 bg-slate-50" {
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" {
-                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" { "What we don't do" }
-                ul class="space-y-3 text-slate-700 text-lg" {
-                    li class="flex items-start gap-3" {
-                        (PreEscaped(ICON_CHECK))
-                        span { strong { "No \"call for pricing.\" " } "If we're a bad fit on price, you should know in 30 seconds, not three phone calls." }
-                    }
-                    li class="flex items-start gap-3" {
-                        (PreEscaped(ICON_CHECK))
-                        span { strong { "No bait-and-switch. " } "The proposal we send is what you pay; scope changes require a written change order with a new price." }
-                    }
-                    li class="flex items-start gap-3" {
-                        (PreEscaped(ICON_CHECK))
-                        span { strong { "No long-term lock-in. " } "Retainers are 30-day cancellable. We'd rather earn renewal than collect a termination fee." }
-                    }
-                    li class="flex items-start gap-3" {
-                        (PreEscaped(ICON_CHECK))
-                        span { strong { "No referral kickbacks. " } "When we recommend a third-party tool or vendor, we are not paid to do so. Recommendations are based on fit." }
-                    }
-                    li class="flex items-start gap-3" {
-                        (PreEscaped(ICON_CHECK))
-                        span { strong { "No license-arbitrage markup. " } "If we resell software (Microsoft 365, etc.) we pass through at cost." }
-                    }
-                }
-            }
-        }
-
-        section class="py-20 bg-slate-900 text-white" {
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" {
-                h2 class="font-display text-3xl md:text-4xl font-bold mb-6 leading-tight" {
-                    "If our rates don't fit, we'll tell you who does."
-                }
-                p class="text-slate-400 text-lg leading-relaxed" {
-                    "We're not a fit for every budget. If you're a 1-2 person practice that needs $50/month tier IT support, you should hire someone other than us — and we'll happily refer. The intake conversation is a free filter that protects your time as much as ours."
-                }
-            }
-        }
-
-        section class="py-20 bg-primary/5" {
-            div class="container mx-auto px-4 md:px-6 text-center max-w-3xl reveal" {
-                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 mb-6" { "Ready to talk numbers?" }
-                a href="/contact" {
-                    button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium bg-primary text-primary-foreground border border-primary-border min-h-10 px-8 py-6 rounded-xl text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all" {
-                        "Schedule an intake call"
-                    }
-                }
-            }
-        }
+        (tiers_section)
+        (promises_section)
+        (dark_section)
+        (cta_section)
     };
+
     page_with_description(
         "Pricing — PlausiDen",
         "/pricing-transparency",
@@ -167,5 +259,13 @@ mod tests {
                 "missing: {promise}"
             );
         }
+    }
+
+    /// Final CTA must point to /contact; otherwise the page can't
+    /// produce a conversion.
+    #[test]
+    fn final_cta_points_to_contact() {
+        let s = render().into_string();
+        assert!(s.contains(r#"href="/contact""#));
     }
 }
