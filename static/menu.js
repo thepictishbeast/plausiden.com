@@ -47,6 +47,20 @@
     nodes.forEach(function (n) { io.observe(n); });
   }
 
+  // Auto-open the <details> inside the section the URL hash points at,
+  // so /services#cyber-security lands the prospect at an already-
+  // expanded card instead of a closed summary they have to click. No-op
+  // when there's no hash, no matching section, or no <details> child.
+  function openDetailsForHash() {
+    if (!location.hash || location.hash.length < 2) return;
+    var id;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+    var section = document.getElementById(id);
+    if (!section) return;
+    var details = section.querySelector('details');
+    if (details && !details.open) details.open = true;
+  }
+
   function init() {
     // Mark <html> as JS-enabled so the animations.css `.js-on` rules
     // kick in. Without this, `.reveal` stays at its default
@@ -55,6 +69,8 @@
     document.documentElement.classList.add('js-on');
     initNavScroll();
     initReveal();
+    openDetailsForHash();
+    window.addEventListener('hashchange', openDetailsForHash);
     var btn = document.getElementById('mobile-menu-toggle');
     var menu = document.getElementById('mobile-menu');
     if (!btn || !menu) return;
