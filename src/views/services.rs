@@ -21,6 +21,10 @@ use super::layout::page;
 
 /// One service category as it appears on the services page.
 struct Service<'a> {
+    /// URL-fragment slug — the section is reachable at
+    /// `/services#<slug>`. Lowercase + dashes so it survives a paste
+    /// into a proposal email without quoting.
+    slug: &'a str,
     /// `loom_icons` constant rendered with the section-icon class.
     icon: &'a icons::Icon,
     /// Section title.
@@ -40,6 +44,7 @@ struct Service<'a> {
 
 const SERVICES: &[Service] = &[
     Service {
+        slug: "it-operations",
         icon: &icons::SERVER,
         title: "IT Operations",
         lede: "Complete infrastructure management designed to keep your business running smoothly. We handle monitoring, maintenance, patching, and support so your team can focus on the work that earns revenue.",
@@ -56,6 +61,7 @@ const SERVICES: &[Service] = &[
         sample: "A 15-person law firm handed off the IT function from a departing partner. We took over Microsoft 365 admin, rebuilt the patch cadence, wrote three runbooks (network down, M365 outage, ransomware), and migrated their backups to a tested off-site target. 90-day handoff to a half-time IT coordinator.",
     },
     Service {
+        slug: "disaster-recovery",
         icon: &icons::CIRCLE_CHECK,
         title: "Disaster Recovery",
         lede: "Recovery posture engineered to be tested, not just documented. We design backup + restore + failover so the procedure on paper matches the procedure under pressure — and we rehearse it on a cadence that catches drift before an incident does.",
@@ -73,6 +79,7 @@ const SERVICES: &[Service] = &[
         sample: "A specialty practice's annual DR rehearsal exposed that their last-known-good backup was 11 days stale and the documented restore procedure referenced an admin who'd left two years prior. We rebuilt the backup target, rewrote the restore runbook against the current stack, and ran a tested restore that completed inside the documented RTO.",
     },
     Service {
+        slug: "cyber-security",
         icon: &icons::SHIELD,
         title: "Cyber Security",
         lede: "Defense-in-depth strategies sized to your actual threat model. From compliance audits to real-time threat detection, we secure your digital perimeter without the enterprise theater you can't operate.",
@@ -90,6 +97,7 @@ const SERVICES: &[Service] = &[
         sample: "A regional medical practice failed a malpractice carrier renewal questionnaire on three controls. We documented the existing controls, remediated the three gaps (MFA on M365 admin, encrypted backups, written WISP), and produced an evidence packet the carrier accepted. Next renewal sailed through.",
     },
     Service {
+        slug: "artificial-intelligence",
         icon: &icons::BRAIN_CIRCUIT,
         title: "Artificial Intelligence",
         lede: "Practical AI integration that solves a real bottleneck — not AI for AI's sake. We help you identify where machine learning earns its keep, build it cleanly, and avoid the failure modes that have made \"AI rollout\" a synonym for \"vendor lock-in\" for many organizations.",
@@ -106,6 +114,7 @@ const SERVICES: &[Service] = &[
         sample: "A small-claims litigation practice was spending 6 hours per case extracting deadlines from court filings. We built a document-intake pipeline that flags every deadline mentioned in incoming PDFs, attorney reviews and confirms in 5 minutes per case. Throughput up 4x.",
     },
     Service {
+        slug: "industrial-automation",
         icon: &icons::SETTINGS,
         title: "Industrial Automation",
         lede: "Operational efficiency through automation systems designed for reliability and auditability. We bridge the gap between OT and IT — without exposing your control plane to the corporate network's threat model.",
@@ -122,6 +131,7 @@ const SERVICES: &[Service] = &[
         sample: "A 40-person specialty manufacturer was losing ~3 hours/day to a manual inventory reconciliation between the floor and ERP. We built a barcode-scan pipeline with offline tolerance + nightly reconciliation. Reconciliation now takes 15 minutes; gap-closing time fell from days to hours.",
     },
     Service {
+        slug: "software-development",
         icon: &icons::CODE,
         title: "Software Development",
         lede: "Custom software for anything you can describe. If a workflow is yours, a tool is yours, a system is yours, we build it the way it should be built — typed, tested, documented, deployable, and structured so the next engineer (yours or ours) can pick it up without us.",
@@ -140,6 +150,7 @@ const SERVICES: &[Service] = &[
         sample: "A nonprofit running case-management on a Google Sheets + email workflow needed real software but couldn't afford SaaS pricing tiers. We built a self-hosted case-management app on top of their existing infrastructure, documented for in-house handoff. Annual cost: $0 SaaS, ~3hr/mo maintenance.",
     },
     Service {
+        slug: "hardware-solutions",
         icon: &icons::CPU,
         title: "Hardware Solutions",
         lede: "Strategic procurement and lifecycle management of enterprise hardware. We make sure your team has the right tools — and that the procurement process doesn't become an operational liability.",
@@ -156,6 +167,7 @@ const SERVICES: &[Service] = &[
         sample: "A 25-person practice had 19 different laptop configurations, no asset register, and three machines running unsupported OS versions. We standardized on two refresh tiers, wrote a 3-year refresh budget, sourced competitively (saved 18% over their previous vendor), and inventoried everything that walked through the door.",
     },
     Service {
+        slug: "network-architecture",
         icon: &icons::GLOBE,
         title: "Network Architecture",
         lede: "Robust network architecture that ensures high availability + speed without enterprise-tier complexity. We design connectivity that scales with you and stays operable by your eventual in-house IT person.",
@@ -310,7 +322,7 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
     let icon_svg = svc.icon.render_with_class("w-8 h-8 text-primary"); // loom-allow: SVG class attribute, not Maud-emitted utility chain
     let number = format!("{index:02}");
     html! {
-        section class=(format!("py-10 md:py-14 {bg}")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background
+        section id=(svc.slug) class=(format!("py-10 md:py-14 {bg} scroll-mt-20")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background; scroll-mt-20 keeps the anchor target visible below the sticky nav
             div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: <details> container with scroll-reveal hook
                 details class="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 open:shadow-xl open:border-primary/30" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive; adds hover-lift + accent border on open
                     summary class="flex items-start gap-5 md:gap-7 p-7 md:p-9 cursor-pointer list-none" { // loom-allow: collapsible header row — bigger padding (p-7/p-9) + list-none to suppress disclosure marker
@@ -434,20 +446,52 @@ mod tests {
         }
     }
 
-    /// All seven services are present.
+    /// Every service in `SERVICES` renders. Iterating the slice
+    /// instead of a hard-coded list means future additions
+    /// (Disaster Recovery was the most recent) don't silently
+    /// regress this gate.
     #[test]
     fn all_services_listed() {
         let s = render().into_string();
-        for title in &[
-            "IT Operations",
-            "Cyber Security",
-            "Artificial Intelligence",
-            "Industrial Automation",
-            "Software Development",
-            "Hardware Solutions",
-            "Network Architecture",
-        ] {
-            assert!(s.contains(title), "missing service: {title}");
+        for svc in SERVICES {
+            assert!(s.contains(svc.title), "missing service: {}", svc.title);
+        }
+    }
+
+    /// Every service has a unique URL-safe slug and renders an
+    /// `id` so `/services#<slug>` deep-links work.
+    #[test]
+    fn every_service_has_unique_slug_and_anchor() {
+        let s = render().into_string();
+        let mut seen = std::collections::HashSet::new();
+        for svc in SERVICES {
+            assert!(
+                !svc.slug.is_empty(),
+                "{} has an empty slug",
+                svc.title
+            );
+            assert!(
+                svc.slug
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-'),
+                "{} slug {:?} is not URL-safe",
+                svc.title,
+                svc.slug
+            );
+            assert!(
+                seen.insert(svc.slug),
+                "duplicate slug {:?} (used by {})",
+                svc.slug,
+                svc.title
+            );
+            // The id attribute lands as id="<slug>" in the rendered
+            // section — Maud quotes attribute values.
+            let needle = format!(r#"id="{}""#, svc.slug);
+            assert!(
+                s.contains(&needle),
+                "rendered HTML missing anchor id for {}: expected {needle}",
+                svc.title
+            );
         }
     }
 
