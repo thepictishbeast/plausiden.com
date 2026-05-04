@@ -40,6 +40,28 @@ jobs:
           else
             git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
           fi
+            - name: Clone PlausiDen-CMS (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.CMS_PAT }}
+        run: |
+          if [ -d ../PlausiDen-CMS/.git ]; then
+            git -C ../PlausiDen-CMS remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git"
+            git -C ../PlausiDen-CMS fetch --depth 1 origin
+            git -C ../PlausiDen-CMS reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git" ../PlausiDen-CMS
+          fi
+      - name: Clone Mailroom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.MAILROOM_PAT }}
+        run: |
+          if [ -d ../Mailroom/.git ]; then
+            git -C ../Mailroom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git"
+            git -C ../Mailroom fetch --depth 1 origin
+            git -C ../Mailroom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git" ../Mailroom
+          fi
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -62,6 +84,28 @@ jobs:
           else
             git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
           fi
+            - name: Clone PlausiDen-CMS (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.CMS_PAT }}
+        run: |
+          if [ -d ../PlausiDen-CMS/.git ]; then
+            git -C ../PlausiDen-CMS remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git"
+            git -C ../PlausiDen-CMS fetch --depth 1 origin
+            git -C ../PlausiDen-CMS reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git" ../PlausiDen-CMS
+          fi
+      - name: Clone Mailroom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.MAILROOM_PAT }}
+        run: |
+          if [ -d ../Mailroom/.git ]; then
+            git -C ../Mailroom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git"
+            git -C ../Mailroom fetch --depth 1 origin
+            git -C ../Mailroom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git" ../Mailroom
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features
@@ -81,6 +125,28 @@ jobs:
             git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
           else
             git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
+            - name: Clone PlausiDen-CMS (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.CMS_PAT }}
+        run: |
+          if [ -d ../PlausiDen-CMS/.git ]; then
+            git -C ../PlausiDen-CMS remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git"
+            git -C ../PlausiDen-CMS fetch --depth 1 origin
+            git -C ../PlausiDen-CMS reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git" ../PlausiDen-CMS
+          fi
+      - name: Clone Mailroom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.MAILROOM_PAT }}
+        run: |
+          if [ -d ../Mailroom/.git ]; then
+            git -C ../Mailroom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git"
+            git -C ../Mailroom fetch --depth 1 origin
+            git -C ../Mailroom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git" ../Mailroom
           fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
@@ -103,6 +169,28 @@ jobs:
             git -C ../PlausiDen-Loom reset --hard FETCH_HEAD
           else
             git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
+          fi
+            - name: Clone PlausiDen-CMS (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.CMS_PAT }}
+        run: |
+          if [ -d ../PlausiDen-CMS/.git ]; then
+            git -C ../PlausiDen-CMS remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git"
+            git -C ../PlausiDen-CMS fetch --depth 1 origin
+            git -C ../PlausiDen-CMS reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-CMS.git" ../PlausiDen-CMS
+          fi
+      - name: Clone Mailroom (private path dep)
+        env:
+          GH_TOKEN: ${{ secrets.MAILROOM_PAT }}
+        run: |
+          if [ -d ../Mailroom/.git ]; then
+            git -C ../Mailroom remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git"
+            git -C ../Mailroom fetch --depth 1 origin
+            git -C ../Mailroom reset --hard FETCH_HEAD
+          else
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/Mailroom.git" ../Mailroom
           fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
