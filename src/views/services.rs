@@ -322,7 +322,7 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
     let icon_svg = svc.icon.render_with_class("w-8 h-8 text-primary"); // loom-allow: SVG class attribute, not Maud-emitted utility chain
     let number = format!("{index:02}");
     html! {
-        section id=(svc.slug) class=(format!("py-10 md:py-14 {bg} scroll-mt-20")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background; scroll-mt-20 keeps the anchor target visible below the sticky nav
+        section id=(svc.slug) class=(format!("py-10 md:py-14 {bg}")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background. Anchor-link offset for the sticky header lives in static/style.css (section[id] { scroll-margin-top })
             div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: <details> container with scroll-reveal hook
                 details class="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 open:shadow-xl open:border-primary/30" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive; adds hover-lift + accent border on open
                     summary class="flex items-start gap-5 md:gap-7 p-7 md:p-9 cursor-pointer list-none" { // loom-allow: collapsible header row — bigger padding (p-7/p-9) + list-none to suppress disclosure marker

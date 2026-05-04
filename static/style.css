@@ -44,6 +44,11 @@ a:hover, a:focus { text-decoration: underline; text-underline-offset: 3px; }
 
 img { max-width: 100%; display: block; }
 
+/* Anchor-link offset so /page#section lands the section below the
+   sticky .site-header (~3.5rem) instead of behind it. Applies to
+   every <section id="…">; cheap and global. */
+section[id] { scroll-margin-top: 4rem; }
+
 /* ---------- header ---------- */
 
 .site-header {
