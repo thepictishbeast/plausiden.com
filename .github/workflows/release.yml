@@ -43,7 +43,7 @@ jobs:
           else
             git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/thepictishbeast/PlausiDen-Loom.git" ../PlausiDen-Loom
           fi
-            - name: Clone PlausiDen-CMS (private path dep)
+      - name: Clone PlausiDen-CMS (private path dep)
         env:
           GH_TOKEN: ${{ secrets.CMS_PAT }}
         run: |
