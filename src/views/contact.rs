@@ -4,9 +4,9 @@
 //! labels, and a proper `action="/contact" method="post"`.
 //!
 //! BUG ASSUMPTION: Form field `name` attributes must match
-//! [`crate::inquiry::InquiryForm`] exactly — `name`, `email`, `phone`,
-//! `company`, `service`, `message`. Renaming a field here without
-//! updating the handler breaks submissions silently.
+//! `InquiryForm` (in `crate::inquiry`) exactly — `name`, `email`,
+//! `phone`, `company`, `service`, `message`. Renaming a field here
+//! without updating the handler breaks submissions silently.
 //!
 //! SECURITY: Input field lengths are enforced server-side; client-side
 //! `maxlength` attributes are convenience-only (they match the server

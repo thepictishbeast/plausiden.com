@@ -49,7 +49,7 @@ pub struct Post {
 /// SECURITY: This slice is the *only* surface that wires post metadata
 /// to its renderer. A typo'd `render` pointer would fail the compile;
 /// a typo'd slug would either 404 (caller-side) or collide (caught by
-/// [`tests::slug_uniqueness`]).
+/// the `slug_uniqueness` test in this module).
 pub const POSTS: &[Post] = &[
     Post {
         slug: "plausible-deniability",
