@@ -57,6 +57,12 @@ loom-tokens = { path = "../PlausiDen-Loom/loom-tokens", version = "0.1" }
 # `${PLAUSIDEN_CMS_ROOT:-./cms-store}` via the FsStorage adapter.
 cms-core = { path = "../PlausiDen-CMS/cms-core" }
 
+# Branded HTML/plain transactional email rendering. Path-dep so the
+# in-progress prebuilt builder additions in Mailroom flow into
+# plausiden-site without a publish step. CI uses git-dep instead;
+# see #52 in the task list (same pattern as Loom).
+mail-templates = { path = "../Mailroom/mail-templates", version = "0.1" }
+
 # Leave stubbed; activate after landlock has baked:
 # seccompiler = "0.5"
 
