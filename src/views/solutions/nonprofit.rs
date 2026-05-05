@@ -22,7 +22,7 @@ pub fn render() -> Markup {
     let svg_audit = icons::CLIPBOARD_CHECK.render();
     let svg_heart = icons::HEART.render();
 
-    render_vertical_landing(VerticalLanding {
+    render_vertical_landing(&VerticalLanding {
         title: "Nonprofit IT — PlausiDen",
         path: "/solutions/nonprofit",
         description: DESCRIPTION,

@@ -29,7 +29,7 @@ pub fn render() -> Markup {
     let svg_users = icons::USERS.render();
     let svg_shield = icons::SHIELD.render();
 
-    render_vertical_landing(VerticalLanding {
+    render_vertical_landing(&VerticalLanding {
         title: "Legal IT — PlausiDen",
         path: "/solutions/legal",
         description: DESCRIPTION,

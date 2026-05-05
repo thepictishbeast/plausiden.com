@@ -30,7 +30,7 @@ pub fn render() -> Markup {
     let svg_globe = icons::GLOBE.render();
     let svg_audit = icons::CLIPBOARD_CHECK.render();
 
-    render_vertical_landing(VerticalLanding {
+    render_vertical_landing(&VerticalLanding {
         title: "Journalism IT — PlausiDen",
         path: "/solutions/journalism",
         description: DESCRIPTION,

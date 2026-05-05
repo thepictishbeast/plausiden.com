@@ -23,7 +23,7 @@ pub fn render() -> Markup {
     let svg_shield = icons::SHIELD.render();
     let svg_audit = icons::CLIPBOARD_CHECK.render();
 
-    render_vertical_landing(VerticalLanding {
+    render_vertical_landing(&VerticalLanding {
         title: "Financial Advisor IT — PlausiDen",
         path: "/solutions/financial-advisors",
         description: DESCRIPTION,

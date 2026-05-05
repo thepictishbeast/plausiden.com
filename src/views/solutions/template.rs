@@ -116,7 +116,7 @@ pub struct VerticalLanding<'a> {
 /// (capability-grid wrapper, dark posture band) — both isolated
 /// here, both annotated, both reviewable as one piece.
 #[must_use]
-pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
+pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
     // Hero CTA pair — primary uses Loom Button (Submit-shaped here
     // is a misnomer; the button sits inside an <a>, so it never
     // submits a form. ButtonType::Button is the right choice).
