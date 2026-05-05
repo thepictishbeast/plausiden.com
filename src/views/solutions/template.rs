@@ -32,6 +32,7 @@ use maud::{Markup, PreEscaped, html};
 use crate::views::layout::page_with_description;
 
 /// One capability tile in the "What we cover" grid.
+#[derive(Debug)]
 pub struct Capability<'a> {
     /// Icon glyph (one of the `loom_icons::*` constants, pre-rendered).
     pub icon_svg: &'a str,
@@ -42,6 +43,7 @@ pub struct Capability<'a> {
 }
 
 /// One step in the "How an engagement starts" ordered list.
+#[derive(Debug)]
 pub struct EngagementStep<'a> {
     /// Step title (e.g. "Confidentiality review (no commitment)").
     pub title: &'a str,
@@ -54,6 +56,7 @@ pub struct EngagementStep<'a> {
 /// Fields map 1:1 to the six structural bands in the rendered
 /// page; supplying every field is required so a vertical can't
 /// accidentally ship a half-empty page.
+#[derive(Debug)]
 pub struct VerticalLanding<'a> {
     /// `<title>` tag and document name.
     pub title: &'a str,
