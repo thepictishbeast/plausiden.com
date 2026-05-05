@@ -88,8 +88,7 @@ impl CmsState {
     #[must_use]
     pub fn from_env() -> Self {
         let root = std::env::var("PLAUSIDEN_CMS_ROOT")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from("./cms-store"));
+            .map_or_else(|_| PathBuf::from("./cms-store"), PathBuf::from);
         Self::from_root(&root)
     }
 

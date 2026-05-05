@@ -202,7 +202,7 @@ fn render_card_grid(b: &Block) -> Markup {
             @for i in 0..n {
                 @let title = &titles[i];
                 @let body = &bodies[i];
-                @let href = hrefs.get(i).map(String::as_str).unwrap_or("");
+                @let href = hrefs.get(i).map_or("", String::as_str);
                 @if href.is_empty() {
                     (card_body_for(title, body))
                 } @else {
