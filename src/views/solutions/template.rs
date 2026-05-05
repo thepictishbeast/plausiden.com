@@ -329,7 +329,10 @@ pub fn render_vertical_landing(cfg: VerticalLanding<'_>) -> Markup {
         (cta_section)
     };
 
-    let _ = BodyText { text: "", tone: HeadingTone::Ink }; // silence unused-import warning if BodyText isn't used elsewhere
+    let _ = BodyText {
+        text: "",
+        tone: HeadingTone::Ink,
+    }; // silence unused-import warning if BodyText isn't used elsewhere
     page_with_description(cfg.title, cfg.path, cfg.description, body)
 }
 

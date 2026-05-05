@@ -15,8 +15,8 @@
 //! `PreEscaped` here.
 
 use mail_templates::{
-    prebuilt::{feedback_received, inquiry_received, magic_link, FeedbackSection},
     EmailDocument,
+    prebuilt::{FeedbackSection, feedback_received, inquiry_received, magic_link},
 };
 
 /// HTML body for the "sign in to admin" magic-link email.

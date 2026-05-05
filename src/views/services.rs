@@ -15,7 +15,7 @@ use loom_components::{
     TextLinkSize, TextLinkVariant,
 };
 use loom_icons as icons;
-use maud::{html, Markup, PreEscaped};
+use maud::{Markup, PreEscaped, html};
 
 use super::layout::page;
 
@@ -465,11 +465,7 @@ mod tests {
         let s = render().into_string();
         let mut seen = std::collections::HashSet::new();
         for svc in SERVICES {
-            assert!(
-                !svc.slug.is_empty(),
-                "{} has an empty slug",
-                svc.title
-            );
+            assert!(!svc.slug.is_empty(), "{} has an empty slug", svc.title);
             assert!(
                 svc.slug
                     .chars()

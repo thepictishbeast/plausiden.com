@@ -16,11 +16,11 @@
 //! FOSS-absorption protocol).
 
 use cms_core::page::{Block, BlockKind, FieldValue, Page, Section, SectionTheme};
+use loom_components::card::{Card, CardElevation, CardHover, CardPadding};
 use loom_components::{
     Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section as LoomSection,
     SectionPadding, SectionTheme as LoomSectionTheme, SectionWidth,
 };
-use loom_components::card::{Card, CardElevation, CardHover, CardPadding};
 use maud::{Markup, html};
 
 use super::layout::page;
@@ -381,10 +381,7 @@ mod tests {
             theme: SectionTheme::Muted,
             blocks: vec![block(
                 BlockKind::PullQuote,
-                &[
-                    ("quote", "Trust nothing."),
-                    ("attribution", "AVP-2"),
-                ],
+                &[("quote", "Trust nothing."), ("attribution", "AVP-2")],
             )],
         }]);
         let s = render(&p, "/docs/test").into_string();
@@ -522,9 +519,7 @@ mod tests {
         );
         fields.insert(
             "card_bodies".into(),
-            FieldValue::List(vec![
-                FieldValue::Text("Only one body.".into()),
-            ]),
+            FieldValue::List(vec![FieldValue::Text("Only one body.".into())]),
         );
         let p = page_with_blocks(vec![Section {
             anchor: None,
@@ -578,7 +573,10 @@ mod tests {
             )],
         }]);
         let s = render(&p, "/docs/test").into_string();
-        assert!(!s.contains("unsplash"), "external src must not appear in rendered output");
+        assert!(
+            !s.contains("unsplash"),
+            "external src must not appear in rendered output"
+        );
         assert!(s.contains("missing or external"));
     }
 
@@ -590,7 +588,10 @@ mod tests {
             theme: SectionTheme::Light,
             blocks: vec![block(
                 BlockKind::HeadingBody,
-                &[("heading", "<script>alert(1)</script>"), ("body", "<img onerror=x>")],
+                &[
+                    ("heading", "<script>alert(1)</script>"),
+                    ("body", "<img onerror=x>"),
+                ],
             )],
         }]);
         let s = render(&p, "/docs/test").into_string();

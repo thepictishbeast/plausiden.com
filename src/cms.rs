@@ -122,7 +122,10 @@ impl CmsState {
 
 /// Handle `GET /docs/{slug}`. Returns the rendered Maud body on a
 /// hit, the shared 404 view (with `404` status) on a miss.
-pub async fn serve_doc(State(state): State<CmsState>, Path(slug): Path<String>) -> impl IntoResponse {
+pub async fn serve_doc(
+    State(state): State<CmsState>,
+    Path(slug): Path<String>,
+) -> impl IntoResponse {
     // SECURITY: validate before touching the filesystem.
     if Page::validate_slug(&slug).is_err() {
         return (StatusCode::NOT_FOUND, not_found::render()).into_response();
@@ -182,7 +185,9 @@ mod tests {
     #[test]
     fn published_page_renders_via_storage() {
         let (_dir, storage) = fixture_storage();
-        storage.write_page(SITE_SLUG, &published_page("why-pps")).unwrap();
+        storage
+            .write_page(SITE_SLUG, &published_page("why-pps"))
+            .unwrap();
         let p = storage.read_page(SITE_SLUG, "why-pps").unwrap();
         assert!(matches!(p.status, PageStatus::Published));
     }

@@ -8,7 +8,7 @@
 use loom_icons as icons;
 use maud::Markup;
 
-use super::template::{render_vertical_landing, Capability, VerticalLanding};
+use super::template::{Capability, VerticalLanding, render_vertical_landing};
 
 const DESCRIPTION: &str = "IT infrastructure for small nonprofits. Donor data hardened against breach, beneficiary confidentiality preserved, audit trails ready for grant reviews + state charity examiners. Sized to a 5–50 person mission, not an enterprise.";
 

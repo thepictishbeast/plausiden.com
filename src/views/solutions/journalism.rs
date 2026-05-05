@@ -16,7 +16,7 @@
 use loom_icons as icons;
 use maud::Markup;
 
-use super::template::{render_vertical_landing, Capability, EngagementStep, VerticalLanding};
+use super::template::{Capability, EngagementStep, VerticalLanding, render_vertical_landing};
 
 const DESCRIPTION: &str = "IT infrastructure designed around source confidentiality. Encrypted source channels, threat-modeled endpoints, Tor onion publication, subpoena-ready records discipline. Built for newsrooms whose adversaries include state actors and well-resourced corporate counsel.";
 

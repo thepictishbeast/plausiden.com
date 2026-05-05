@@ -16,7 +16,7 @@
 use loom_icons as icons;
 use maud::Markup;
 
-use super::template::{render_vertical_landing, Capability, EngagementStep, VerticalLanding};
+use super::template::{Capability, EngagementStep, VerticalLanding, render_vertical_landing};
 
 const DESCRIPTION: &str = "IT infrastructure designed around a law firm's duty of confidentiality. Self-hosted email, matter-aware document handling, audit-ready compliance posture. We design pipelines where the privacy guarantee is provable, not promised.";
 

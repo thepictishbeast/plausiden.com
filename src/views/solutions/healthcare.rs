@@ -17,7 +17,7 @@
 use loom_icons as icons;
 use maud::Markup;
 
-use super::template::{render_vertical_landing, Capability, EngagementStep, VerticalLanding};
+use super::template::{Capability, EngagementStep, VerticalLanding, render_vertical_landing};
 
 const DESCRIPTION: &str = "IT infrastructure designed around HIPAA's Security Rule for small healthcare practices. Self-hosted email, audit-ready ePHI handling, BAA-ready posture. Built for practices that take patient confidentiality as the floor, not the ceiling.";
 

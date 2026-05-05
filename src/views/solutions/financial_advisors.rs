@@ -10,7 +10,7 @@
 use loom_icons as icons;
 use maud::Markup;
 
-use super::template::{render_vertical_landing, Capability, VerticalLanding};
+use super::template::{Capability, VerticalLanding, render_vertical_landing};
 
 const DESCRIPTION: &str = "IT infrastructure for small RIAs and wealth-management practices. SEC custody-rule-aware, SOC 2-friendly, BCP-prepared. We design the technical posture custodians and clients are starting to ask about — before they ask.";
 

@@ -4,10 +4,10 @@
 //! tighter prose container. No CMS, no markdown engine; posts are Maud
 //! functions registered in [`crate::views::posts`].
 
-use maud::{html, Markup};
+use maud::{Markup, html};
 
-use super::layout::{page, page_with_meta, PageMeta};
-use super::posts::{by_slug, Post, POSTS};
+use super::layout::{PageMeta, page, page_with_meta};
+use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
 use loom_components::{
     Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
