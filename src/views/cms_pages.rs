@@ -282,7 +282,7 @@ fn render_placeholder(b: &Block) -> Markup {
     }
 }
 
-fn map_theme(t: SectionTheme) -> LoomSectionTheme {
+const fn map_theme(t: SectionTheme) -> LoomSectionTheme {
     match t {
         SectionTheme::Light => LoomSectionTheme::Light,
         SectionTheme::Muted => LoomSectionTheme::Muted,

@@ -353,6 +353,7 @@ fn engagement_step_item(n: usize, title: &str, description: &str) -> Markup {
 }
 
 /// Check-mark line used inside the dark posture band.
+#[must_use]
 pub fn check_line(text: &str) -> Markup {
     html! {
         // loom-allow: posture-band check row; bound to dark-band slate-300 text colour.
