@@ -25,7 +25,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
-thiserror = "2"
 # Platform-conditional in-binary sandboxing. Layered on top of the
 # systemd hardening unit (belt + suspenders).
 [target.'cfg(target_os = "linux")'.dependencies]
