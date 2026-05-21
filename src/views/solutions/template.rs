@@ -22,7 +22,7 @@
 use loom_components::card::FeatureCard;
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    BodyText, Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
+    BodyText, Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel,
     HeadingTone, HeadingVariant, HelperSize, HelperText, Lede, Section, SectionPadding,
     SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
@@ -128,6 +128,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let secondary_cta_btn = Button {
@@ -138,6 +139,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
         icon: None,
         decoration: Decoration::None,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let hero_cta = html! {
@@ -270,6 +272,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let mailto_link = TextLink {

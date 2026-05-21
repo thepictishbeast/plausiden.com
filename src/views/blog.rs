@@ -10,7 +10,7 @@ use super::layout::{PageMeta, page, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
 use loom_components::{
-    Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
     TextLink, TextLinkSize, TextLinkVariant,
 };
 
@@ -47,7 +47,7 @@ pub fn index() -> Markup {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-slate-50" { // loom-allow: grid-fleck hero shell — pt-32/44 cadence + fleck overlay don't fit Loom Section
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — decorative pattern, no Loom primitive
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl with z-10 fleck stacking
-                div class="mb-6" { (Badge { label: "Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
+                div class="mb-6" { (Badge { label: "Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-4" {
                     (Heading {
                         text: "Notes from the build floor.",
@@ -106,7 +106,7 @@ pub fn post(slug: &str) -> Option<Markup> {
                     size: TextLinkSize::Small,
                 }.render())
                 div class="mt-6" {
-                    (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
+                    (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
                     div class="mt-4 mb-4" { // loom-allow: spacing wrapper between Badge eyebrow and Heading
                         (Heading {
                             text: post.title,
@@ -164,7 +164,7 @@ fn post_card(post: &Post) -> Markup {
     let href = format!("/blog/{}", post.slug);
     let body = html! {
         div class="flex items-center gap-3 text-xs uppercase tracking-wider font-semibold text-slate-500" { // loom-allow: card meta-row chrome — eyebrow + dot-separated dates with stronger letter-spacing for "label" feel
-            (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
+            (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
             span class="font-medium tracking-normal normal-case text-slate-500" { (post.published) } // loom-allow: nested meta date — overrides parent uppercase chrome
             span class="text-slate-300" { "·" } // loom-allow: meta dot separator
             span class="font-medium tracking-normal normal-case text-slate-500" { (post.read_time) } // loom-allow: nested read-time — overrides parent uppercase chrome

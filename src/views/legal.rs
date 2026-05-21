@@ -8,7 +8,7 @@
 //! 200 and surface the "under review" disclaimer.
 
 use loom_components::{
-    Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
 };
 use maud::{Markup, html};
 
@@ -20,7 +20,7 @@ fn legal_shell(title: &str, current: &str, heading: &str, subheading: &str) -> M
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — same pattern as blog hero
             div class="container relative mx-auto px-4 md:px-6 z-10" { // loom-allow: hero container with z-10 fleck stacking
                 div class="max-w-3xl" { // loom-allow: hero content max-w-3xl
-                    div class="mb-6" { (Badge { label: "Legal", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
+                    div class="mb-6" { (Badge { label: "Legal", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                     div class="mb-4" {
                         (Heading {
                             text: heading,

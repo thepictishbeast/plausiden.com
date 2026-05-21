@@ -8,7 +8,7 @@
 //! drill can copy it.
 
 use loom_components::{
-    Badge, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonVariant, Decoration,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration,
     Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
     SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
@@ -73,7 +73,7 @@ pub fn render() -> Markup {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: custom hero shell — pt-32/44 cadence below Loom Section padding scale
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: hero container max-w-3xl with z-10 stacking
                 // loom-allow: eyebrow pill — recurring badge pattern; future Badge::Eyebrow primitive.
-                div class="mb-6" { (Badge { label: "Following Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
+                div class="mb-6" { (Badge { label: "Following Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-4" {
                     (Heading {
                         text: "Subscribe.",
@@ -201,6 +201,7 @@ pub fn render() -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let cta_body = html! {

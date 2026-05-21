@@ -10,7 +10,7 @@
 
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
     HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth, TextLink,
     TextLinkSize, TextLinkVariant,
 };
@@ -259,6 +259,7 @@ fn final_cta() -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let mailto_link = TextLink {

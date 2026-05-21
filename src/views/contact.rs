@@ -12,9 +12,9 @@
 //! `maxlength` attributes are convenience-only (they match the server
 //! limits to keep UX feedback honest).
 
-use loom_components::form::{InputType, Select, SelectOption, TextArea, TextInput};
+use loom_components::form::{FormDensity, FormStyle, InputType, Select, SelectOption, TextArea, TextInput};
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
     HeadingVariant, Lede,
 };
 use loom_icons as icons;
@@ -141,6 +141,8 @@ pub fn render() -> Markup {
                                             placeholder: Some("John Doe"),
                                             max_length: Some(100),
                                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                                         }.render())
                                         (TextInput {
                                             id: "contact-email",
@@ -150,6 +152,8 @@ pub fn render() -> Markup {
                                             placeholder: Some("john@company.com"),
                                             max_length: Some(200),
                                             required: true,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                                         }.render())
                                     }
 
@@ -162,6 +166,8 @@ pub fn render() -> Markup {
                                             placeholder: Some("(555) 000-0000"),
                                             max_length: Some(50),
                                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                                         }.render())
                                         (TextInput {
                                             id: "contact-company",
@@ -171,6 +177,8 @@ pub fn render() -> Markup {
                                             placeholder: Some("Your Business LLC"),
                                             max_length: Some(200),
                                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                                         }.render())
                                     }
 
@@ -179,6 +187,8 @@ pub fn render() -> Markup {
                                         name: "service",
                                         label: "Service Interest",
                                         options: SERVICE_OPTIONS,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                                     }.render())
 
                                     (TextArea {
@@ -188,6 +198,8 @@ pub fn render() -> Markup {
                                         placeholder: Some("Tell us about your project or requirements..."),
                                         max_length: Some(5000),
                                         required: true,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                                     }.render())
 
                                     div class="w-full" { // loom-allow: full-width wrapper around Loom Button (Button has no Block variant yet)
@@ -199,6 +211,7 @@ pub fn render() -> Markup {
                                             icon: None,
                                             decoration: Decoration::SoftShadow,
                                             button_type: ButtonType::Submit,
+        shape: ButtonShape::default(),
                                         }.render())
                                     }
                                 }

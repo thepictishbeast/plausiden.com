@@ -3,9 +3,9 @@
 //! Tailwind/shadcn stylesheet at `/static/index-CWVVhmVm.css`.
 
 use loom_components::card::{FeatureCard, FeatureCardStyle};
-use loom_components::{Badge, BadgeSize, BadgeTone};
+use loom_components::{Badge, BadgeShape, BadgeSize, BadgeTone};
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
     HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
 };
 use loom_icons as icons;
@@ -41,6 +41,7 @@ fn final_cta_band() -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let body = html! {
@@ -95,7 +96,7 @@ pub fn render() -> Markup {
             div class="container relative mx-auto px-4 md:px-6 z-10" { // loom-allow: hero container with fleck stacking
                 div class="max-w-3xl" { // loom-allow: hero content max-w-3xl
                     div {
-                        div class="mb-6 animate-fade-in-up" { (Badge { label: "Professional IT Solutions", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) } // loom-allow: animation hook on Badge wrapper
+                        div class="mb-6 animate-fade-in-up" { (Badge { label: "Professional IT Solutions", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) } // loom-allow: animation hook on Badge wrapper
                         h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" { // loom-allow: home hero h1 — text-5xl/6xl/7xl one step bigger than Loom Heading{Display} (4xl/5xl/6xl); the front door warrants the upsize
                             "Comprehensive IT for the " span class="text-primary" { "Modern Enterprise" } // loom-allow: two-tone headline accent — Loom Heading takes a single &str
                         }

@@ -5,7 +5,7 @@
 use loom_components::card::FeatureCard;
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
     HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
 };
 use maud::{Markup, html};
@@ -185,6 +185,7 @@ pub fn render() -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
     let cta_body = html! {

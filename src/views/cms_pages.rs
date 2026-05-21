@@ -16,7 +16,7 @@
 //! FOSS-absorption protocol).
 
 use cms_core::page::{Block, BlockKind, FieldValue, Page, Section, SectionTheme};
-use loom_components::card::{Card, CardElevation, CardHover, CardPadding};
+use loom_components::card::{Card, CardElevation, CardHover, CardPadding, CardShape};
 use loom_components::{
     Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section as LoomSection,
     SectionPadding, SectionTheme as LoomSectionTheme, SectionWidth,
@@ -232,6 +232,7 @@ fn card_body_for(title: &str, body: &str) -> Markup {
         elevation: CardElevation::Soft,
         padding: CardPadding::Comfortable,
         hover: CardHover::Lift,
+        shape: CardShape::default(),
     }
     .render()
 }

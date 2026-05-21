@@ -7,7 +7,7 @@
 //! written sign-off.
 
 use loom_components::{
-    Badge, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonVariant, Decoration,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration,
     Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
 };
 use maud::{Markup, html};
@@ -67,13 +67,14 @@ pub fn render() -> Markup {
         icon: None,
         decoration: Decoration::SoftShadow,
         button_type: ButtonType::Button,
+        shape: ButtonShape::default(),
     }
     .render();
 
     let body = html! {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: hero band — pt-32/44 + pb-16/24 cadence below Loom Section padding scale
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl
-                div class="mb-6" { (Badge { label: "Selected work", tone: BadgeTone::Primary, size: BadgeSize::Md }.render()) }
+                div class="mb-6" { (Badge { label: "Selected work", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-6" {
                     (Heading {
                         text: "Case studies",
@@ -93,7 +94,7 @@ pub fn render() -> Markup {
             section class=(if i % 2 == 0 { "py-16 bg-white" } else { "py-16 bg-slate-50" }) { // loom-allow: alternating zebra band — branchy class needs raw form
                 div class="container mx-auto px-4 md:px-6 max-w-3xl" { // loom-allow: case-study container max-w-3xl
                     div class="mb-4" {
-                        (Badge { label: c.industry, tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
+                        (Badge { label: c.industry, tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
                     }
                     div class="mb-6" {
                         (Heading {

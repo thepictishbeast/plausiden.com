@@ -22,9 +22,9 @@
 //! prose, Button(Submit) for the submit CTA.
 
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
+    Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
     HeadingVariant, HelperSize, HelperText, Hero, HeroBackground, InputType, Section,
-    SectionPadding, SectionTheme, SectionWidth, Select, SelectOption, TextArea, TextInput,
+    FormDensity, FormStyle, SectionPadding, SectionTheme, SectionWidth, Select, SelectOption, TextArea, TextInput,
 };
 use maud::{Markup, html};
 
@@ -79,6 +79,8 @@ pub fn render() -> Markup {
                             placeholder: Some("Your name"),
                             max_length: Some(100),
                             required: true,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextInput {
                             id: "fb-company",
@@ -88,6 +90,8 @@ pub fn render() -> Markup {
                             placeholder: Some("Optional"),
                             max_length: Some(200),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextInput {
                             id: "fb-email",
@@ -97,6 +101,8 @@ pub fn render() -> Markup {
                             placeholder: Some("Optional"),
                             max_length: Some(200),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                     }
 
@@ -120,6 +126,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextArea {
                             id: "fb-didnt",
@@ -128,6 +136,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                     }
 
@@ -149,6 +159,8 @@ pub fn render() -> Markup {
                             name: "consent",
                             label: "3. How can we attribute you?",
                             options: ATTRIBUTION_OPTIONS,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextArea {
                             id: "fb-alt",
@@ -157,6 +169,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextArea {
                             id: "fb-why",
@@ -165,6 +179,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextArea {
                             id: "fb-changed",
@@ -173,6 +189,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextArea {
                             id: "fb-rec",
@@ -181,6 +199,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                         (TextArea {
                             id: "fb-extra",
@@ -189,6 +209,8 @@ pub fn render() -> Markup {
                             placeholder: None,
                             max_length: Some(2000),
                             required: false,
+        density: FormDensity::default(),
+        style: FormStyle::default(),
                         }.render())
                     }
 
@@ -201,6 +223,7 @@ pub fn render() -> Markup {
                     icon: None,
                     decoration: Decoration::SoftShadow,
                     button_type: ButtonType::Submit,
+        shape: ButtonShape::default(),
                 }.render())
                 div class="mt-3" {
                     (HelperText {

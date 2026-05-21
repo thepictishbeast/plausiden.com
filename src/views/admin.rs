@@ -7,7 +7,7 @@
 
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Badge, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, TextLink,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, TextLink,
     TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
@@ -29,7 +29,7 @@ pub fn login(error: Option<&str>) -> Markup {
                 div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8" { // loom-allow: inset login card chrome — rounded-2xl + shadow-sm
                     div class="mb-6 text-center" { // loom-allow: centred login-card header
                         div class="mb-4" {
-                            (Badge { label: "Admin", tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
+                            (Badge { label: "Admin", tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
                         }
                         div class="mb-2" {
                             (Heading {
@@ -120,7 +120,7 @@ pub fn feedback_dashboard(email: &str, rows: &[FeedbackRow]) -> Markup {
                 div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3" { // loom-allow: header row — title left, exports right; responsive flex
                     div {
                         div class="mb-3" {
-                            (Badge { label: "Admin · Feedback", tone: BadgeTone::Primary, size: BadgeSize::Sm }.render())
+                            (Badge { label: "Admin · Feedback", tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
                         }
                         (Heading {
                             text: "Submitted feedback",

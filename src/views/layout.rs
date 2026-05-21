@@ -2,9 +2,9 @@
 //! nav / footer structure so visual parity is preserved across server-rendered
 //! pages.
 
-use loom_components::ButtonVariant;
-use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink};
-use loom_components::nav::{Nav, NavCta, NavLink};
+use loom_components::{ButtonShape, ButtonVariant};
+use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink, FooterStyle};
+use loom_components::nav::{Nav, NavCta, NavLink, NavStyle};
 use loom_icons as icons;
 use maud::{DOCTYPE, Markup, PreEscaped, html};
 
@@ -174,6 +174,7 @@ fn nav(current: &str) -> Markup {
         links: NAV_LINKS,
         ctas: NAV_CTAS,
         current,
+        style: NavStyle::default(),
     }
     .render()
 }
@@ -315,6 +316,7 @@ fn footer() -> Markup {
         columns: FOOTER_COLUMNS,
         copyright: "© PlausiDen LLC. All rights reserved.",
         legal_links: FOOTER_LEGAL,
+        style: FooterStyle::default(),
     }
     .render()
 }
