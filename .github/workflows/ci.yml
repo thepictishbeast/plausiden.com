@@ -18,7 +18,7 @@ jobs:
     name: rustfmt
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
@@ -28,7 +28,7 @@ jobs:
     name: clippy
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Clone PlausiDen-Loom (private path dep)
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}
@@ -72,7 +72,7 @@ jobs:
     name: test
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Clone PlausiDen-Loom (private path dep)
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}
@@ -118,7 +118,7 @@ jobs:
     name: cargo-audit
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Clone PlausiDen-Loom (private path dep)
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}
@@ -162,7 +162,7 @@ jobs:
     name: cargo-deny
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Clone PlausiDen-Loom (private path dep)
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}

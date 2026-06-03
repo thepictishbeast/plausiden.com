@@ -31,7 +31,7 @@ jobs:
     name: build (musl, static)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Clone PlausiDen-Loom (private path dep)
         env:
           GH_TOKEN: ${{ secrets.LOOM_PAT }}
