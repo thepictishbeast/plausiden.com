@@ -70,7 +70,7 @@ jobs:
           git-cliff --output CHANGELOG.md
 
       - name: Open PR with the updated CHANGELOG
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "docs(changelog): update for ${{ github.ref_name }}"
           title: "Changelog rollup for ${{ github.ref_name }}"
