@@ -230,6 +230,54 @@ fn is_likely_spam(f: &InquiryForm) -> bool {
         score += 1;
     }
 
+    // SEO / "we'll rank your site" outreach — the dominant contact-form spam
+    // category. Multi-word phrases only, so we never trip on a legit word.
+    for needle in [
+        "seo services",
+        "seo expert",
+        "seo audit",
+        "seo agency",
+        "search engine optimization",
+        "rank your",
+        "ranking on google",
+        "first page of google",
+        "backlink",
+        "increase your traffic",
+        "increase traffic",
+        "digital marketing",
+        "guaranteed results",
+        "we noticed your website",
+        "improve your website ranking",
+        "domain authority",
+    ] {
+        if msg.contains(needle) {
+            score += 1;
+        }
+    }
+    // Crypto / investment bait.
+    if msg.contains("bitcoin")
+        || msg.contains("crypto")
+        || msg.contains("forex")
+        || msg.contains("investment opportunity")
+    {
+        score += 1;
+    }
+    // Link-heavy bodies: a genuine inquiry rarely pastes several URLs.
+    let links = msg.matches("http").count();
+    if links >= 3 {
+        score += 2;
+    } else if links == 2 {
+        score += 1;
+    }
+    // Mass-mail salutations.
+    if msg.contains("dear sir")
+        || msg.contains("dear owner")
+        || msg.contains("dear webmaster")
+        || msg.contains("to whom it may concern")
+    {
+        score += 1;
+    }
+
     score >= 3
 }
 
@@ -756,6 +804,20 @@ mod tests {
                      WhatsApp https://wa.me/+375259112693"
             .into();
         assert!(is_likely_spam(&f), "should classify the canonical spam");
+    }
+
+    #[test]
+    fn spam_filter_catches_seo_outreach() {
+        let mut f = empty_form();
+        f.name = "Marketing Pro".into();
+        f.reply_to = "seo.offers@example.com".into();
+        f.service = "Other".into();
+        f.message = "Dear owner, we noticed your website could rank on the \
+                     first page of Google. Our SEO services and backlink \
+                     packages will increase your traffic. \
+                     See https://x.example/a https://x.example/b https://x.example/c"
+            .into();
+        assert!(is_likely_spam(&f), "should classify SEO outreach spam");
     }
 
     #[test]
