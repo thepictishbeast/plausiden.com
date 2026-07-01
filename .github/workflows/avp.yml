@@ -10,7 +10,7 @@ jobs:
   pre-merge:
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run pre-merge audit routine
         run: |
           # Resolve from PlausiDen-Audits/routines/pre-merge.toml.
