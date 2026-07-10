@@ -27,6 +27,10 @@ const NAV_LINKS: &[NavLink<'static>] = &[
         label: "About",
     },
     NavLink {
+        href: "/docs/ecosystem",
+        label: "Ecosystem",
+    },
+    NavLink {
         href: "/blog",
         label: "Field Notes",
     },
