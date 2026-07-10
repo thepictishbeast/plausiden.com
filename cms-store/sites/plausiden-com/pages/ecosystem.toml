@@ -1,0 +1,104 @@
+id = "8f4b2a10-63de-4a5b-9d92-4f0e6c2a7b31"
+slug = "ecosystem"
+title = "The PlausiDen Ecosystem"
+description = "What PlausiDen is — the services it operates, the products it builds, its goals, capabilities, and track record. Sovereign software held to six axes at once."
+status = "published"
+created_at = "2026-07-10T00:00:00Z"
+updated_at = "2026-07-10T00:00:00Z"
+
+[[sections]]
+theme = "light"
+
+[[sections.blocks]]
+kind = "hero"
+
+[sections.blocks.fields]
+headline = "Sovereign software, end to end."
+lede = "PlausiDen designs, builds, and operates its own stack — mail, web, identity, AI, storage — and holds every decision to six axes at once: fast, reliable, robust, secure, anonymous, private. Most engineering picks two or three and trades the rest away. Refusing that trade is the founding constraint of everything here."
+
+[[sections]]
+theme = "muted"
+anchor = "services"
+
+[[sections.blocks]]
+kind = "heading_body"
+
+[sections.blocks.fields]
+heading = "Services operating today."
+body = """
+These are not roadmap items; they run in production on PlausiDen-operated infrastructure.
+
+Hosted email — full-stack mail with 100%-green authentication DNS (SPF, DKIM, DMARC, MTA-STS, TLS-RPT, DNSSEC, CAA), archival capture, snapshot backups with rehearsed restores, server-side sorting, and a self-audit harness that runs on every configuration change.
+
+Web hosting — Rust-served sites behind strict security headers and modern TLS, with an onion-service presence.
+
+Sovereign Workspace — a self-hosted, zero-trust collaboration stack: Matrix chat and calls, Nextcloud files, single sign-on, ERP, CRM, and remote management. FOSS end to end, on owned hardware.
+"""
+
+[[sections]]
+theme = "light"
+anchor = "flagships"
+
+[[sections.blocks]]
+kind = "card_grid"
+
+[sections.blocks.fields]
+heading = "Flagship projects."
+lede = "Each is independently auditable and built on the same substrates — typed contracts, adversarial validation, accessibility and dual themes by default."
+card_titles = ["ThunderCrab", "Forge + Loom", "Mailroom", "SacredVote", "Privacy Suite", "Local-first AI"]
+card_bodies = [
+  "A Rust-native, sovereignty-first email client — Android-first with desktop and CLI. IMAP push, Markdown-native mail, RFC-correct threading, consent-only read receipts, and post-quantum hybrid TLS already shipping.",
+  "The website substrate: typed content in, accessible CSP-strict dual-theme sites out. Every production PlausiDen site is derived from it rather than hand-coded.",
+  "Mail-server configuration as a typed substrate: Rust sources emit validated Sieve and mailbox layouts, with spam-training watchers and a rehearsed-restore audit harness.",
+  "Verifiable, privacy-preserving civic voting research: post-quantum ballots, WebAuthn, zkTLS, and a post-quantum Belenios line of work.",
+  "Plausible deniability as engineering: a deniable filesystem (hidden volumes, ML-KEM, Shamir), plus fragmenting, distribution, cleanup, and monitoring layers — possession proves nothing.",
+  "CPU-viable, federated-by-design neurosymbolic AI. Deterministic systems first; learned components as auditable, fail-closed augmentation — no cloud dependency.",
+]
+
+[[sections]]
+theme = "muted"
+anchor = "track-record"
+
+[[sections.blocks]]
+kind = "heading_body"
+
+[sections.blocks.fields]
+heading = "Track record."
+body = """
+A business mail platform in production since May 2026 with fully green authentication DNS and automated restore drills. Production websites served from owned infrastructure. Nine tagged ThunderCrab releases with tag-to-APK release automation. Over 1,200 tests green across the website substrate, including a pixel-level site-reproduction harness. A session classifier deployed at zero false positives and zero false negatives across 1,182 real transcripts. Tens of terabytes of encrypted ZFS under snapshot discipline backing all of it.
+"""
+
+[[sections]]
+theme = "light"
+anchor = "honesty"
+
+[[sections.blocks]]
+kind = "heading_body"
+
+[sections.blocks.fields]
+heading = "The honest banner."
+body = """
+Most public PlausiDen repositories open with a deliberate warning: DO NOT USE — UNVERIFIED. Code is published for transparency and third-party audit from day one, while the Adversarial Validation Protocol withholds the fit-for-use claim until verification passes are actually earned. We would rather show unfinished work honestly than finished-looking work falsely.
+"""
+
+[[sections]]
+theme = "muted"
+anchor = "source"
+
+[[sections.blocks]]
+kind = "cta"
+
+[sections.blocks.fields]
+heading = "Read the full overview."
+body = "The canonical ecosystem overview — goals, every project family, capabilities, and the complete index — lives in the open."
+label = "PlausiDen-About on GitHub"
+href = "https://github.com/thepictishbeast/PlausiDen-About"
+
+[[sections.blocks]]
+kind = "cta"
+
+[sections.blocks.fields]
+heading = "This site is open source."
+body = "plausiden.com is a zero-state Rust application — Axum and Maud, privacy-first. Audit the code that served you this page."
+label = "Website source on GitHub"
+href = "https://github.com/thepictishbeast/plausiden.com"
