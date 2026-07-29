@@ -23,7 +23,7 @@ jobs:
     name: "tarpaulin (line coverage)"
     runs-on: [self-hosted, linux, x64, plausiden]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Clone PlausiDen-Loom (private path dep)
         env:
