@@ -1,0 +1,24 @@
+/* Nav responsive utilities — companion to loom-components nav.rs.
+ *
+ * WHY THIS FILE EXISTS: /static/index-*.css is a frozen Tailwind bundle
+ * reused from the old React production build (see git a1cef3f); there is
+ * no Tailwind toolchain in this repo to regenerate it. The nav's
+ * landscape-overflow fix (loom nav.rs: collapse below lg instead of md,
+ * 2026-08-12) uses `lg:flex` / `lg:hidden` / `xl:gap-8`, which the old
+ * bundle purged because nothing used them at the time. This file supplies
+ * exactly those utilities, byte-equivalent to what Tailwind would emit.
+ *
+ * Must load AFTER index-*.css (cascade order makes xl:gap-8 beat the
+ * bundle's gap-4 at >=1280px; equal specificity, later wins).
+ *
+ * IF THE TAILWIND BUNDLE IS EVER REBUILT from a real pipeline, these
+ * rules will be generated there and this file becomes redundant —
+ * identical rules, no conflict — and can be deleted.
+ */
+@media (min-width: 1024px) {
+  .lg\:flex { display: flex; }
+  .lg\:hidden { display: none; }
+}
+@media (min-width: 1280px) {
+  .xl\:gap-8 { gap: 2rem; }
+}

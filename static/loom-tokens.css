@@ -74,3 +74,15 @@
   --loom-color-bg-canvas: hsl(220 33% 6%);
   --loom-color-bg-overlay: hsl(220 24% 20%);
 }
+
+/* Substrate utility classes (CSP-safe alternative to inline padding) */
+.loom-shell {
+  padding-left: 4rem;
+  padding-right: 4rem;
+}
+@media (max-width: 768px) {
+  .loom-shell {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

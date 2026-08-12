@@ -292,8 +292,12 @@ mod tests {
     #[test]
     fn uses_loom_form_primitives() {
         // Spot-check that the input chrome came from loom-components,
-        // not raw class strings. Loom inputs all carry h-12 + bg-slate-50.
+        // not raw class strings. Loom inputs carry h-12 (Comfortable
+        // density) and bg-slate-50 — assert both are present rather
+        // than adjacent, since loom's density refactor emits them at
+        // different positions in the class string.
         let s = render().into_string();
-        assert!(s.contains("h-12 bg-slate-50")); // loom-allow: test-assertion literal of expected loom-components output
+        assert!(s.contains("h-12")); // loom-allow: test-assertion literal of expected loom-components output
+        assert!(s.contains("bg-slate-50")); // loom-allow: test-assertion literal of expected loom-components output
     }
 }

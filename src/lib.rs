@@ -563,8 +563,12 @@ mod tests {
             "/pricing-transparency",
         ] {
             let body = fetch_body(path).await;
+            // A real inline-style attribute is always ` style="` (preceded by
+            // whitespace). A bare `style="` substring false-positives on data
+            // attributes like `data-loom-nav-style="standard"`, which are
+            // legitimate and carry no CSS.
             assert!(
-                !body.contains("style=\""),
+                !body.contains(" style=\""),
                 "{path}: inline style= emitted; CSP forbids it"
             );
             assert!(

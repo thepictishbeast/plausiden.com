@@ -161,6 +161,11 @@ fn head_tag(meta: &PageMeta<'_>) -> Markup {
             // when a custom rule references the token.
             link rel="stylesheet" href="/static/loom-tokens.css";
             link rel="stylesheet" href="/static/index-CWVVhmVm.css";
+            // nav-responsive.css supplies the lg:/xl: nav utilities the
+            // frozen Tailwind bundle predates (nav landscape-overflow
+            // fix). Must come after the bundle — cascade order lets
+            // xl:gap-8 beat the bundle's gap-4 at equal specificity.
+            link rel="stylesheet" href="/static/nav-responsive.css";
             link rel="stylesheet" href="/static/animations.css";
             script src="/static/menu.js" defer {}
         }
