@@ -22,3 +22,6 @@
 # local-only until `cargo insta review` accepts them.
 **/*.snap.new
 **/*.pending-snap
+
+# agent onboarding kept local-only (cruft standard)
+CLAUDE.md
