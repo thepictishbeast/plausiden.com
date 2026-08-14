@@ -655,3 +655,39 @@ h3 {
 @media (min-width: 1024px) {
   .lg\:text-\[2rem\] { font-size: 2rem; }
 }
+
+/* ==========================================================================
+   LEGAL / STATUS / SUBSCRIBE GAP FILLS
+   --------------------------------------------------------------------------
+   Found once the guard was pointed at every public route rather than a
+   hand-kept subset. Each of these was doing nothing:
+
+     - the callout box on both legal pages had no background, border or text
+       colour, so a deliberately-highlighted notice read as plain paragraph;
+     - the status page's health dot had no fill, so the one element whose
+       entire job is being green was invisible;
+     - `select-all` on /subscribe, which is what makes a single click select
+       the whole feed URL — the page tells the reader to copy it.
+   ========================================================================== */
+
+/* -- amber notice, used on /privacy-directive and /terms-of-service ------- */
+.bg-amber-50 { background-color: rgb(255 251 235); }
+.border-amber-200 { border-color: rgb(253 230 138); }
+.text-amber-800 { color: rgb(146 64 14); }
+.text-amber-900 { color: rgb(120 53 15); }
+.hover\:text-amber-700:hover { color: rgb(180 83 9); }
+
+/* -- status page --------------------------------------------------------- */
+.bg-emerald-500 { background-color: rgb(16 185 129); }
+.text-emerald-900 { color: rgb(6 78 59); }
+.gap-x-8 { column-gap: 2rem; }
+.gap-y-4 { row-gap: 1rem; }
+
+/* -- subscribe ----------------------------------------------------------- */
+.items-baseline { align-items: baseline; }
+.pl-6 { padding-left: 1.5rem; }
+
+/* One click selects the whole feed URL. The page asks the reader to copy it
+   into a feed reader, so this is the difference between a copy and a careful
+   drag across a long string. */
+.select-all { user-select: all; }

@@ -797,31 +797,12 @@ mod plain_language {
 
     #[test]
     fn marketing_pages_avoid_filler_vocabulary() {
-        let pages: Vec<(&str, String)> = vec![
-            ("/", crate::views::home::render().into_string()),
-            ("/services", crate::views::services::render().into_string()),
-            (
-                "/capabilities",
-                crate::views::capabilities::render().into_string(),
-            ),
-            (
-                "/sample-report",
-                crate::views::sample_report::render().into_string(),
-            ),
-            (
-                "/how-we-work",
-                crate::views::how_we_work::render().into_string(),
-            ),
-            (
-                "/pricing-transparency",
-                crate::views::pricing::render().into_string(),
-            ),
-            (
-                "/case-studies",
-                crate::views::case_studies::render().into_string(),
-            ),
-            ("/about", crate::views::about::render().into_string()),
-        ];
+        // Shared list, not a private one. The blog and /subscribe were never
+        // in here, which is how "Field Notes" survived on them after the rest
+        // of the site was renamed, and how the blog shipped 25 dead classes.
+        // Long-form prose is exactly where filler vocabulary accumulates, so
+        // excluding it inverted the check.
+        let pages = super::utility_class_coverage::rendered_pages();
         for (route, html) in &pages {
             let lower = visible_text(html).to_lowercase();
             for word in FILLER {
@@ -959,7 +940,10 @@ mod utility_class_coverage {
         let mut pages: Vec<(&'static str, String)> = vec![
             ("/", crate::views::home::render().into_string()),
             ("/services", crate::views::services::render().into_string()),
-            ("/pricing", crate::views::pricing::render().into_string()),
+            (
+                "/pricing-transparency",
+                crate::views::pricing::render().into_string(),
+            ),
             (
                 "/sample-report",
                 crate::views::sample_report::render().into_string(),
@@ -980,6 +964,39 @@ mod utility_class_coverage {
             ("/contact", crate::views::contact::render().into_string()),
             ("/feedback", crate::views::feedback::render().into_string()),
             ("/404", crate::views::not_found::render().into_string()),
+            (
+                "/solutions/legal",
+                crate::views::solutions::legal::render().into_string(),
+            ),
+            (
+                "/solutions/healthcare",
+                crate::views::solutions::healthcare::render().into_string(),
+            ),
+            (
+                "/solutions/journalism",
+                crate::views::solutions::journalism::render().into_string(),
+            ),
+            (
+                "/solutions/financial-advisors",
+                crate::views::solutions::financial_advisors::render().into_string(),
+            ),
+            (
+                "/solutions/nonprofit",
+                crate::views::solutions::nonprofit::render().into_string(),
+            ),
+            (
+                "/subscribe",
+                crate::views::subscribe::render().into_string(),
+            ),
+            ("/status", crate::views::status::render().into_string()),
+            (
+                "/privacy-directive",
+                crate::views::legal::privacy().into_string(),
+            ),
+            (
+                "/terms-of-service",
+                crate::views::legal::terms().into_string(),
+            ),
         ];
         // Blog posts too. They were missing, and the gap was not academic: the
         // guard passed for weeks while every post rendered bullet lists with no
@@ -1125,6 +1142,103 @@ mod retired_class_names {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod audit_coverage {
+    //! Every public page must be walked by the guards.
+    //!
+    //! This is the defect behind the last two ticks, stated once so it stops
+    //! recurring. `rendered_pages()` was a hand-kept list, and everything the
+    //! guards check — dead classes, retired names, filler vocabulary,
+    //! undefined design tokens — was therefore only checked on the pages
+    //! somebody remembered to add.
+    //!
+    //! What that cost: the five blog posts shipped bullet lists with no
+    //! bullets and inline code with no background; every post was missing its
+    //! vertical rhythm; the blog called itself "Field Notes" while the nav
+    //! said "Insights"; the legal pages' callout box had no background; the
+    //! status page's health dot had no fill; and `select-all` on /subscribe,
+    //! the affordance that makes one click select the feed URL, did nothing.
+    //! Twelve of those were found the moment the list was widened.
+    //!
+    //! So the list is no longer trusted on its own. This test reads the
+    //! router and fails if a public page route is not represented, which
+    //! turns "somebody remembered" into "the compiler noticed".
+
+    /// Routes that are not pages and have nothing for a page guard to check:
+    /// machine endpoints, redirects, and the token-gated admin surface.
+    const NOT_A_PAGE: &[&str] = &[
+        "/healthz",
+        "/sitemap.xml",
+        "/robots.txt",
+        "/blog/rss.xml",
+        "/feedback/export",
+        "/admin",
+        "/admin/login",
+        "/admin/login/verify",
+        "/admin/logout",
+        "/admin/feedback",
+    ];
+
+    #[test]
+    fn every_public_route_is_audited() {
+        let src = include_str!("lib.rs");
+
+        // Routes as the router declares them.
+        let mut declared: Vec<&str> = Vec::new();
+        for part in src.split(".route(\"").skip(1) {
+            let Some(route) = part.split('"').next() else {
+                continue;
+            };
+            // Only GET handlers render a page.
+            if !part.contains("get(") {
+                continue;
+            }
+            declared.push(route);
+        }
+        assert!(
+            declared.len() > 15,
+            "failed to parse the router; found only {declared:?}"
+        );
+
+        let audited: Vec<String> = super::utility_class_coverage::rendered_pages()
+            .into_iter()
+            .map(|(route, _)| route.to_owned())
+            .collect();
+
+        let mut unaudited: Vec<&str> = Vec::new();
+        for route in declared {
+            if NOT_A_PAGE.contains(&route) {
+                continue;
+            }
+            // Dynamic routes are covered by walking their real content: every
+            // blog post is rendered by name, and /docs/{slug} is CMS-backed
+            // with no compile-time content to enumerate.
+            if route.contains('{') {
+                continue;
+            }
+            if !audited.iter().any(|a| a == route) {
+                unaudited.push(route);
+            }
+        }
+        unaudited.sort_unstable();
+        unaudited.dedup();
+
+        assert!(
+            unaudited.is_empty(),
+            "{} public page route(s) are served but never walked by the \
+             guards, so nothing checks them for dead classes, retired names, \
+             filler vocabulary or undefined tokens:\n{}\n\nAdd them to \
+             rendered_pages().",
+            unaudited.len(),
+            unaudited
+                .iter()
+                .map(|r| format!("  {r}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+        );
     }
 }
 
