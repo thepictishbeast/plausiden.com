@@ -27,7 +27,7 @@ pub fn render() -> Markup {
         }
 
         p {
-            "Unreliability has a different failure mode. If an adversary recovers your encrypted data and your traffic logs and your full search history, they have something — but what they have doesn't yield a reliable inference. The signal is buried in noise that was deliberately added, methodically, over years. Recovering the haystack does not, by itself, find the needle. The defense is robust to the kind of catastrophic compromise the hiding model can't survive."
+            "Unreliability has a different failure mode. If an adversary recovers your encrypted data and your traffic logs and your full search history, they have something — but what they have doesn't yield a reliable inference. The signal is buried in noise that was deliberately added, methodically, over years. Recovering the haystack does not, by itself, find the needle. The defense survives the kind of total compromise the hiding model does not."
         }
 
         p {

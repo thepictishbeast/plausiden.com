@@ -93,7 +93,10 @@ pub fn render() -> Markup {
                     div class="lg:col-span-1 space-y-6 pd-reveal" { // loom-allow: 1/3 column with scroll-reveal hook
                         div class="shadcn-card rounded-xl border border-card-border text-card-foreground border-none shadow-xl bg-white overflow-hidden" { // loom-allow: inset card chrome with overflow-hidden for primary-band header
                             div class="bg-primary p-6" { // loom-allow: primary-bg card-header band
-                                h3 class="text-white font-display text-xl font-bold" { "Get in touch" } // loom-allow: card-internal heading on primary band; Heading{Sub,OnDark} would re-introduce text-slate-* defaults
+                                // h2: peer of "Send us a message", which is already h2.
+                                // As h3 it both skipped a level under the page h1 and
+                                // claimed to be a subsection of a heading that follows it.
+                                h2 class="text-white font-display text-xl font-bold" { "Get in touch" } // loom-allow: card-internal heading on primary band; Heading{Sub,OnDark} would re-introduce text-slate-* defaults
                                 p class="text-primary-foreground/80 mt-2 text-sm" { // loom-allow: card sub-line on primary band
                                     "You will be talking to the engineer who would do the work, not a call center or an account manager."
                                 }

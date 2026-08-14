@@ -1129,6 +1129,99 @@ mod eyebrow_contrast {
 }
 
 #[cfg(test)]
+mod heading_outline {
+    //! Every page has exactly one h1 and skips no heading level.
+    //!
+    //! A browser sweep of 24 routes found four pages jumping h1 -> h3. Three
+    //! shared one cause and it was not on those pages: the footer rendered its
+    //! column headings ("Company", "Solutions", "Contact") as h3, and on any
+    //! page whose main content stops at the h1 — the placeholder legal pages,
+    //! /status — the next heading in the document is that footer h3. The
+    //! fourth was /contact, where "Get in touch" was an h3 sitting *before*
+    //! the h2 it was supposedly nested under.
+    //!
+    //! Both are invisible on screen, because Tailwind preflight normalises
+    //! heading font-size and margin: the level carries meaning for screen
+    //! readers and for anyone scanning the outline, and nothing else. That is
+    //! exactly the kind of defect that returns silently, and exactly why a
+    //! browser-only check is not enough — this runs on every build.
+    //!
+    //! Note the footer case could only be caught by looking at whole rendered
+    //! pages. Reading the footer component alone, an h3 looks perfectly
+    //! reasonable; it is wrong only in the document it lands in.
+
+    /// Heading levels in document order, with their visible text.
+    fn headings(html: &str) -> Vec<(u32, String)> {
+        let mut out = Vec::new();
+        for (idx, _) in html.match_indices('<') {
+            let rest = &html[idx + 1..];
+            let mut chars = rest.chars();
+            if chars.next() != Some('h') {
+                continue;
+            }
+            // `<h2 ...` or `<h2>`, but not `<html`, `<hr`, `<header`.
+            let Some(level) = chars.next().and_then(|c| c.to_digit(10)) else {
+                continue;
+            };
+            if !(1..=6).contains(&level) || !matches!(chars.next(), Some(' ' | '>')) {
+                continue;
+            }
+            let Some(open_end) = rest.find('>') else {
+                continue;
+            };
+            let inner = rest[open_end + 1..]
+                .split_once(&format!("</h{level}>"))
+                .map_or("", |(before, _)| before);
+            let text = super::plain_language::visible_text(inner);
+            out.push((level, text.split_whitespace().collect::<Vec<_>>().join(" ")));
+        }
+        out
+    }
+
+    #[test]
+    fn every_page_has_exactly_one_h1() {
+        let mut offenders: Vec<String> = Vec::new();
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            let h1s: Vec<String> = headings(&html)
+                .into_iter()
+                .filter(|(level, _)| *level == 1)
+                .map(|(_, text)| text)
+                .collect();
+            if h1s.len() != 1 {
+                offenders.push(format!("{route}: {} h1s {h1s:?}", h1s.len()));
+            }
+        }
+        assert!(
+            offenders.is_empty(),
+            "a page must have exactly one h1 — it names the page:\n{}",
+            offenders.join("\n")
+        );
+    }
+
+    #[test]
+    fn no_page_skips_a_heading_level() {
+        let mut offenders: Vec<String> = Vec::new();
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            let mut previous = 0;
+            for (level, text) in headings(&html) {
+                if previous != 0 && level > previous + 1 {
+                    offenders.push(format!("{route}: h{previous} -> h{level} at {text:?}"));
+                }
+                previous = level;
+            }
+        }
+        assert!(
+            offenders.is_empty(),
+            "{} skipped heading level(s). A heading's level is its depth in the \
+             outline, so h{{n}} may only be followed by h{{n+1}} or shallower. \
+             Remember the footer renders on every page:\n{}",
+            offenders.len(),
+            offenders.join("\n")
+        );
+    }
+}
+
+#[cfg(test)]
 mod retired_class_names {
     //! Classes that were replaced and must not come back.
 
@@ -1295,11 +1388,12 @@ mod service_naming {
                 continue;
             }
             let text = part[open_end + 1..close].trim();
-            // Skip the footer column headings, which are not services.
-            if text.is_empty()
-                || text.len() > 40
-                || matches!(text, "Company" | "Solutions" | "Contact")
-            {
+            // The footer column headings used to land here too, because the
+            // footer rendered them as h3; they were skipped by name. They are
+            // h2 now, so this only sees card titles and the name list is gone.
+            // If "Company" ever shows up in a failure here, the footer level
+            // regressed and heading_outline will be failing as well.
+            if text.is_empty() || text.len() > 40 {
                 continue;
             }
             cards.push(text.to_owned());
