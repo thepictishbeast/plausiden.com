@@ -18,93 +18,93 @@ pub fn render() -> Markup {
 
         (ArticleHeading { text: "What a doctrine is" }.render())
 
-        p class="mb-6" {
+        p {
             "Internally we call it the AVP Doctrine — \"audit, verify, prove.\" It's a single document that governs how every PlausiDen repository is structured, how every public function is annotated, what gets reviewed at what stage, and what \"done\" means before we ship to a client environment. It is not aspirational; it is enforced. A pull request that violates the doctrine fails CI before a human reads it."
         }
 
-        p class="mb-6" {
+        p {
             "The doctrine is not a style guide. Style guides are conventions. The doctrine is a contract: \"if a piece of code lives in this repo, then these properties hold of it.\" Some examples of the contracts we enforce:"
         }
 
-        ul class="list-disc list-inside space-y-2 mb-6 text-slate-700" {
+        ul {
             li { "Every public function is annotated with what we call a " strong { "BUG ASSUMPTION" } " — a one-paragraph explanation of what would have to be true for the function to break." }
             li { "Every defense-in-depth measure carries a " strong { "SECURITY" } " annotation explaining what threat it mitigates and why we believe the mitigation holds." }
-            li { "The Rust crates we ship forbid " code class="text-sm bg-slate-100 px-1.5 py-0.5 rounded" { "unsafe_code" } " at the crate level and require " code class="text-sm bg-slate-100 px-1.5 py-0.5 rounded" { "missing_docs = deny" } " — a compile error if any public item lacks documentation." }
+            li { "The Rust crates we ship forbid " code { "unsafe_code" } " at the crate level and require " code { "missing_docs = deny" } " — a compile error if any public item lacks documentation." }
             li { "Ship decisions — \"why this and not the alternative?\" — are recorded in code comments at the call site, not in a wiki nobody reads." }
             li { "Annotations exist as markers a code-search can find. There are no slogans; if the convention can't be enforced by a CI grep, it can't be relied on." }
         }
 
         (ArticleHeading { text: "Why we do this" }.render())
 
-        p class="mb-6" {
+        p {
             "Consulting work compounds. We start a project, ship the first version, hand it off to the client's team, and revisit it eighteen months later when something needs to change. The cost of that revisit is determined almost entirely by what we were disciplined about at the start. Specifically: by whether the next person reading the code — possibly future-us, possibly the client's new engineer — can answer two questions cheaply."
         }
 
-        p class="mb-4" {
+        p {
             "The questions are:"
         }
 
-        ul class="list-disc list-inside space-y-2 mb-6 text-slate-700" {
+        ul {
             li { strong { "Why is this here?" } " (Why this design, not the obvious alternative? What problem does this solve that we wouldn't notice if we deleted it?)" }
             li { strong { "What would have to be true to break it?" } " (Under what assumptions does this code work? Are those assumptions still true today?)" }
         }
 
-        p class="mb-6" {
+        p {
             "The AVP Doctrine forces both questions to have answers in the code itself. Not in a separate doc. Not in tribal memory. Right there, in the function body, where the next reader will look."
         }
 
         (ArticleHeading { text: "What this changes for clients" }.render())
 
-        p class="mb-6" {
+        p {
             "Three things, in our experience, are different about working on a system we built versus a system built without this discipline."
         }
 
-        p class="mb-6" {
+        p {
             strong { "Audits get faster. " }
             "When a malpractice carrier, a state regulator, or your own counsel shows up with a security questionnaire, the answers are not buried in three different engineers' inboxes — they are inline annotations in the relevant code. We can produce evidence for each control by running a search, not by reconstructing memory."
         }
 
-        p class="mb-6" {
+        p {
             strong { "Onboarding gets faster. " }
             "When you eventually want your own staff to take over the system — and you should — they read the code with the doctrine annotations and have a working understanding in days, not months. The system explains itself."
         }
 
-        p class="mb-6" {
+        p {
             strong { "Incident response gets shorter. " }
             "When something goes wrong at 3am, the right question is not \"why did this happen?\" but \"what assumptions broke?\" The BUG ASSUMPTION annotations are the literal answer to that question. The relevant code can usually be found in one search."
         }
 
         (ArticleHeading { text: "What's the catch" }.render())
 
-        p class="mb-6" {
+        p {
             "Writing this much down is slow. A function that another shop would ship in twenty lines takes us thirty after the annotations. A pull request that another shop would land in an hour takes us a half-day after the BUG ASSUMPTION review and the SECURITY justification. We are deliberately slower at the first version."
         }
 
-        p class="mb-6" {
+        p {
             "The bet — and we think it's the right one — is that the second through tenth versions are dramatically faster, because nobody is rebuilding context that was lost. And the version where something breaks is dramatically faster, because the assumption that broke is right next to the code that depends on it."
         }
 
-        p class="mb-6" {
+        p {
             "It's the same bet a senior engineer makes every time they take twenty minutes to write a tighter commit message: a small upfront cost in service of a much larger downstream payoff. We just made it the rule rather than a habit some engineers have."
         }
 
         (ArticleHeading { text: "Where this connects to everything else we say" }.render())
 
-        p class="mb-6" {
+        p {
             "The phrase we use elsewhere is \"compose, don't compromise.\" The AVP Doctrine is what makes that phrase load-bearing. When we tell a law firm that their privacy guarantees are properties of the architecture rather than promises, we're saying: those guarantees are written down as BUG ASSUMPTION annotations on the relevant functions, and a reviewer can verify them in a code search. When we tell a healthcare practice that their ePHI handling is BAA-ready, we're saying: the controls are annotated, the audit trail is reproducible, and a regulator can be handed a tour of the system that doesn't require an interpreter."
         }
 
-        p class="mb-6" {
+        p {
             "It's not magic. It's just a level of discipline that turns out to compound across projects. We've watched it pay off in our own work; we wrote it down so it could pay off across more projects than any one engineer can hold in their head."
         }
 
         (ArticleHeading { text: "What we're doing with it next" }.render())
 
-        p class="mb-6" {
+        p {
             "The doctrine is currently an internal document. We are slowly preparing a sanitized public version — partly because we think other small consultancies could benefit from the pattern, partly because publishing it makes our own commitments more durable. Like everything else we build, we'd rather get sustainable revenue first and ship the open version once, properly, than ship something half-baked into the world for free."
         }
 
-        p class="mb-6" {
+        p {
             "If your team is dealing with the second-version problem — where every change to a system you shipped a year ago feels disproportionately expensive — the conversation usually starts there. The fix is rarely \"refactor everything.\" Most of the time it's \"start writing down the assumptions, function by function, as you touch them.\" We can help that be more than a New Year's resolution."
         }
     }

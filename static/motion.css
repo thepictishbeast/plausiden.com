@@ -703,3 +703,69 @@ h3 {
    into a feed reader, so this is the difference between a copy and a careful
    drag across a long string. */
 .select-all { user-select: all; }
+
+/* ==========================================================================
+   ARTICLE PROSE
+   --------------------------------------------------------------------------
+   Blog posts styled every element by hand: `class="mb-6"` on 90 paragraphs,
+   plus the list and inline-code chrome, 103 class attributes across five
+   files. The posts were originally written for the Tailwind Typography
+   plugin (`prose prose-slate`), which the frozen bundle never contained, and
+   the per-element classes are the patch someone applied when it did nothing.
+
+   The reason to replace them is not tidiness. An author writing a new post
+   who forgets `mb-6` gets a paragraph with no space under it, and nothing
+   anywhere reports that — the same silent-failure shape as the rest of this
+   stylesheet's history. Content should not have to remember its own spacing.
+
+   Every value below reproduces exactly what the utility classes computed to,
+   measured before the change: paragraphs 24px bottom margin, lists 24px with
+   8px between items, code at 14px on slate-100 with 2px/6px padding and a 4px
+   radius. The article heights at 1440 and 390 are pinned in the commit
+   message; if a future edit here changes them, it changed the design.
+   ========================================================================== */
+
+.pd-prose > p {
+  margin-bottom: 1.5rem;
+}
+
+/* A paragraph that introduces a list belongs to that list, so it closes
+ * the gap rather than sitting in open space. Every such paragraph in the
+ * blog ends in a colon ("The questions are:"), which is the tell.
+ *
+ * This was previously an mb-4 typed onto one of the three lead-ins by
+ * hand; the other two were missed, which is what a per-element class
+ * gets you. Deriving it from structure means a new post is spaced
+ * correctly without the author knowing the rule exists.
+ *
+ * Note the specificity: .pd-prose > p is 0-1-1 and outranks a 0-1-0
+ * utility like .mb-4, so an author cannot override this from the
+ * template. That is deliberate — the container owns prose rhythm.
+ * Browsers without :has() fall back to the uniform 1.5rem above. */
+.pd-prose > p:has(+ ul) {
+  margin-bottom: 1rem;
+}
+
+.pd-prose > ul {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-bottom: 1.5rem;
+  color: rgb(51 65 85);
+}
+
+.pd-prose > ul > li + li {
+  margin-top: 0.5rem;
+}
+
+/* Inline code, not blocks. Descendant rather than child because it appears
+   inside paragraphs and list items. */
+.pd-prose code {
+  font-size: 0.875rem;
+  background-color: rgb(241 245 249);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+/* The opening paragraph keeps its own larger treatment; it is a lede, not
+   body copy, and carries its classes explicitly so nothing has to infer
+   "first paragraph means different" from position. */

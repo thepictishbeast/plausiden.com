@@ -130,7 +130,10 @@ pub fn post(slug: &str) -> Option<Markup> {
         article class="py-12 md:py-16 bg-white" { // loom-allow: post-body article shell — py-12 cadence + prose container scope, not Loom Section
             div class="container mx-auto px-4 md:px-6" { // loom-allow: container chrome wrapping prose
                 div class="prose prose-slate max-w-2xl mx-auto leading-relaxed text-slate-700" { // loom-allow: long-form prose container — Tailwind typography plugin scope, no Loom equivalent
-                    ((post.render)())
+                    // Post bodies carry no per-element classes; their
+                    // typography comes from .pd-prose in motion.css so an
+                    // author writing a new post cannot forget it.
+                    div class="pd-prose" { ((post.render)()) }
                 }
                 div class="max-w-2xl mx-auto mt-16 pt-8 border-t border-slate-200" { // loom-allow: post-footer divider chrome
                     p class="text-slate-600" { // loom-allow: post-footer prose with inline TextLink
