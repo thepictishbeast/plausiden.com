@@ -10,8 +10,8 @@ use super::layout::{PageMeta, page_with_description, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
 use loom_components::{
-    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
-    TextLink, TextLinkSize, TextLinkVariant,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant,
+    Lede, TextLink, TextLinkSize, TextLinkVariant,
 };
 
 /// JSON escape a string for safe embedding inside a JSON literal in the

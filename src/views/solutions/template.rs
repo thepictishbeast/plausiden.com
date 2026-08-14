@@ -22,9 +22,9 @@
 use loom_components::card::FeatureCard;
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    BodyText, Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel,
-    HeadingTone, HeadingVariant, HelperSize, HelperText, Lede, Section, SectionPadding,
-    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
+    BodyText, Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading,
+    HeadingLevel, HeadingTone, HeadingVariant, HelperSize, HelperText, Lede, Section,
+    SectionPadding, SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};

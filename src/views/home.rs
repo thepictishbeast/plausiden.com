@@ -5,8 +5,8 @@
 use loom_components::card::{FeatureCard, FeatureCardStyle};
 use loom_components::{Badge, BadgeShape, BadgeSize, BadgeTone};
 use loom_components::{
-    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
-    HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
+    HeadingTone, HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
 };
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
@@ -292,7 +292,10 @@ mod tests {
         // The hero must name who it is for. "Comprehensive IT for the
         // Modern Enterprise" named no industry, size, place or price.
         assert!(s.contains("confidential client data"));
-        assert!(s.contains("5 to 100 staff"), "hero states the size of client we serve");
+        assert!(
+            s.contains("5 to 100 staff"),
+            "hero states the size of client we serve"
+        );
     }
 
     #[test]

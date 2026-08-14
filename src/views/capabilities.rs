@@ -11,8 +11,8 @@
 //! cadence.
 
 use loom_components::{
-    Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration,
-    Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonShape, ButtonSize, ButtonType,
+    ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
 };
 use maud::{Markup, html};
 

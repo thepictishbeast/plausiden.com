@@ -14,7 +14,8 @@ use std::sync::OnceLock;
 use std::time::Instant;
 
 use loom_components::{
-    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant,
+    Lede,
 };
 use maud::{Markup, html};
 

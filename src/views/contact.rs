@@ -12,10 +12,12 @@
 //! `maxlength` attributes are convenience-only (they match the server
 //! limits to keep UX feedback honest).
 
-use loom_components::form::{FormDensity, FormStyle, InputType, Select, SelectOption, TextArea, TextInput};
+use loom_components::form::{
+    FormDensity, FormStyle, InputType, Select, SelectOption, TextArea, TextInput,
+};
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
-    HeadingVariant, Lede,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
+    HeadingTone, HeadingVariant, Lede,
 };
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};

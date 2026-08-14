@@ -8,7 +8,8 @@
 //! 200 and surface the "under review" disclaimer.
 
 use loom_components::{
-    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant,
+    Lede,
 };
 use maud::{Markup, html};
 

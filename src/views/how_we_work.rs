@@ -5,8 +5,8 @@
 use loom_components::card::FeatureCard;
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone,
-    HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
+    HeadingTone, HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
 };
 use maud::{Markup, html};
 

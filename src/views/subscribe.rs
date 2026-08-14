@@ -8,9 +8,9 @@
 //! drill can copy it.
 
 use loom_components::{
-    Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonSize, ButtonType, ButtonShape, ButtonVariant, Decoration,
-    Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
-    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonShape, ButtonSize, ButtonType,
+    ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section,
+    SectionPadding, SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
 

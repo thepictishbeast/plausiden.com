@@ -458,7 +458,10 @@ mod tests {
         // Assert what the page must genuinely provide instead: a reachable
         // human and a working form.
         let markup = contact().await.into_string();
-        assert!(markup.contains("team@plausiden.com"), "email address present");
+        assert!(
+            markup.contains("team@plausiden.com"),
+            "email address present"
+        );
         assert!(markup.contains("978-351-6495"), "phone number present");
         assert!(markup.contains("<form"), "message form present");
         assert!(

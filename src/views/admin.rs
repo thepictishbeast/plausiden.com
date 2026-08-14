@@ -7,8 +7,8 @@
 
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant, TextLink,
-    TextLinkSize, TextLinkVariant,
+    Badge, BadgeShape, BadgeSize, BadgeTone, Heading, HeadingLevel, HeadingTone, HeadingVariant,
+    TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
 

@@ -2,9 +2,9 @@
 //! nav / footer structure so visual parity is preserved across server-rendered
 //! pages.
 
-use loom_components::{ButtonShape, ButtonVariant};
 use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink, FooterStyle};
 use loom_components::nav::{Nav, NavCta, NavLink, NavStyle};
+use loom_components::{ButtonShape, ButtonVariant};
 use loom_icons as icons;
 use maud::{DOCTYPE, Markup, PreEscaped, html};
 
@@ -495,7 +495,10 @@ mod tests {
         // "Secure Drop" wording.
         let s = page("X", "/", html! {}).into_string();
         assert!(s.contains("Book a scoping call"), "primary CTA present");
-        assert!(!s.contains("Secure Drop"), "must not revert to 'Secure Drop'");
+        assert!(
+            !s.contains("Secure Drop"),
+            "must not revert to 'Secure Drop'"
+        );
         assert!(
             !s.contains("Encrypted Inquiry"),
             "the second CTA promised an encrypted intake that /contact does not \
@@ -632,7 +635,10 @@ mod motion_css_guards {
         // The bundle's heavy shadows are pure black (shadow-2xl is 25% black at
         // 50px blur), which is what makes a page read as a template. These are
         // overridden with slate-900-tinted, lower-opacity values.
-        assert!(MOTION_CSS.contains(".shadow-xl"), "shadow scale is overridden");
+        assert!(
+            MOTION_CSS.contains(".shadow-xl"),
+            "shadow scale is overridden"
+        );
         assert!(
             MOTION_CSS.contains("rgb(15 23 42 /"),
             "shadows must be tinted with the body ink, not pure black"
