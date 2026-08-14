@@ -214,9 +214,30 @@
 
 /* A visible, consistent focus ring everywhere. Keyboard users are not an edge
    case, and a security firm's site failing keyboard navigation is a bad look
-   in front of exactly the audience that will notice. */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid #0f4c81;
+   in front of exactly the audience that will notice.
+ *
+ * TWO THINGS WERE WRONG HERE, both invisible unless you tab with a keyboard.
+ *
+ * 1. The colour. This was #0f4c81, which is 8.86:1 on white and gorgeous —
+ *    and 2.02:1 on the slate-900 bands, against a 3:1 requirement (SC 1.4.11,
+ *    non-text contrast). The footer is slate-900 and renders on every page, so
+ *    that single value failed on 83 of the 154 focusable elements measured
+ *    across four routes: every footer link on the site, plus the dark CTA
+ *    bands. #3b82f6 is the only candidate tried that clears 3:1 on all four
+ *    surfaces the site actually paints — measured 3.68 on white, 3.52 on
+ *    slate-50, 3.52 on gray-50, 4.85 on slate-900. It gives up some contrast
+ *    on light surfaces to stop failing outright on dark ones.
+ *
+ * 2. The specificity. `:where()` scores zero, so the frozen bundle's
+ *    `.focus-visible\:outline-none:focus-visible` (0-2-0) beat it and removed
+ *    the ring entirely on eight elements. `:is(...)` scores by its most
+ *    specific argument — `[tabindex]`, 0-1-0 — and the doubled
+ *    `:focus-visible:focus-visible` takes the whole selector to 0-3-0, which
+ *    wins. Repeating a pseudo-class purely for specificity looks like a typo,
+ *    hence this paragraph. A focus ring is a floor, not a default: no
+ *    component gets to opt out of being reachable by keyboard. */
+:is(a, button, input, select, textarea, summary, [tabindex]):focus-visible:focus-visible {
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
   border-radius: 3px;
 }
