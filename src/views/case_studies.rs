@@ -8,7 +8,8 @@
 
 use loom_components::{
     Badge, BadgeShape, BadgeSize, BadgeTone, Button, ButtonShape, ButtonSize, ButtonType,
-    ButtonVariant, Decoration, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede,
+    ButtonVariant, Decoration, Eyebrow, EyebrowSize, Heading, HeadingLevel, HeadingTone,
+    HeadingVariant, Lede,
 };
 use maud::{Markup, html};
 
@@ -106,36 +107,15 @@ pub fn render() -> Markup {
                     }
                     div class="space-y-6" { // loom-allow: vertical rhythm between case-study sub-sections
                         div {
-                            div class="mb-2" {
-                                (Heading {
-                                    text: "What mattered",
-                                    level: HeadingLevel::H3,
-                                    variant: HeadingVariant::Card,
-                                    tone: HeadingTone::Ink,
-                                }.render())
-                            }
+                            (Eyebrow { text: "What mattered", size: EyebrowSize::Subhead }.render())
                             p class="text-slate-600 leading-relaxed" { (c.what_mattered) } // loom-allow: case-study prose paragraph; Lede is for hero openers
                         }
                         div {
-                            div class="mb-2" {
-                                (Heading {
-                                    text: "What we shipped",
-                                    level: HeadingLevel::H3,
-                                    variant: HeadingVariant::Card,
-                                    tone: HeadingTone::Ink,
-                                }.render())
-                            }
+                            (Eyebrow { text: "What we shipped", size: EyebrowSize::Subhead }.render())
                             p class="text-slate-600 leading-relaxed" { (c.what_we_did) } // loom-allow: case-study prose paragraph
                         }
                         div {
-                            div class="mb-2" {
-                                (Heading {
-                                    text: "Outcome",
-                                    level: HeadingLevel::H3,
-                                    variant: HeadingVariant::Card,
-                                    tone: HeadingTone::Ink,
-                                }.render())
-                            }
+                            (Eyebrow { text: "Outcome", size: EyebrowSize::Subhead }.render())
                             p class="text-slate-600 leading-relaxed" { (c.outcome) } // loom-allow: case-study prose paragraph
                         }
                     }
