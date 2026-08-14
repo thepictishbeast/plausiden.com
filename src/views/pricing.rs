@@ -6,7 +6,7 @@ use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
     Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
     HeadingTone, HeadingVariant, HelperSize, HelperText, Lede, Section, SectionPadding,
-    SectionTheme, SectionWidth,
+    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, PreEscaped, html};
 
@@ -75,6 +75,140 @@ const PROMISES: &[(&str, &str)] = &[
     ),
 ];
 
+/// The published rate card for security assessment work.
+///
+/// These mirror `PlausiDen-Salesman`'s `salesman-quote` crate, which is what
+/// actually produces a client's quote. The page renders its prose *from* these
+/// constants rather than restating them in text, so the words and the numbers
+/// cannot drift apart, and `rate_card_matches_the_quoting_tool` checks them
+/// against the crate's source when it is checked out alongside.
+///
+/// Publishing a day rate at all is the point. Most firms in this market will
+/// not, which is why a buyer cannot compare two proposals without a call.
+const DAY_RATE_USD: u32 = 1_600;
+const SETUP_REPORTING_FEE_USD: u32 = 1_200;
+const EXPEDITED_SURCHARGE_PCT: u32 = 25;
+const EXTENDED_RETEST_FEE_USD: u32 = 1_000;
+const RETEST_WINDOW_DAYS: u32 = 30;
+
+/// The worked example, in half-days.
+///
+/// Taken from the quoting tool's own regression case: a 30-endpoint
+/// application with two roles at standard complexity scopes to 6.5 days
+/// (1.5 day scaffold, 0.15 day per endpoint, 0.5 day for the second role).
+/// Using its example rather than inventing one means the figure on this page
+/// is the figure the tool would quote.
+const EXAMPLE_HALF_DAYS: u32 = 13;
+const EXAMPLE_ENDPOINTS: u32 = 30;
+
+/// Format whole dollars with thousands separators.
+fn usd(n: u32) -> String {
+    let digits = n.to_string();
+    let mut out = String::with_capacity(digits.len() + digits.len() / 3 + 1);
+    out.push('$');
+    for (i, c) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// Testing days rendered as a decimal, from half-day units.
+fn days_label(half_days: u32) -> String {
+    if half_days % 2 == 0 {
+        format!("{}", half_days / 2)
+    } else {
+        format!("{}.5", half_days / 2)
+    }
+}
+
+/// Line items for the assessment rate card, built from the constants above.
+fn rate_card_rows() -> Vec<(String, String)> {
+    vec![
+        (
+            format!("{} per engineer-day", usd(DAY_RATE_USD)),
+            "An eight-hour day of senior testing time, billed in half-days. The person testing is the person who scoped it and the person who writes the report.".to_owned(),
+        ),
+        (
+            format!("{} flat, once per engagement", usd(SETUP_REPORTING_FEE_USD)),
+            "Scoping, threat modelling, report synthesis and the readout call. Charged once whether the assessment runs two days or twenty.".to_owned(),
+        ),
+        (
+            "Included".to_owned(),
+            format!("A retest of high and critical findings within {RETEST_WINDOW_DAYS} days. Not an upsell, not a second engagement — verifying the fix is part of the job."),
+        ),
+        (
+            format!("+{EXPEDITED_SURCHARGE_PCT}%"),
+            "Rush turnaround or testing outside business hours. Applied to the testing days, and only when you ask for it.".to_owned(),
+        ),
+        (
+            format!("{}", usd(EXTENDED_RETEST_FEE_USD)),
+            format!("Optional. Extends the retest window from {RETEST_WINDOW_DAYS} to 60 days when a fix has to wait on a release train."),
+        ),
+    ]
+}
+
+/// The assessment pricing band.
+///
+/// /services and /sample-report describe the security work in detail, and
+/// until now the pricing page had no number for it at all — a buyer who read
+/// the sample report and wanted one had to ask. That is the exact "call for
+/// pricing" behaviour this page's own promises reject.
+fn assessment_band() -> Markup {
+    let testing = EXAMPLE_HALF_DAYS * DAY_RATE_USD / 2;
+    let total = testing + SETUP_REPORTING_FEE_USD;
+    let body = html! {
+        div class="reveal" {
+            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Security assessments" }
+            div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /about
+                (Heading {
+                    text: "What a penetration test costs.",
+                    level: HeadingLevel::H2,
+                    variant: HeadingVariant::Section,
+                    tone: HeadingTone::Ink,
+                }.render())
+            }
+            (Lede {
+                text: "Assessment work is priced from a published day rate rather than a range, because a range is not much use when you are comparing two proposals. Here is the whole rate card and the arithmetic.",
+                tone: HeadingTone::Ink,
+            }.render())
+            dl class="border-t border-slate-200 mt-12" { // loom-allow: hairline definition list, same pattern as the /services standards table
+                @for (amount, detail) in rate_card_rows() {
+                    div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-7 py-5 border-b border-slate-200" { // loom-allow: definition row
+                        dt class="font-semibold text-slate-900" { (amount) }
+                        dd class="md:col-span-2 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" { (detail) }
+                    }
+                }
+            }
+            div class="mt-12" { // loom-allow: worked-example block rhythm
+                h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Worked example" }
+                p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
+                    "A web application with roughly " (EXAMPLE_ENDPOINTS) " endpoints and two user roles scopes to "
+                    (days_label(EXAMPLE_HALF_DAYS)) " days of testing. That is " (usd(testing)) " of testing time plus the "
+                    (usd(SETUP_REPORTING_FEE_USD)) " flat fee, so " strong { (usd(total)) } " — agreed in writing before anything starts, "
+                    "with the retest included. If the scope changes mid-engagement, the price conversation happens before the work does."
+                }
+                p class="text-slate-500 text-sm mt-6" { // loom-allow: prose with inline link
+                    "The method behind that number is on the "
+                    (TextLink { label: "services page", href: "/services", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
+                    ", and the report it produces is "
+                    (TextLink { label: "published in full", href: "/sample-report", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
+                    "."
+                }
+            }
+        }
+    };
+    Section {
+        body: &body,
+        theme: SectionTheme::Light,
+        width: SectionWidth::Article,
+        padding: SectionPadding::Loose,
+    }
+    .render()
+}
+
 fn tier_card(tier: &Tier<'_>) -> Markup {
     html! {
         div class="reveal" {
@@ -116,6 +250,8 @@ pub fn render() -> Markup {
         padding: SectionPadding::Default,
     }
     .render();
+
+    let assessment_section = assessment_band();
 
     let promises_body = html! {
         div class="reveal" {
@@ -211,6 +347,7 @@ pub fn render() -> Markup {
             background: HeroBackground::GridLight,
         }.render())
         (tiers_section)
+        (assessment_section)
         (promises_section)
         (dark_section)
         (cta_section)
@@ -263,6 +400,93 @@ mod tests {
     /// Final CTA must point to /contact; otherwise the page can't
     /// produce a conversion.
     #[test]
+    /// The worked example must be arithmetic a reader can redo, and it
+    /// must come from the constants rather than from a number typed into
+    /// prose. A pricing page whose example does not add up is worse than
+    /// one with no example.
+    #[test]
+    fn the_worked_example_adds_up() {
+        let testing = EXAMPLE_HALF_DAYS * DAY_RATE_USD / 2;
+        let total = testing + SETUP_REPORTING_FEE_USD;
+        assert_eq!(testing, 10_400, "testing subtotal changed");
+        assert_eq!(total, 11_600, "worked-example total changed");
+
+        let page = render().into_string();
+        for figure in [
+            usd(testing),
+            usd(total),
+            usd(DAY_RATE_USD),
+            usd(SETUP_REPORTING_FEE_USD),
+        ] {
+            assert!(
+                page.contains(&figure),
+                "the worked example no longer shows {figure}"
+            );
+        }
+        assert!(
+            page.contains("6.5 days"),
+            "the example no longer states the day count it prices"
+        );
+    }
+
+    /// Thousands separators, because $10400 on a pricing page looks like a
+    /// typo and undermines the one thing this page is selling.
+    #[test]
+    fn currency_is_formatted_for_humans() {
+        assert_eq!(usd(1_600), "$1,600");
+        assert_eq!(usd(11_600), "$11,600");
+        assert_eq!(usd(900), "$900");
+        assert_eq!(usd(1_000_000), "$1,000,000");
+        assert_eq!(days_label(13), "6.5");
+        assert_eq!(days_label(4), "2");
+    }
+
+    /// The published rates must equal the ones the quoting tool charges.
+    ///
+    /// A prospect who reads a number here and receives a different one in
+    /// their quote has caught the firm being careless with money, on the
+    /// page that exists to prove it is not. `salesman-quote` lives in a
+    /// sibling repository and is not a build dependency, so this reads its
+    /// source directly and reports plainly when it is not checked out
+    /// rather than passing quietly and pretending it verified something.
+    #[test]
+    fn rate_card_matches_the_quoting_tool() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../PlausiDen-Salesman/crates/salesman-quote/src/lib.rs"
+        );
+        let Ok(src) = std::fs::read_to_string(path) else {
+            eprintln!(
+                "NOTE: {path} is not present, so the published rates were NOT checked against \
+                 the quoting tool. Clone PlausiDen-Salesman alongside this repo to enable it."
+            );
+            return;
+        };
+        for (name, ours) in [
+            ("DAILY_RATE", DAY_RATE_USD),
+            ("SETUP_REPORTING_FEE", SETUP_REPORTING_FEE_USD),
+            ("EXPEDITED_SURCHARGE_PCT", EXPEDITED_SURCHARGE_PCT),
+            ("EXTENDED_RETEST_FEE", EXTENDED_RETEST_FEE_USD),
+        ] {
+            let needle = format!("pub const {name}: u32 = ");
+            let theirs: u32 = src
+                .split(&needle)
+                .nth(1)
+                .unwrap_or_else(|| panic!("{name} not found in salesman-quote"))
+                .chars()
+                .take_while(|c| c.is_ascii_digit() || *c == '_')
+                .filter(|c| *c != '_')
+                .collect::<String>()
+                .parse()
+                .unwrap_or_else(|e| panic!("could not parse {name}: {e}"));
+            assert_eq!(
+                ours, theirs,
+                "the website publishes {name} as {ours} but salesman-quote charges {theirs}; \
+                 a prospect would read one number here and receive another in their quote"
+            );
+        }
+    }
+
     fn final_cta_points_to_contact() {
         let s = render().into_string();
         assert!(s.contains(r#"href="/contact""#));

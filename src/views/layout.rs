@@ -280,7 +280,10 @@ const FOOTER_COMPANY: &[FooterItem<'static>] = &[
     // being present and Published; the route 404s otherwise.
     FooterItem::Link {
         href: "/docs/why-pps",
-        label: "Why PPS",
+        // The page's own title is "Why Plausible Privacy Software". A footer
+        // that shows only the acronym asks a first-time reader to decode a
+        // product name before they know the product exists.
+        label: "Plausible Privacy Software",
     },
     // Same destination as the nav, so it carries the same label. A page that is
     // "Insights" in the header and "Field Notes" in the footer reads as two
