@@ -259,7 +259,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
         let body = to_bytes(resp.into_body(), 64 * 1024).await.unwrap();
         let s = std::str::from_utf8(&body).unwrap();
-        assert!(s.contains("Field Notes"));
+        assert!(s.contains("Insights"));
         assert!(s.contains("/blog/federated-rule-learning"));
     }
 
@@ -718,22 +718,26 @@ mod cta_naming {
         "Schedule an intake call",
         "Want to start a conversation",
         "Encrypted Inquiry",
+        // The blog was "Field Notes" in the badge, the back-link, the RSS
+        // title and three places on /subscribe, while the nav and footer said
+        // "Insights". One section, two names, depending which page you landed
+        // on first.
+        "Field Notes",
     ];
 
     const CURRENT_CTA_LABEL: &str = "Book a scoping call";
 
     #[test]
     fn no_page_uses_a_retired_call_to_action_name() {
-        let pages: Vec<String> = vec![
-            crate::views::home::render().into_string(),
-            crate::views::sample_report::render().into_string(),
-            crate::views::how_we_work::render().into_string(),
-            crate::views::pricing::render().into_string(),
-            crate::views::services::render().into_string(),
-            crate::views::case_studies::render().into_string(),
-            crate::views::capabilities::render().into_string(),
-            crate::views::about::render().into_string(),
-        ];
+        // Use the shared page list rather than a private one. A guard that
+        // walks only the routes someone remembered to add will keep passing
+        // for the pages nobody remembered — which is how "Field Notes"
+        // survived on the blog and subscribe pages after the rest of the site
+        // moved to "Insights".
+        let pages: Vec<String> = super::utility_class_coverage::rendered_pages()
+            .into_iter()
+            .map(|(_, html)| html)
+            .collect();
         for (i, page) in pages.iter().enumerate() {
             for label in RETIRED_CTA_LABELS {
                 assert!(
@@ -864,8 +868,13 @@ mod utility_class_coverage {
     /// component marker whose visual treatment comes from the utilities sitting
     /// next to it. None of these should be "fixed" by inventing CSS for them.
     fn is_marker(class: &str) -> bool {
-        matches!(class, "group" | "peer" | "shadcn-card" | "lucide")
-            || class.starts_with("lucide-")
+        // `prose`/`prose-slate` are Tailwind Typography plugin classes the
+        // frozen bundle never contained. Left inert deliberately — see the
+        // blog gap-fill note in static/motion.css.
+        matches!(
+            class,
+            "group" | "peer" | "shadcn-card" | "lucide" | "prose" | "prose-slate"
+        ) || class.starts_with("lucide-")
             || class.starts_with("group/")
             || class.starts_with("peer/")
     }
@@ -947,7 +956,7 @@ mod utility_class_coverage {
     /// exactly the same set of pages — a route added to one and not the other
     /// is a hole neither test would report.
     pub(super) fn rendered_pages() -> Vec<(&'static str, String)> {
-        vec![
+        let mut pages: Vec<(&'static str, String)> = vec![
             ("/", crate::views::home::render().into_string()),
             ("/services", crate::views::services::render().into_string()),
             ("/pricing", crate::views::pricing::render().into_string()),
@@ -971,7 +980,20 @@ mod utility_class_coverage {
             ("/contact", crate::views::contact::render().into_string()),
             ("/feedback", crate::views::feedback::render().into_string()),
             ("/404", crate::views::not_found::render().into_string()),
-        ]
+        ];
+        // Blog posts too. They were missing, and the gap was not academic: the
+        // guard passed for weeks while every post rendered bullet lists with no
+        // bullets and inline code with no background, because `list-disc`,
+        // `bg-slate-100` and `px-1.5` are not in the frozen bundle. A guard
+        // that only walks the pages someone remembered to list will keep
+        // finding nothing wherever nobody remembered.
+        for post in crate::views::posts::POSTS {
+            if let Some(markup) = crate::views::blog::post(post.slug) {
+                pages.push((post.slug, markup.into_string()));
+            }
+        }
+        pages.push(("/blog", crate::views::blog::index().into_string()));
+        pages
     }
 
     #[test]

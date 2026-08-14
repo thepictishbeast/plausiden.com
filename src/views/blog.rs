@@ -47,7 +47,7 @@ pub fn index() -> Markup {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-slate-50" { // loom-allow: grid-fleck hero shell — pt-32/44 cadence + fleck overlay don't fit Loom Section
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — decorative pattern, no Loom primitive
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl with z-10 fleck stacking
-                div class="mb-6" { (Badge { label: "Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
+                div class="mb-6" { (Badge { label: "Insights", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-4" {
                     (Heading {
                         text: "Notes from the build floor.",
@@ -105,7 +105,7 @@ pub fn post(slug: &str) -> Option<Markup> {
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck — same pattern as index hero
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: post-hero container max-w-3xl with fleck stacking
                 (TextLink {
-                    label: "← Field Notes",
+                    label: "← Insights",
                     href: "/blog",
                     variant: TextLinkVariant::Subtle,
                     size: TextLinkSize::Small,
@@ -214,7 +214,7 @@ mod tests {
     #[test]
     fn index_lists_known_post() {
         let s = index().into_string();
-        assert!(s.contains("Field Notes"));
+        assert!(s.contains("Insights"));
         assert!(s.contains("Federated rule learning"));
         // Slug-derived URL on the card
         assert!(s.contains("/blog/federated-rule-learning"));

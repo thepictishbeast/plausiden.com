@@ -247,7 +247,7 @@ pub async fn blog_rss() -> impl IntoResponse {
     out.push_str(
         r#"<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>PlausiDen — Field Notes</title>
+  <title>PlausiDen — Insights</title>
   <subtitle>Notes on infrastructure, privacy, and how we work.</subtitle>
   <link href="https://plausiden.com/blog" rel="alternate"/>
   <link href="https://plausiden.com/blog/rss.xml" rel="self"/>

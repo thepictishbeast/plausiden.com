@@ -1,4 +1,4 @@
-//! `/subscribe` — non-technical instructions for following Field Notes
+//! `/subscribe` — non-technical instructions for following Insights
 //! via RSS / Atom.
 //!
 //! The bare `/blog/rss.xml` link rendered as XML in most browsers,
@@ -73,7 +73,7 @@ pub fn render() -> Markup {
         section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: custom hero shell — pt-32/44 cadence below Loom Section padding scale
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-3xl" { // loom-allow: hero container max-w-3xl with z-10 stacking
                 // loom-allow: eyebrow pill — recurring badge pattern; future Badge::Eyebrow primitive.
-                div class="mb-6" { (Badge { label: "Following Field Notes", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
+                div class="mb-6" { (Badge { label: "Following Insights", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-4" {
                     (Heading {
                         text: "Subscribe.",
@@ -83,7 +83,7 @@ pub fn render() -> Markup {
                     }.render())
                 }
                 (Lede {
-                    text: "Field Notes ships as an RSS feed — a small file your computer or phone checks for new posts so you don't have to. There's no account, no email signup, no analytics tracking who's reading what. Pick a reader app, paste in the feed link, done.",
+                    text: "Insights ships as an RSS feed — a small file your computer or phone checks for new posts so you don't have to. There's no account, no email signup, no analytics tracking who's reading what. Pick a reader app, paste in the feed link, done.",
                     tone: HeadingTone::Ink,
                 }.render())
             }
@@ -221,7 +221,7 @@ pub fn render() -> Markup {
                 }.render())
                 p class="text-slate-600 leading-relaxed" { // loom-allow: prose with inline link; standard BodyText doesn't support inline children
                     "If a reader app sounds like more setup than it's worth, bookmark "
-                    (TextLink { label: "the Field Notes index", href: "/blog", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
+                    (TextLink { label: "the Insights index", href: "/blog", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     " and check back when the mood strikes. New posts go up at the top."
                 }
             }
