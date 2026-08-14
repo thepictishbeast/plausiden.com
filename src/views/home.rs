@@ -126,7 +126,17 @@ pub fn render() -> Markup {
                         }
                         div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-3" { // loom-allow: CTA cluster with delay-3 animation hook
                             a href="/contact" {
-                                button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-10 text-lg px-8 py-6 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all" { // loom-allow: hero primary CTA — has hover-elevate + active-elevate-2 hooks Loom Button doesn't emit
+                                // `hover:bg-primary/90`, not `hover:-translate-y-0.5`.
+                                // Measured across five routes: of eleven "Book a
+                                // scoping call" buttons, ten shift their background
+                                // on hover and this one — alone — moved instead.
+                                // One action, one label, two behaviours, and the odd
+                                // one out was the most important button on the site.
+                                // Movement is also the signal a card now uses to mean
+                                // "this is a link" (see FeatureCard), so spending it
+                                // on a button that is already obviously a button
+                                // muddies the one place it carries meaning.
+                                button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-10 text-lg px-8 py-6 rounded-xl shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all" { // loom-allow: hero primary CTA — has hover-elevate + active-elevate-2 hooks Loom Button doesn't emit
                                     // Same words as the nav CTA. It was "Get a
                                     // Free Consultation" here and "Book a
                                     // scoping call" there — one action should
