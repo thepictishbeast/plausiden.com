@@ -1,4 +1,4 @@
-//! POST `/contact` form handler — receives the Encrypted Inquiry submission,
+//! POST `/contact` form handler — receives the contact-form submission,
 //! rate-limits per IP, and emails the message to `team@plausiden.com` via
 //! the local Postfix on `127.0.0.1:25` (DKIM-signed by opendkim).
 //!
@@ -260,26 +260,116 @@ fn validate(f: &InquiryForm) -> Result<(), &'static str> {
     Ok(())
 }
 
-fn ack_page(message: &str) -> Markup {
+/// What a sender is told when the form is accepted.
+///
+/// SECURITY: this exact string is also returned for the honeypot and
+/// spam-heuristic drops, so a bot cannot tell a filtered submission from a
+/// delivered one. The three paths must stay byte-identical — status code
+/// included — or the filtering becomes detectable and adaptable. Pinned by
+/// `silent_drops_are_indistinguishable_from_success`.
+///
+/// It describes what happens next in the same terms as the rest of the site
+/// and deliberately states no response time. A reply-within commitment is
+/// Paul's to make, not this page's to invent.
+const RECEIVED_MESSAGE: &str = "We have your message and will reply to the address you gave us. \
+     If a scoping call makes sense, we will suggest a time: it runs 45 minutes, we sign a mutual \
+     NDA first, and you get a written proposal with a specific scope and a specific price \
+     afterwards. If we are not the right firm for the work, we will say so rather than book a call \
+     to find out.";
+
+/// Where the acknowledgement page sends the reader next.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum AckExit {
+    /// Nothing more to do here.
+    Home,
+    /// Something needs correcting, so the form is the useful destination.
+    ///
+    /// The copy tells the reader that going back preserves what they typed.
+    /// The Loom `TextInput` has no `value` field, so the server cannot
+    /// repopulate the form without changing a component shared with another
+    /// tenant; browser back-forward cache restores form state on its own, and
+    /// saying so is honest and costs nothing.
+    Form,
+}
+
+/// Acknowledgement page shown after a POST to `/contact`.
+///
+/// One shape for every outcome so the page a sender lands on always looks
+/// like the rest of the site. Previously this was branded "Encrypted
+/// Inquiry", a name retired from every other page earlier — it survived here
+/// because the page renders only in response to a POST and no guard walked it.
+fn ack_page(title: &str, eyebrow: &str, headline: &str, message: &str, exit: AckExit) -> Markup {
+    let (label, href) = match exit {
+        AckExit::Home => ("← Back home", "/"),
+        AckExit::Form => ("← Back to the form", "/contact"),
+    };
     let cta = html! {
         (TextLink {
-            label: "← Back home",
-            href: "/",
+            label: label,
+            href: href,
             variant: TextLinkVariant::PrimaryBold,
             size: TextLinkSize::Default,
         }.render())
     };
     let body = html! {
         (Hero {
-            eyebrow: Some("Encrypted Inquiry"),
-            headline_lead: "Message received.",
+            eyebrow: Some(eyebrow),
+            headline_lead: headline,
             headline_accent: None,
             subheadline: message,
             cta: Some(&cta),
             background: HeroBackground::GridLight,
         }.render())
     };
-    page("Encrypted Inquiry — PlausiDen", "/contact", body)
+    page(title, "/contact", body)
+}
+
+/// Turn a validator code into something a sender can act on.
+///
+/// The old page said "Your submission didn't pass basic validation. Please
+/// correct and retry." — which does not say what was wrong, on the one page
+/// where the business earns anything. Naming the field costs nothing and
+/// leaks nothing: every limit here is already visible as a `maxlength`
+/// attribute in the markup the sender's browser received.
+fn validation_message(code: &str) -> String {
+    let detail = match code {
+        "name too long" => "the name field is over its 100-character limit",
+        "reply-to too long" => "the email address is over its 200-character limit",
+        "phone too long" => "the phone number is over its 50-character limit",
+        "company too long" => "the company field is over its 200-character limit",
+        "service too long" => "the service selection was not one of the listed options",
+        "message required" => "the message was empty",
+        "message too long" => "the message is over its 5,000-character limit",
+        // Defensive: a new validator rule with no case here should still
+        // produce a sentence rather than an empty gap.
+        _ => "one of the fields did not pass validation",
+    };
+    format!(
+        "It looks like {detail}. Going back will return you to the form with what you typed still \
+         in it — correct that one field and send again."
+    )
+}
+
+/// The accepted-submission page. Success, honeypot and spam all render this.
+fn ack_received() -> Markup {
+    ack_page(
+        "Message received — PlausiDen",
+        "Next steps",
+        "Message received.",
+        RECEIVED_MESSAGE,
+        AckExit::Home,
+    )
+}
+
+/// Something the sender can fix.
+fn ack_problem(message: &str) -> Markup {
+    ack_page(
+        "Message not sent — PlausiDen",
+        "Contact",
+        "That did not send.",
+        message,
+        AckExit::Form,
+    )
 }
 
 /// POST `/contact` handler.
@@ -302,11 +392,7 @@ pub(crate) async fn submit(
     // detect filtering and adapt) and skip all I/O.
     if !form.website.trim().is_empty() {
         tracing::warn!("inquiry honeypot tripped — silent drop");
-        return (
-            StatusCode::ACCEPTED,
-            ack_page("Your message has been delivered. We'll reply via the address you provided."),
-        )
-            .into_response();
+        return (StatusCode::ACCEPTED, ack_received()).into_response();
     }
 
     // Heuristic spam filter for contact-form-spam-as-a-service bots
@@ -314,29 +400,25 @@ pub(crate) async fn submit(
     // — bots adapt to honest 4xx responses; they don't adapt to 202s.
     if is_likely_spam(&form) {
         tracing::warn!("inquiry classified as spam — silent drop");
-        return (
-            StatusCode::ACCEPTED,
-            ack_page("Your message has been delivered. We'll reply via the address you provided."),
-        )
-            .into_response();
+        return (StatusCode::ACCEPTED, ack_received()).into_response();
     }
 
     if state.limiter.check().is_err() {
         tracing::warn!("inquiry rate-limited");
         return (
             StatusCode::TOO_MANY_REQUESTS,
-            ack_page("The inbox is being flooded right now — please try again in a minute."),
+            ack_problem(
+                "We are receiving an unusual number of messages right now and this one was not \
+                 accepted. Try again in a minute, or email team@plausiden.com directly — that \
+                 reaches the same place.",
+            ),
         )
             .into_response();
     }
 
     if let Err(e) = validate(&form) {
         tracing::warn!(error = e, "inquiry rejected at validation");
-        return (
-            StatusCode::BAD_REQUEST,
-            ack_page("Your submission didn't pass basic validation. Please correct and retry."),
-        )
-            .into_response();
+        return (StatusCode::BAD_REQUEST, ack_problem(&validation_message(e))).into_response();
     }
 
     // Compose. We deliberately keep the from/to identity stable so DKIM
@@ -391,7 +473,10 @@ pub(crate) async fn submit(
     let Ok(email) = builder.multipart(MultiPart::alternative_plain_html(body, html)) else {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
-            ack_page("Server error composing the message. Try again later."),
+            ack_problem(
+                "Something broke on our side while handling the message — this one is our fault, \
+                 not yours. Please email team@plausiden.com directly.",
+            ),
         )
             .into_response();
     };
@@ -399,20 +484,19 @@ pub(crate) async fn submit(
     match state.mailer.send(email).await {
         Ok(_) => {
             tracing::info!("inquiry sent");
-            (
-                StatusCode::ACCEPTED,
-                ack_page(
-                    "Your message has been delivered. We'll reply via the address you provided.",
-                ),
-            )
-                .into_response()
+            (StatusCode::ACCEPTED, ack_received()).into_response()
         }
         Err(e) => {
             tracing::warn!(error = %e, "inquiry SMTP send failed");
             (
                 StatusCode::ACCEPTED,
                 ack_page(
-                    "Your message has been queued. If we don't reply, email team@plausiden.com directly.",
+                    "Message received — PlausiDen",
+                    "Next steps",
+                    "Message received.",
+                    "Your message is queued for delivery. If you do not hear back, email \
+                     team@plausiden.com directly — that reaches the same inbox.",
+                    AckExit::Home,
                 ),
             )
                 .into_response()
@@ -800,5 +884,126 @@ mod tests {
                      schedule a call to discuss your DR offering?"
             .into();
         assert!(!is_likely_spam(&f));
+    }
+}
+
+#[cfg(test)]
+mod acknowledgement_tests {
+    use super::*;
+
+    /// SECURITY: the honeypot and spam heuristics drop a submission
+    /// silently and return the *same* page a real sender gets, so a bot
+    /// cannot tell filtered from delivered and adapt. Three call sites
+    /// render this; if someone later personalises the success page — a
+    /// name, a reference number, anything — the drops stop matching and
+    /// the filtering becomes detectable. This pins the shape.
+    #[test]
+    fn silent_drops_are_indistinguishable_from_success() {
+        let a = ack_received().into_string();
+        let b = ack_received().into_string();
+        assert_eq!(a, b, "the acknowledgement page is not deterministic");
+        assert!(
+            a.contains(
+                RECEIVED_MESSAGE
+                    .split(" If a scoping call")
+                    .next()
+                    .unwrap_or(RECEIVED_MESSAGE)
+            ),
+            "the acknowledgement page no longer carries the shared received message"
+        );
+    }
+
+    /// The name retired everywhere else must not survive here. This page
+    /// renders only in response to a POST, which is exactly why the
+    /// site-wide naming guard never walked it and the old wording sat
+    /// here unnoticed.
+    #[test]
+    fn no_retired_naming_on_the_acknowledgement_pages() {
+        let pages = [
+            ack_received().into_string(),
+            ack_problem("test").into_string(),
+        ];
+        for page in &pages {
+            for retired in [
+                "Encrypted Inquiry",
+                "Secure Drop",
+                "Get a Free Consultation",
+                "Start Your Journey",
+            ] {
+                assert!(
+                    !page.contains(retired),
+                    "an acknowledgement page still uses the retired name {retired:?}"
+                );
+            }
+        }
+    }
+
+    /// A sender who gets bounced needs to know which field to fix and
+    /// how to get back to what they typed. "Please correct and retry"
+    /// satisfies neither.
+    #[test]
+    fn validation_messages_name_the_field_and_the_way_back() {
+        for code in [
+            "name too long",
+            "reply-to too long",
+            "phone too long",
+            "company too long",
+            "service too long",
+            "message required",
+            "message too long",
+        ] {
+            let msg = validation_message(code);
+            assert!(
+                msg.len() > 60,
+                "validation message for {code:?} is too terse to act on: {msg:?}"
+            );
+            assert!(
+                msg.contains("Going back"),
+                "validation message for {code:?} does not tell the sender how to recover"
+            );
+            assert!(
+                !msg.contains("did not pass validation"),
+                "validation message for {code:?} fell through to the generic case; \
+                 every code the validator can emit needs its own sentence"
+            );
+        }
+    }
+
+    /// The error page must route back to the form, not to the homepage.
+    /// Sending someone who mistyped an address back to the front door is
+    /// how a lead is lost.
+    #[test]
+    fn problem_pages_lead_back_to_the_form() {
+        let page = ack_problem("something went wrong").into_string();
+        assert!(
+            page.contains(r#"href="/contact""#),
+            "the problem page does not link back to the form"
+        );
+        let received = ack_received().into_string();
+        assert!(
+            received.contains(r#"href="/""#),
+            "the received page should offer the way home"
+        );
+    }
+
+    /// No response-time commitment may appear here. Whether PlausiDen
+    /// replies within a day is Paul's promise to make; a page that
+    /// invents one creates an obligation nobody agreed to.
+    #[test]
+    fn promises_no_response_time() {
+        let page = ack_received().into_string().to_lowercase();
+        for sla in [
+            "within one business day",
+            "within 24 hours",
+            "same day",
+            "within the hour",
+            "reply within",
+        ] {
+            assert!(
+                !page.contains(sla),
+                "the acknowledgement page promises {sla:?}; a response-time \
+                 commitment is Paul's to make, not this page's to invent"
+            );
+        }
     }
 }
