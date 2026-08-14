@@ -31,7 +31,11 @@ run() {
     fi
 }
 
-SRC_DIR="/home/admin/plausiden-site"
+# Resolved from this script's own location, so the deploy always ships the
+# checkout it was invoked from. The previous hardcoded /home/admin/plausiden-site
+# stopped existing, which meant every deploy through this script failed at step 1
+# and the real deploys were being done by hand.
+SRC_DIR="${PD_SRC_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 DST_DIR="/opt/plausiden-site"
 BIN_SRC="$SRC_DIR/target/release/plausiden-site"
 BIN_DST="$DST_DIR/plausiden-site"
@@ -48,6 +52,16 @@ fi
 
 # 2. Stage new binary at a non-busy filename.
 run cp "$BIN_SRC" "$STAGING"
+
+# 2a. Force mode and ownership rather than inheriting them from the build tree.
+#
+# cargo writes target/release with the umask of whoever built it. A build tree
+# under a 750 home directory yields a 750 binary, cp preserves that, and the
+# service — which runs as `plausiden`, not root — then fails at EXEC with
+# "Permission denied" (status 203). That took the site down once. The mode is a
+# property of the deployment, so set it explicitly instead of hoping.
+run chmod 755 "$STAGING"
+run chown root:root "$STAGING"
 
 # 3. Atomic rename onto the busy executable. Linux allows this.
 run mv -f "$STAGING" "$BIN_DST"
