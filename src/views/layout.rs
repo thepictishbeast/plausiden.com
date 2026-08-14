@@ -544,6 +544,22 @@ mod motion_css_guards {
 
     const MOTION_CSS: &str = include_str!("../../static/motion.css");
 
+    /// Drop /* ... */ blocks so assertions inspect declarations rather than the
+    /// commentary about them.
+    fn strip_comments(css: &str) -> String {
+        let mut out = String::with_capacity(css.len());
+        let mut rest = css;
+        while let Some(start) = rest.find("/*") {
+            out.push_str(&rest[..start]);
+            match rest[start + 2..].find("*/") {
+                Some(end) => rest = &rest[start + 2 + end + 2..],
+                None => return out, // unterminated; the balance test reports it
+            }
+        }
+        out.push_str(rest);
+        out
+    }
+
     #[test]
     fn nav_toggle_display_stays_inside_a_mobile_media_query() {
         // REGRESSION-GUARD. A tap-target fix once set `display: inline-flex` on
@@ -568,6 +584,46 @@ mod motion_css_guards {
         assert!(
             MOTION_CSS.contains("max-width: 1023.98px"),
             "the mobile scope for the nav toggle is missing"
+        );
+    }
+
+    #[test]
+    fn css_comments_are_balanced() {
+        // A malformed comment silently kills the rules that follow it. That is
+        // exactly what happened while fixing the invisible-heading bug: an edit
+        // left explanatory prose outside a comment block, the parser discarded
+        // the rule after it, and two rebuild-and-measure cycles were spent
+        // wondering why a correct selector "did not work". Unbalanced markers
+        // are cheap to detect and expensive to debug.
+        assert_eq!(
+            MOTION_CSS.matches("/*").count(),
+            MOTION_CSS.matches("*/").count(),
+            "unbalanced CSS comment markers — rules after the break are dropped"
+        );
+    }
+
+    #[test]
+    fn dark_band_headings_can_inherit_their_colour() {
+        // The bundle's base rule paints every h1-h6 slate-900, and an element
+        // rule beats an inherited value, so a plain <h2> on a dark band renders
+        // invisible. The homepage shipped that way. This override lets a
+        // heading with no colour of its own follow its band.
+        //
+        // The exclusion list must name colour utilities only: an earlier
+        // version excluded [class*="text-"], which also caught size utilities
+        // like text-4xl and matched nothing.
+        assert!(
+            MOTION_CSS.contains(".text-white"),
+            "dark-band heading override is missing"
+        );
+        // Inspect the DECLARATIONS, not the prose. The comment above that
+        // override quotes the broken selector while explaining why it was
+        // wrong, so a substring search over the whole file flags the
+        // explanation as the defect — which it did, on the first run.
+        assert!(
+            !strip_comments(MOTION_CSS).contains(r#":not([class*="text-"])"#),
+            "exclusion is too broad — it would also exclude size utilities like \
+             text-4xl, so the rule would silently match nothing"
         );
     }
 

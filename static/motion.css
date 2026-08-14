@@ -178,6 +178,39 @@
   left: 0;
 }
 
+/* ------------------------------------------------------ headings on dark -- */
+
+/* The frozen bundle contains a base rule:
+     h1,h2,h3,h4,h5,h6 { ... color: rgb(15 23 42) }
+   An element-selector rule beats an INHERITED value, so a heading inside a
+   dark band marked `text-white` does not turn white — it stays slate-900 and
+   disappears. That is not hypothetical: the homepage's "What working with us
+   actually looks like" heading rendered slate-900 on a slate-900 section,
+   contrast ratio 1.0, leaving a 90px hole between the eyebrow and the
+   paragraph. It shipped that way, and its predecessor had the same fault, so
+   the section heading on the front page had been invisible for some time.
+   Nothing failed; the markup is perfectly reasonable.
+
+   Fixing the one heading would leave the trap armed for the next person who
+   writes a plain <h2> on a dark band. Instead: inside a container that has
+   declared itself light-on-dark, a heading that specifies no colour of its own
+   inherits, which is what the author expected in the first place. Headings
+   that DO carry an explicit colour class are untouched, so a white card inside
+   a dark section still gets its dark heading.
+
+   The exclusion list names colour utilities specifically. A first attempt used
+   :not([class*="text-"]), which also excluded every SIZE utility — the very
+   heading being fixed carries `text-4xl`, so the rule matched nothing and the
+   heading stayed invisible. Surveyed the rendered markup: the only colour
+   classes that appear on headings anywhere on this site are text-slate-900 and
+   text-white, so those are what must be allowed to win. */
+.text-white
+  :is(h1, h2, h3, h4, h5, h6):not([class*="text-slate"]):not([class*="text-white"]):not(
+    [class*="text-primary"]
+  ) {
+  color: inherit;
+}
+
 /* ---------------------------------------------------------------- depth -- */
 
 /* A censussed problem, not a taste one. Across eight pages the site used six
