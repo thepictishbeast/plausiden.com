@@ -178,6 +178,46 @@
   left: 0;
 }
 
+/* ---------------------------------------------------------------- depth -- */
+
+/* A censussed problem, not a taste one. Across eight pages the site used six
+   shadow levels, and the two heaviest carried most of the weight: shadow-xl 34
+   times and shadow-2xl twice. The frozen bundle defines them as pure black —
+   shadow-2xl is `0 25px 50px -12px rgb(0 0 0 / .25)` — and a 25%-black 50px
+   blur is the single most reliable way to make a page look like a 2015
+   template. Big soft black clouds read as cheap; tight, low-opacity, slightly
+   ink-tinted shadows read as considered.
+
+   Two changes, both here rather than in markup so no page has to be touched:
+   1. Every level gets softer and is tinted with slate-900 (the body ink)
+      instead of pure black, so shadows sit in the same colour family as the
+      type rather than muddying it.
+   2. shadow-2xl is collapsed onto shadow-xl. Six levels of elevation is more
+      than this site distinguishes between; five is already generous.
+
+   Tailwind's utilities set box-shadow from the --tw-shadow custom property, so
+   redefining just that property here is enough — this file loads after the
+   bundle, and the bundle's own box-shadow declaration picks up the new value. */
+.shadow-sm {
+  --tw-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+}
+
+.shadow-md {
+  --tw-shadow:
+    0 2px 6px -1px rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+}
+
+.shadow-lg {
+  --tw-shadow:
+    0 8px 20px -6px rgb(15 23 42 / 0.1), 0 2px 6px -2px rgb(15 23 42 / 0.06);
+}
+
+.shadow-xl,
+.shadow-2xl {
+  --tw-shadow:
+    0 14px 32px -12px rgb(15 23 42 / 0.12), 0 3px 8px -3px rgb(15 23 42 / 0.06);
+}
+
 /* ------------------------------------------------------------ tap targets -- */
 
 /* Measured on a 390px viewport: the menu button rendered 40x40 and every link
@@ -185,18 +225,28 @@
    and below that a thumb starts hitting the wrong row — on the nav, which is
    the one control every mobile visitor uses.
    Set as min-* so nothing shrinks and the existing padding still applies. */
-#mobile-menu-toggle {
-  min-width: 44px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Scoped below the lg breakpoint on purpose. An earlier version of this rule
+   set `display: inline-flex` unconditionally; because this file loads after the
+   Tailwind bundle, it beat `lg:hidden` and the menu button appeared on desktop
+   next to the full nav — a regression introduced by an accessibility fix and
+   caught only by looking at a screenshot, which is the argument for looking at
+   screenshots. Setting display anywhere a breakpoint also sets it is a fight
+   this file should not pick, so the whole block now lives where the button is
+   meant to be visible. */
+@media (max-width: 1023.98px) {
+  #mobile-menu-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-#mobile-menu a {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
+  #mobile-menu a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
 }
 
 /* --------------------------------------------------------------- headings -- */

@@ -536,3 +536,50 @@ mod tests {
         assert!(s.contains("text-slate-600"));
     }
 }
+
+#[cfg(test)]
+mod motion_css_guards {
+    //! Guards on static/motion.css. It loads last, so anything it declares beats
+    //! the Tailwind bundle — which is the point, and also the hazard.
+
+    const MOTION_CSS: &str = include_str!("../../static/motion.css");
+
+    #[test]
+    fn nav_toggle_display_stays_inside_a_mobile_media_query() {
+        // REGRESSION-GUARD. A tap-target fix once set `display: inline-flex` on
+        // #mobile-menu-toggle unconditionally. Because this file loads after the
+        // bundle it beat `lg:hidden`, and the menu button shipped to production
+        // visible on desktop beside the full nav. Nothing failed; it took
+        // looking at a screenshot to notice.
+        //
+        // The rule may exist, but only where the button is meant to be shown.
+        let Some(idx) = MOTION_CSS.find("#mobile-menu-toggle") else {
+            return; // rule removed entirely is also fine
+        };
+        let before = &MOTION_CSS[..idx];
+        let opened = before.matches("@media").count();
+        let closed_blocks = before.matches("\n}").count();
+        assert!(
+            opened > closed_blocks.saturating_sub(1) || before.contains("max-width: 1023.98px"),
+            "#mobile-menu-toggle must be scoped to a mobile media query — an \
+             unscoped display here overrides lg:hidden and shows the menu \
+             button on desktop"
+        );
+        assert!(
+            MOTION_CSS.contains("max-width: 1023.98px"),
+            "the mobile scope for the nav toggle is missing"
+        );
+    }
+
+    #[test]
+    fn shadows_are_ink_tinted_not_pure_black() {
+        // The bundle's heavy shadows are pure black (shadow-2xl is 25% black at
+        // 50px blur), which is what makes a page read as a template. These are
+        // overridden with slate-900-tinted, lower-opacity values.
+        assert!(MOTION_CSS.contains(".shadow-xl"), "shadow scale is overridden");
+        assert!(
+            MOTION_CSS.contains("rgb(15 23 42 /"),
+            "shadows must be tinted with the body ink, not pure black"
+        );
+    }
+}
