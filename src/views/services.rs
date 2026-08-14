@@ -194,9 +194,21 @@ pub fn render() -> Markup {
 
         (Hero {
             eyebrow: Some("Our services"),
-            headline_lead: "Comprehensive IT,",
-            headline_accent: Some("specifically scoped."),
-            subheadline: "Eight areas of work, for organizations that want infrastructure they can audit, retain and eventually run without us. Most firms need two or three of them. Pick the one that is biting you, or book a scoping call and we will work out where to start.",
+            // Was "Comprehensive IT, specifically scoped." — and "comprehensive"
+            // is the one word on this page that every competitor can also type.
+            // It asserts nothing and it is a half-step from the banned
+            // "comprehensive solutions".
+            //
+            // The claim worth making was already here, sitting in the third
+            // sentence of the subheadline: most firms need two or three of the
+            // eight. That is a firm telling you it does not intend to sell you
+            // everything, which is not a line the scan-and-bill end of this
+            // market can print. So it moves up, and the subheadline stops
+            // repeating the count. `headline_number_matches_the_service_list`
+            // keeps "Eight" honest if a service is ever added or dropped.
+            headline_lead: "Eight services.",
+            headline_accent: Some("Most firms need two or three."),
+            subheadline: "For organizations that want infrastructure they can audit, retain and eventually run without us. Pick the one that is biting you, or book a scoping call and we will work out where to start.",
             cta: None,
             background: HeroBackground::GridLight,
         }.render())
@@ -552,6 +564,59 @@ mod tests {
     #[test]
     fn renders_nonempty() {
         assert!(render().into_string().len() > 12_000);
+    }
+
+    /// The headline counts the services, so it must count them correctly.
+    ///
+    /// "Eight services." is a checkable claim printed above a list a reader can
+    /// count, which is the point of using a number instead of "comprehensive".
+    /// It is also the kind of claim that rots silently: add a ninth service and
+    /// the page starts lying in its largest text, with nothing to notice.
+    ///
+    /// Spelled out rather than computed because the site writes numbers as
+    /// words, and a `match` from 8 to "Eight" would be more machinery than the
+    /// problem deserves. This asserts the word and the list agree instead.
+    #[test]
+    fn headline_number_matches_the_service_list() {
+        const SPELLED: [(usize, &str); 4] = [(7, "Seven"), (8, "Eight"), (9, "Nine"), (10, "Ten")];
+        let expected = SPELLED
+            .iter()
+            .find(|(n, _)| *n == SERVICES.len())
+            .map(|(_, word)| *word)
+            .unwrap_or_else(|| {
+                panic!(
+                    "SERVICES has {} entries and this test has no word for that; \
+                     add it and update the headline",
+                    SERVICES.len()
+                )
+            });
+        let page = render().into_string();
+        assert!(
+            page.contains(&format!("{expected} services.")),
+            "the page lists {} services but its headline does not say {expected:?}",
+            SERVICES.len()
+        );
+    }
+
+    /// The headline must not fall back on a claim any competitor could print.
+    ///
+    /// It read "Comprehensive IT, specifically scoped." for a while. Every IT
+    /// firm on earth can call itself comprehensive; the word carries no
+    /// information and sits one step from the banned "comprehensive solutions".
+    #[test]
+    fn headline_makes_a_claim_a_competitor_could_not_copy() {
+        let page = render().into_string();
+        for empty in [
+            "Comprehensive IT",
+            "comprehensive solutions",
+            "full-service",
+        ] {
+            assert!(
+                !page.contains(empty),
+                "{empty:?} is back on /services — it asserts nothing a competitor \
+                 could not also assert"
+            );
+        }
     }
 
     /// Every service section has a contact link — the user-facing
