@@ -18,7 +18,7 @@ use maud::Markup;
 
 use super::template::{Capability, EngagementStep, VerticalLanding, render_vertical_landing};
 
-const DESCRIPTION: &str = "IT infrastructure designed around source confidentiality. Encrypted source channels, threat-modeled endpoints, Tor onion publication, subpoena-ready records discipline. Built for newsrooms whose adversaries include state actors and well-resourced corporate counsel.";
+const DESCRIPTION: &str = "IT built around source confidentiality: encrypted source channels, threat-modeled endpoints, Tor onion publication, subpoena-ready records.";
 
 /// Render the journalism vertical landing page.
 #[must_use]
@@ -31,7 +31,7 @@ pub fn render() -> Markup {
     let svg_audit = icons::CLIPBOARD_CHECK.render();
 
     render_vertical_landing(&VerticalLanding {
-        title: "Journalism IT — PlausiDen",
+        title: "Newsroom IT — Source Confidentiality — PlausiDen",
         path: "/solutions/journalism",
         description: DESCRIPTION,
 

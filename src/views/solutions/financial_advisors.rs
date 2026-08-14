@@ -12,7 +12,7 @@ use maud::Markup;
 
 use super::template::{Capability, VerticalLanding, render_vertical_landing};
 
-const DESCRIPTION: &str = "IT infrastructure for small RIAs and wealth-management practices. SEC custody-rule-aware, SOC 2-friendly, BCP-prepared. We design the technical posture custodians and clients are starting to ask about — before they ask.";
+const DESCRIPTION: &str = "IT for small RIAs and wealth-management practices: SEC custody-rule-aware, SOC 2-friendly, and BCP-prepared. Sized to a practice, not a bank.";
 
 /// Render `/solutions/financial-advisors`.
 #[must_use]
@@ -24,7 +24,7 @@ pub fn render() -> Markup {
     let svg_audit = icons::CLIPBOARD_CHECK.render();
 
     render_vertical_landing(&VerticalLanding {
-        title: "Financial Advisor IT — PlausiDen",
+        title: "RIA and Advisor IT — Custody-Rule Aware — PlausiDen",
         path: "/solutions/financial-advisors",
         description: DESCRIPTION,
 

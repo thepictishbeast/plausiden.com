@@ -54,7 +54,7 @@ pub const POSTS: &[Post] = &[
     Post {
         slug: "plausible-deniability",
         title: "What plausible deniability means in our architecture",
-        excerpt: "We named the company after a phrase. Most privacy products sell hiding; we sell unreliability. What that buys, where it lands, and the bright lines we won't cross to ship it.",
+        excerpt: "We named the company after a phrase. Most privacy products sell hiding; we sell unreliability. What that buys, and the lines we will not cross to ship it.",
         category: "Architecture",
         published: "2026-04-27",
         read_time: "11 min read",
@@ -63,7 +63,7 @@ pub const POSTS: &[Post] = &[
     Post {
         slug: "why-thundercrab",
         title: "Why we're building Thundercrab",
-        excerpt: "Modern consumer mail clients replaced an open, auditable filtering standard with opaque ML categorization that users can't see, edit, or carry between providers. We're building the local-first GUI for transparent mail rules — and writing about why nobody else has.",
+        excerpt: "Consumer mail clients replaced an open filtering standard with ML categorization nobody can read, edit or carry between providers. We build the alternative.",
         category: "Engineering",
         published: "2026-04-27",
         read_time: "10 min read",
@@ -72,7 +72,7 @@ pub const POSTS: &[Post] = &[
     Post {
         slug: "provable-privacy",
         title: "Provable-by-construction privacy",
-        excerpt: "Two ways to promise to protect data: a policy you trust, or a property the type system enforces. We try to pick the second whenever the engineering allows. What that changes about audits, incident response, and the trade-offs people accept.",
+        excerpt: "Two ways to promise to protect data: a policy you trust, or a property the type system enforces. We pick the second where the engineering allows.",
         category: "Architecture",
         published: "2026-04-27",
         read_time: "9 min read",
@@ -81,7 +81,7 @@ pub const POSTS: &[Post] = &[
     Post {
         slug: "avp-doctrine",
         title: "How a written-down doctrine changes what \"shipping\" means",
-        excerpt: "We wrote our taste down. Every public function carries a BUG ASSUMPTION annotation; every defense-in-depth carries a SECURITY annotation; CI enforces both. Why we think this is the right pace.",
+        excerpt: "We wrote our taste down. Every public function carries a BUG ASSUMPTION annotation, every defense a SECURITY annotation, and CI enforces both.",
         category: "Operating Model",
         published: "2026-04-27",
         read_time: "7 min read",
@@ -90,7 +90,7 @@ pub const POSTS: &[Post] = &[
     Post {
         slug: "federated-rule-learning",
         title: "Federated rule learning, without ever reading your mail",
-        excerpt: "How sorting rules can get smarter from the collective without any provider — including us — seeing message content. A note on what we built and why we think it matters.",
+        excerpt: "How sorting rules get smarter from the collective without any provider — us included — ever seeing message content. What we built, and why it matters.",
         category: "Architecture",
         published: "2026-04-26",
         read_time: "8 min read",

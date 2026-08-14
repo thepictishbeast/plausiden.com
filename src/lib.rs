@@ -383,9 +383,20 @@ mod tests {
         assert!(s.contains(r#"property="og:description""#));
         assert!(s.contains(r#"property="og:url""#));
         assert!(s.contains(r#"name="twitter:card""#));
-        // Per-page description must be the post's excerpt, not the
-        // site default — confirms page_with_description is wired.
-        assert!(s.contains("How sorting rules can get smarter"));
+        // Per-page description must be the post's excerpt, not the site
+        // default — confirms page_with_description is wired. Compares against
+        // the excerpt itself rather than a copy of its wording, which is what
+        // this line used to do: shortening the excerpt to fit a search result
+        // failed this test for a rewording, not for a broken behaviour.
+        let excerpt = crate::views::posts::POSTS
+            .iter()
+            .find(|p| p.slug == "federated-rule-learning")
+            .expect("the federated-rule-learning post exists")
+            .excerpt;
+        assert!(
+            s.contains(excerpt),
+            "the page is not rendering this post's excerpt as its description"
+        );
         // JSON-LD Organization
         assert!(s.contains("application/ld+json"));
         assert!(s.contains("\"PlausiDen LLC\""));
@@ -1122,6 +1133,100 @@ mod eyebrow_contrast {
             offenders.is_empty(),
             "{} section eyebrow(s) use a grey that cannot reach 4.5:1 on white. \
              Use text-slate-500 (4.76:1), the lightest grey that passes:\n{}",
+            offenders.len(),
+            offenders.join("\n")
+        );
+    }
+}
+
+#[cfg(test)]
+mod search_result_fits {
+    //! Nothing a search result shows may be long enough to be cut off.
+    //!
+    //! Measured across seventeen routes: titles ran from 18 to 87 characters
+    //! and descriptions from 139 to 265. Twelve of the seventeen descriptions
+    //! were over the ~160 a result actually renders, and the part that gets
+    //! dropped is the end — which on this site is where the differentiator
+    //! lived. `/solutions/journalism` spent its last 100 characters naming the
+    //! adversaries it defends against, and a searcher never saw one of them.
+    //!
+    //! Only an upper bound is checked. A short title is a missed opportunity
+    //! rather than a defect, and a minimum length would just invite padding to
+    //! satisfy the test — which is how meta descriptions end up restating the
+    //! company name three times.
+    //!
+    //! The limits are where rendering truncates, not where an SEO tool prefers.
+    //! They are pixel-based in reality; character counts are the honest
+    //! approximation, set slightly loose so a one-word edit does not fail.
+
+    /// Practical cutoff for a title before it is elided.
+    const MAX_TITLE: usize = 62;
+    /// Practical cutoff for a description before it is elided.
+    const MAX_DESCRIPTION: usize = 162;
+
+    /// Count what a reader sees, not what the markup stores.
+    ///
+    /// maud escapes quotes and ampersands, so a title holding one `"` arrives
+    /// here as six characters of `&quot;`. Counting the raw string charges a
+    /// page five characters it does not spend on screen, and would have forced
+    /// a rewrite of a blog title that already fits.
+    fn rendered_len(raw: &str) -> usize {
+        raw.replace("&quot;", "\"")
+            .replace("&#39;", "'")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
+            .chars()
+            .count()
+    }
+
+    fn attribute_after<'a>(html: &'a str, needle: &str, attr: &str) -> Option<&'a str> {
+        let tag_start = html.find(needle)?;
+        let tag = &html[tag_start..];
+        let tag_end = tag.find('>')?;
+        let value_start = tag[..tag_end].find(attr)? + attr.len();
+        tag[value_start..tag_end].split('"').next()
+    }
+
+    #[test]
+    fn no_title_or_description_is_long_enough_to_be_truncated() {
+        let mut offenders: Vec<String> = Vec::new();
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            let title = html
+                .split("<title>")
+                .nth(1)
+                .and_then(|t| t.split("</title>").next())
+                .unwrap_or_default();
+            assert!(
+                !title.is_empty(),
+                "{route} renders no <title>, so a search result has nothing to show"
+            );
+            if rendered_len(title) > MAX_TITLE {
+                offenders.push(format!(
+                    "{route}: title is {} chars (max {MAX_TITLE}) — {title:?}",
+                    rendered_len(title)
+                ));
+            }
+
+            let Some(description) =
+                attribute_after(&html, "<meta name=\"description\"", "content=\"")
+            else {
+                offenders.push(format!("{route}: no meta description"));
+                continue;
+            };
+            if rendered_len(description) > MAX_DESCRIPTION {
+                offenders.push(format!(
+                    "{route}: description is {} chars (max {MAX_DESCRIPTION})",
+                    rendered_len(description)
+                ));
+            }
+        }
+        offenders.sort();
+        assert!(
+            offenders.is_empty(),
+            "{} search result(s) would be cut off. The end of a description is \
+             where the reason to click lives, and it is the end that gets \
+             dropped:\n{}",
             offenders.len(),
             offenders.join("\n")
         );

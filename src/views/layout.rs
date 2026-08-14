@@ -109,7 +109,7 @@ fn asset(path: &str) -> String {
 
 /// Default page description used when a caller doesn't supply one.
 /// Tuned for SEO + social previews — single sentence under 160 chars.
-pub const DEFAULT_DESCRIPTION: &str = "IT operations, security and disaster recovery for Massachusetts law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff. Published rates, fixed-price proposals.";
+pub const DEFAULT_DESCRIPTION: &str = "IT operations, security and disaster recovery for Massachusetts law firms, medical practices, advisers and nonprofits of 5 to 100 staff. Rates published.";
 
 /// JSON-LD for the firm itself, emitted in every page head.
 ///

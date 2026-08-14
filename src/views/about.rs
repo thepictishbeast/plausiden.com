@@ -30,7 +30,7 @@ use maud::{Markup, html};
 
 use super::layout::page_with_description;
 
-const ABOUT_DESCRIPTION: &str = "A woman-owned IT, security and disaster-recovery firm in Greater Boston, working with law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff.";
+const ABOUT_DESCRIPTION: &str = "A woman-owned IT, security and disaster-recovery firm in Greater Boston, working with practices of 5 to 100 staff that hold confidential client data.";
 
 // loom-allow: inline-SVG icon strings — the w-6 h-6 text-primary chain lives inside the SVG class attribute, not as Maud-emitted utilities
 const ICON_USERS: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>"#; // loom-allow: SVG class attribute
@@ -98,7 +98,7 @@ pub fn render() -> Markup {
         (closing_band())
     };
     page_with_description(
-        "About PlausiDen — Woman-owned IT & Security Firm in Massachusetts",
+        "About PlausiDen — Woman-Owned IT & Security, Massachusetts",
         "/about",
         ABOUT_DESCRIPTION,
         body,

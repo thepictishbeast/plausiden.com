@@ -10,7 +10,7 @@ use maud::Markup;
 
 use super::template::{Capability, VerticalLanding, render_vertical_landing};
 
-const DESCRIPTION: &str = "IT infrastructure for small nonprofits. Donor data hardened against breach, beneficiary confidentiality preserved, audit trails ready for grant reviews + state charity examiners. Sized to a 5–50 person mission, not an enterprise.";
+const DESCRIPTION: &str = "IT for small nonprofits: donor data hardened against breach, beneficiary confidentiality kept, audit trails ready for grant reviews.";
 
 /// Render `/solutions/nonprofit`.
 #[must_use]
@@ -23,7 +23,7 @@ pub fn render() -> Markup {
     let svg_heart = icons::HEART.render();
 
     render_vertical_landing(&VerticalLanding {
-        title: "Nonprofit IT — PlausiDen",
+        title: "Nonprofit IT — Donor Data, Grant-Ready Audits — PlausiDen",
         path: "/solutions/nonprofit",
         description: DESCRIPTION,
 

@@ -283,7 +283,7 @@ pub fn render() -> Markup {
         (final_cta_band())
     };
     page(
-        "PlausiDen LLC — IT & Cybersecurity for Massachusetts Law, Medical & Financial Practices",
+        "PlausiDen — IT & Security for Confidential-Data Practices",
         "/",
         body,
     )

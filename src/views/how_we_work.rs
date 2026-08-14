@@ -12,7 +12,7 @@ use maud::{Markup, html};
 
 use super::layout::page_with_description;
 
-const HWW_DESCRIPTION: &str = "How PlausiDen engages, ships, and hands off. Written-down doctrine, in-writing proposals, scope-limited access, audit-ready documentation. The operating posture behind every deliverable.";
+const HWW_DESCRIPTION: &str = "How PlausiDen engages, ships and hands off: proposals in writing, scope-limited access, audit-ready documentation, findings the day we find them.";
 
 // loom-allow: inline-SVG icon string — w-6 h-6 text-primary lives inside the SVG `class=` attribute, not as a Maud-emitted utility chain
 const ICON_DOC: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-primary"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>"#; // loom-allow: SVG class attribute, see comment above

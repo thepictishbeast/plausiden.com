@@ -18,7 +18,7 @@ use maud::Markup;
 
 use super::template::{Capability, EngagementStep, VerticalLanding, render_vertical_landing};
 
-const DESCRIPTION: &str = "IT infrastructure designed around a law firm's duty of confidentiality. Self-hosted email, matter-aware document handling, audit-ready compliance posture. We design pipelines where the privacy guarantee is provable, not promised.";
+const DESCRIPTION: &str = "IT built around a law firm's duty of confidentiality: self-hosted email, matter-aware document handling, and an audit-ready compliance posture.";
 
 /// Render the law-firm vertical landing page.
 #[must_use]
@@ -30,7 +30,7 @@ pub fn render() -> Markup {
     let svg_shield = icons::SHIELD.render();
 
     render_vertical_landing(&VerticalLanding {
-        title: "Legal IT — PlausiDen",
+        title: "Law Firm IT — Confidentiality by Construction — PlausiDen",
         path: "/solutions/legal",
         description: DESCRIPTION,
 

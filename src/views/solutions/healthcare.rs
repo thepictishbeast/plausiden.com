@@ -19,7 +19,7 @@ use maud::Markup;
 
 use super::template::{Capability, EngagementStep, VerticalLanding, render_vertical_landing};
 
-const DESCRIPTION: &str = "IT infrastructure designed around HIPAA's Security Rule for small healthcare practices. Self-hosted email, audit-ready ePHI handling, BAA-ready posture. Built for practices that take patient confidentiality as the floor, not the ceiling.";
+const DESCRIPTION: &str = "IT built around HIPAA's Security Rule for small practices: self-hosted email, audit-ready ePHI handling, and a BAA-ready posture.";
 
 /// Render the small-healthcare vertical landing page.
 #[must_use]
@@ -32,7 +32,7 @@ pub fn render() -> Markup {
     let svg_shield = icons::SHIELD.render();
 
     render_vertical_landing(&VerticalLanding {
-        title: "Healthcare IT — PlausiDen",
+        title: "Small-Practice Healthcare IT — HIPAA-Ready — PlausiDen",
         path: "/solutions/healthcare",
         description: DESCRIPTION,
 

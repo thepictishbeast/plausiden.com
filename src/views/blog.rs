@@ -144,7 +144,12 @@ pub fn post(slug: &str) -> Option<Markup> {
             }
         }
     };
-    let title = format!("{} — PlausiDen", post.title);
+    // No " — PlausiDen" suffix here, unlike every other route. Three of the
+    // five post titles are sentences already, and the twelve characters of
+    // brand pushed them past the width a search result renders — so the brand
+    // was costing the end of the headline it was attached to. The domain is
+    // shown beside the title in results regardless.
+    let title = post.title.to_owned();
     let current = format!("/blog/{}", post.slug);
     // Pre-rendered by scripts/gen-og-images.py, one card per post, derived
     // from this same POSTS list. Previously this pointed at /og/blog/<slug>.svg,

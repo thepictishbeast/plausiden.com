@@ -160,7 +160,7 @@ pub fn render() -> Markup {
     page_with_description(
         "Capabilities — What PlausiDen Actually Does",
         "/capabilities",
-        "The specific work behind the service lines: monitoring and patching, access review, tested restores, network segmentation, and the security questionnaires clients send before signing.",
+        "The work behind the service lines: monitoring and patching, access review, tested restores, network segmentation, security questionnaires.",
         body,
     )
 }

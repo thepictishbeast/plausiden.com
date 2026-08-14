@@ -17,7 +17,7 @@ expression: body
     <published>2026-04-27T00:00:00Z</published>
     <updated>2026-04-27T00:00:00Z</updated>
     <category term="Architecture"/>
-    <summary>We named the company after a phrase. Most privacy products sell hiding; we sell unreliability. What that buys, where it lands, and the bright lines we won&apos;t cross to ship it.</summary>
+    <summary>We named the company after a phrase. Most privacy products sell hiding; we sell unreliability. What that buys, and the lines we will not cross to ship it.</summary>
   </entry>
   <entry>
     <title>Why we&apos;re building Thundercrab</title>
@@ -26,7 +26,7 @@ expression: body
     <published>2026-04-27T00:00:00Z</published>
     <updated>2026-04-27T00:00:00Z</updated>
     <category term="Engineering"/>
-    <summary>Modern consumer mail clients replaced an open, auditable filtering standard with opaque ML categorization that users can&apos;t see, edit, or carry between providers. We&apos;re building the local-first GUI for transparent mail rules — and writing about why nobody else has.</summary>
+    <summary>Consumer mail clients replaced an open filtering standard with ML categorization nobody can read, edit or carry between providers. We build the alternative.</summary>
   </entry>
   <entry>
     <title>Provable-by-construction privacy</title>
@@ -35,7 +35,7 @@ expression: body
     <published>2026-04-27T00:00:00Z</published>
     <updated>2026-04-27T00:00:00Z</updated>
     <category term="Architecture"/>
-    <summary>Two ways to promise to protect data: a policy you trust, or a property the type system enforces. We try to pick the second whenever the engineering allows. What that changes about audits, incident response, and the trade-offs people accept.</summary>
+    <summary>Two ways to promise to protect data: a policy you trust, or a property the type system enforces. We pick the second where the engineering allows.</summary>
   </entry>
   <entry>
     <title>How a written-down doctrine changes what &quot;shipping&quot; means</title>
@@ -44,7 +44,7 @@ expression: body
     <published>2026-04-27T00:00:00Z</published>
     <updated>2026-04-27T00:00:00Z</updated>
     <category term="Operating Model"/>
-    <summary>We wrote our taste down. Every public function carries a BUG ASSUMPTION annotation; every defense-in-depth carries a SECURITY annotation; CI enforces both. Why we think this is the right pace.</summary>
+    <summary>We wrote our taste down. Every public function carries a BUG ASSUMPTION annotation, every defense a SECURITY annotation, and CI enforces both.</summary>
   </entry>
   <entry>
     <title>Federated rule learning, without ever reading your mail</title>
@@ -53,6 +53,6 @@ expression: body
     <published>2026-04-26T00:00:00Z</published>
     <updated>2026-04-26T00:00:00Z</updated>
     <category term="Architecture"/>
-    <summary>How sorting rules can get smarter from the collective without any provider — including us — seeing message content. A note on what we built and why we think it matters.</summary>
+    <summary>How sorting rules get smarter from the collective without any provider — us included — ever seeing message content. What we built, and why it matters.</summary>
   </entry>
 </feed>
