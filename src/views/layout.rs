@@ -700,6 +700,40 @@ mod motion_css_guards {
         }
     }
 
+    /// The mobile drawer must hand focus back when it closes.
+    ///
+    /// Closing puts `display: none` on an ancestor of whatever is focused, and
+    /// the browser answers by dropping focus to <body>. Measured before the
+    /// fix: a keyboard user opened the drawer, pressed Escape, and landed at
+    /// the top of the document with no visible focus, having to tab through
+    /// the whole header again to get anywhere.
+    ///
+    /// There is no JavaScript test harness in this crate, so this reads the
+    /// source. It is a weak check — it cannot prove the handler runs — but the
+    /// behaviour itself is driven with real key presses during each tick's
+    /// verification, and this stops the restoration being deleted as dead
+    /// code by someone who cannot see why it is there.
+    #[test]
+    fn drawer_close_restores_focus_to_its_toggle() {
+        const MENU_JS: &str = include_str!("../../static/menu.js");
+        assert!(
+            MENU_JS.contains("restoreFocus"),
+            "menu.js no longer restores focus when the drawer closes; Escape \
+             will drop the keyboard user at the top of the document"
+        );
+        assert!(
+            MENU_JS.contains("btn.focus()"),
+            "menu.js no longer moves focus back to the menu toggle"
+        );
+        // Restoration must be conditional on focus actually being inside the
+        // drawer, or Escape pressed while typing would yank the caret away.
+        assert!(
+            MENU_JS.contains("menu.contains(document.activeElement)"),
+            "focus restoration is unconditional; Escape in a form field would \
+             steal the caret to the menu button"
+        );
+    }
+
     #[test]
     fn og_cards_exist_for_every_route() {
         let routes = [

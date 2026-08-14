@@ -51,13 +51,21 @@
     var menu = document.getElementById('mobile-menu');
     if (!btn || !menu) return;
 
-    function setOpen(open) {
+    // `restoreFocus` matters more than it looks. Closing the drawer puts
+    // `display: none` on an ancestor of whatever is focused, and the browser
+    // responds by dropping focus to <body>. A keyboard user who opened the
+    // menu, changed their mind and pressed Escape was left at the very top of
+    // the document with no visible focus, having to tab through the whole
+    // header again. Measured before this: Escape closed the drawer and
+    // activeElement became <body>.
+    function setOpen(open, restoreFocus) {
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       menu.setAttribute('aria-hidden', open ? 'false' : 'true');
       if (open) {
         menu.classList.remove('hidden');
       } else {
         menu.classList.add('hidden');
+        if (restoreFocus) btn.focus();
       }
     }
 
@@ -65,9 +73,15 @@
       setOpen(btn.getAttribute('aria-expanded') !== 'true');
     });
 
-    // Close on Escape
+    // Close on Escape, returning focus to the control that opened it.
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key !== 'Escape') return;
+      if (btn.getAttribute('aria-expanded') !== 'true') return;
+      // Only take focus back if it is currently inside the thing being
+      // closed. Escape pressed while typing in a form field should not yank
+      // the caret up to the menu button.
+      var inside = menu.contains(document.activeElement);
+      setOpen(false, inside);
     });
 
     // Close when clicking any link inside the menu
