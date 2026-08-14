@@ -205,6 +205,7 @@ pub fn render() -> Markup {
             (service_section(svc, i + 1, i % 2 == 0))
         }
 
+        (methodology_band())
         (posture_band())
         (final_cta())
     };
@@ -214,6 +215,135 @@ pub fn render() -> Markup {
         "Managed IT operations, cyber security, disaster recovery, automation and software for practices of 5 to 100 staff. Fixed scope, fixed price, published rates.",
         body,
     )
+}
+
+/// The published standards the security work runs against, and what
+/// each one is actually for.
+///
+/// Naming a standard is cheap, so each entry says what it governs and
+/// what it produces. A buyer comparing quotes can check every one of
+/// these against the public document; none of it depends on taking our
+/// word for anything.
+const METHOD_STANDARDS: &[(&str, &str)] = &[
+    (
+        "PTES",
+        "Sets the engagement phases — pre-engagement scoping, intelligence gathering, threat modelling, vulnerability analysis, exploitation, post-exploitation, reporting. It is why the scope conversation happens before the invoice, not after.",
+    ),
+    (
+        "NIST SP 800-115",
+        "The technical assessment method: plan, discover, attack, report. It governs how evidence is captured and how a finding is substantiated, which is what makes a report defensible to an auditor who was not in the room.",
+    ),
+    (
+        "OWASP ASVS",
+        "Web application verification requirements. We test against a stated level and tell you which one, so \"we tested the application\" becomes a list of specific requirements that passed or failed.",
+    ),
+    (
+        "MITRE ATT&CK",
+        "Findings are mapped to technique IDs. Your detection engineering then has something concrete to build against, instead of a severity rating and a paragraph.",
+    ),
+    (
+        "CIS Benchmarks",
+        "Configuration baselines for the platforms in scope. Useful because most of what we find in small environments is a default nobody changed, not an exotic vulnerability.",
+    ),
+];
+
+/// What automated tooling structurally cannot determine, and why.
+///
+/// This is the honest form of the scanner comparison the sales prompt
+/// asks for: it names the *practice* being criticised, never a firm,
+/// and each item is a class of flaw a scanner cannot reason about
+/// rather than a claim about anyone's product.
+const SCANNER_BLIND_SPOTS: &[&str] = &[
+    "Business logic — a checkout that lets you apply the discount after the total is computed. Every request is individually valid, so nothing flags.",
+    "Chained privilege escalation — three findings rated low that combine into domain admin. A scanner grades findings one at a time and never tries the combination.",
+    "Authorization gaps — the endpoint works exactly as built; it just never checks whether this user should be allowed to call it for that record.",
+    "Multi-step workflow abuse — approving your own request by completing the steps out of order.",
+];
+
+/// Engagement deliverables. Every line here is a commitment PlausiDen
+/// can be held to, which is the point — see the `commitments` list on
+/// /how-we-work for the same discipline applied to conduct.
+const METHOD_DELIVERABLES: &[&str] = &[
+    "An executive summary in plain English, written for the partner or practice manager who has to decide what to fund.",
+    "Technical findings with reproduction steps and evidence, so your engineers can confirm each one without asking us what we meant.",
+    "Remediation guidance specific to your stack, not a link to a vendor advisory.",
+    "Anything critical reaches you the day we find it. We do not sit on a live issue to preserve the drama of the final report.",
+    "A retest of high and critical findings within 30 days, included in the price rather than sold back to you.",
+];
+
+/// Standards-mapped methodology band.
+///
+/// Sits between the service list and the posture band: the services
+/// above say *what* we do, this says *how the security work is done and
+/// what lands on your desk*. It exists because "penetration testing"
+/// means anything from a genuine assessment to a scan with a cover
+/// page, and a buyer cannot tell which they are quoting without asking
+/// the method.
+fn methodology_band() -> Markup {
+    html! {
+        section class="py-24 bg-white" { // loom-allow: methodology band — py-24 primary cadence, matches the services band
+            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: article-width container with scroll-reveal hook
+                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" {
+                    "Method"
+                }
+                div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
+                    (Heading {
+                        text: "How the security work is actually done.",
+                        level: HeadingLevel::H2,
+                        variant: HeadingVariant::Section,
+                        tone: HeadingTone::Ink,
+                    }.render())
+                }
+                (Lede {
+                    text: "Two quotes for a penetration test can differ by a factor of five and describe the same words. One is a person working through your application; the other is a scan with a cover page. The difference is the method, so here is ours in enough detail that you can compare it against anyone else's.",
+                    tone: HeadingTone::Ink,
+                }.render())
+
+                div class="mt-12" { // loom-allow: band-internal rhythm between lede and standards list
+                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" {
+                        "Standards the work runs against"
+                    }
+                    dl class="border-t border-slate-200" { // loom-allow: hairline definition list — lighter than card chrome at this density
+                        @for (name, purpose) in METHOD_STANDARDS {
+                            div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-7 py-5 border-b border-slate-200" { // loom-allow: two-column definition row
+                                dt class="font-semibold text-slate-900" { (name) }
+                                dd class="md:col-span-2 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" { (purpose) }
+                            }
+                        }
+                    }
+                }
+
+                div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12" { // loom-allow: paired blind-spots / deliverables columns
+                    div {
+                        h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" {
+                            "What a scanner cannot find"
+                        }
+                        ul class="space-y-4" {
+                            @for item in SCANNER_BLIND_SPOTS {
+                                li class="pd-proof text-slate-600 text-[15px] leading-relaxed font-light" { (item) }
+                            }
+                        }
+                    }
+                    div {
+                        h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" {
+                            "What lands on your desk"
+                        }
+                        ul class="space-y-4" {
+                            @for item in METHOD_DELIVERABLES {
+                                li class="pd-proof text-slate-600 text-[15px] leading-relaxed font-light" { (item) }
+                            }
+                        }
+                    }
+                }
+
+                p class="text-slate-500 text-sm mt-12" { // loom-allow: prose with inline link
+                    "Scope, price and the retest window are agreed in writing before any testing starts — see "
+                    (TextLink { label: "how we work", href: "/how-we-work", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
+                    "."
+                }
+            }
+        }
+    }
 }
 
 /// Cross-cutting "how we approach every engagement" band — same dark
@@ -526,5 +656,86 @@ mod tests {
         let s = render().into_string();
         assert!(s.contains(r#"href="/how-we-work""#));
         assert!(s.contains(r#"href="/pricing-transparency""#));
+    }
+}
+
+#[cfg(test)]
+mod methodology_tests {
+    use super::*;
+
+    /// A standard named without saying what it governs is decoration.
+    /// Every entry must explain its purpose in enough words to be worth
+    /// reading, or it is just an acronym on a sales page.
+    #[test]
+    fn every_standard_explains_what_it_is_for() {
+        for (name, purpose) in METHOD_STANDARDS {
+            assert!(
+                purpose.split_whitespace().count() >= 20,
+                "standard {name:?} is named but barely explained; \
+                 a buyer cannot compare quotes on an acronym alone"
+            );
+        }
+    }
+
+    /// The five standards must actually reach the page. This catches a
+    /// band that renders but silently drops its data.
+    ///
+    /// Compare against unescaped markup: maud writes `MITRE ATT&CK` as
+    /// `MITRE ATT&amp;CK`, so a naive `contains` reports a standard
+    /// missing when it is rendering perfectly well.
+    #[test]
+    fn the_page_names_the_standards_it_claims_to_follow() {
+        let page = render().into_string().replace("&amp;", "&");
+        for (name, _) in METHOD_STANDARDS {
+            assert!(page.contains(name), "/services no longer names {name:?}");
+        }
+    }
+
+    /// The retest window is a commercial promise, and it is also encoded
+    /// in the quoting tool (`salesman-quote`, which prices a 30-day
+    /// remediation retest as included). If someone edits one of the two
+    /// they must edit both, so pin the number here rather than letting
+    /// the site and the quote quietly disagree in front of a client.
+    #[test]
+    fn retest_window_matches_the_rate_card() {
+        let deliverables = METHOD_DELIVERABLES.join(" ");
+        assert!(
+            deliverables.contains("30 days"),
+            "the deliverables no longer state the 30-day retest window that \
+             salesman-quote prices as included"
+        );
+        assert!(
+            deliverables.contains("included"),
+            "the retest must be stated as included; selling it back is the \
+             practice we position against"
+        );
+    }
+
+    /// Competitor criticism is allowed to name a practice, never a firm.
+    /// This guards the line the sales brief draws: "reports that stop at
+    /// scanner output" is fair, a vendor's name is not.
+    #[test]
+    fn scanner_comparison_names_no_company() {
+        let text = format!(
+            "{} {}",
+            SCANNER_BLIND_SPOTS.join(" "),
+            METHOD_DELIVERABLES.join(" ")
+        );
+        for vendor in [
+            "Nessus",
+            "Qualys",
+            "Rapid7",
+            "Tenable",
+            "Burp",
+            "Acunetix",
+            "Veracode",
+            "Checkmarx",
+        ] {
+            assert!(
+                !text.contains(vendor),
+                "the scanner comparison names {vendor:?}; criticise the practice, \
+                 never a company"
+            );
+        }
     }
 }
