@@ -90,7 +90,7 @@ pub fn render() -> Markup {
     .render();
 
     let body = html! {
-        section class="relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: hero band — pt-32/44 cadence below Loom Section padding scale
+        section class="pd-hero relative pt-32 pb-16 md:pt-44 md:pb-24 bg-slate-50 overflow-hidden" { // loom-allow: hero band — pt-32/44 cadence below Loom Section padding scale
             div class="container relative mx-auto px-4 md:px-6 z-10 max-w-4xl" { // loom-allow: hero container max-w-4xl
                 div class="mb-6" { (Badge { label: "What we run, not just what we sell", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-6" {

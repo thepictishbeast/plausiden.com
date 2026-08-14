@@ -56,7 +56,7 @@ pub fn render() -> Markup {
     let uptime_str = format!("{days}d {hours}h {minutes}m {seconds}s");
 
     let body = html! {
-        section class="pt-32 pb-16 md:pt-44 md:pb-20 bg-slate-50" { // loom-allow: hero band — pt-32/44 cadence sits below Loom Section padding scale
+        section class="pd-hero pt-32 pb-16 md:pt-44 md:pb-20 bg-slate-50" { // loom-allow: hero band — pt-32/44 cadence sits below Loom Section padding scale
             div class="container mx-auto px-4 md:px-6 max-w-3xl" { // loom-allow: hero container max-w-3xl
                 div class="mb-6" { (Badge { label: "Operational", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-4" {

@@ -784,7 +784,19 @@ h3 {
    "first paragraph means different" from position. */
 
 /* ---------------------------------------------------------------------------
-   HOME HERO — desktop geometry
+   PAGE HERO — desktop geometry
+
+   `.pd-hero` is on every hero on the site: the eight rendered by Loom's Hero
+   component, the six still hand-rolled in views, and the home hero. One class,
+   one number. When only the home hero carried it, the front door ended up with
+   144px of top padding while all thirteen pages behind it had 176 — the front
+   door tighter than the rooms, which is backwards, and drift I introduced
+   myself in the commit that widened the headline.
+
+   The md: utilities are left in place on every one of those sections. They are
+   the sub-768px cadence, and they are the fallback: motion.css loads after the
+   frozen bundle, so at md+ these rules win the tie, and if this stylesheet ever
+   fails to load the pages keep a sane cadence instead of collapsing.
 
    Paul, looking at 1440px: "the desktop site looks poor". He was right, and
    the measurement said why. The hero copy sat in a max-w-3xl box: 768px of
