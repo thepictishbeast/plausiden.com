@@ -146,10 +146,22 @@
   }
 }
 
+/* Values match Loom's FeatureCard, which rolls its own lift because it is
+   shared with another tenant and cannot depend on this stylesheet. Two
+   implementations is a fact of the repo boundary; two different lifts on the
+   same page is not. -2px is Tailwind's -translate-y-0.5, and the shadow is the
+   same ink-tinted hover shadow `shadow-lg` resolves to here, so a card lifts
+   identically whichever system drew it.
+
+   The `:focus-within` half is the part the ad-hoc versions never had: four
+   hand-written lift treatments across the site all fired on :hover only, so a
+   keyboard user tabbing through cards got no feedback at all. */
 .pd-lift:hover,
 .pd-lift:focus-within {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px -12px rgb(15 23 42 / 0.22);
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 32px -12px rgb(15 23 42 / 0.14),
+    0 3px 8px -3px rgb(15 23 42 / 0.07);
 }
 
 /* Buttons acknowledge the press. Kept very small: a call to action that moves

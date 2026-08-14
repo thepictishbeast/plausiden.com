@@ -132,7 +132,7 @@ pub fn render() -> Markup {
         }
 
         section class="py-20 bg-primary/5" { // loom-allow: tinted CTA band — py-20 + primary/5 tint, not exactly Loom Section::Tinted
-            div class="container mx-auto px-4 md:px-6 text-center max-w-2xl" { // loom-allow: centred CTA container max-w-2xl
+            div class="pd-reveal container mx-auto px-4 md:px-6 text-center max-w-2xl" { // loom-allow: centred CTA container max-w-2xl
                 div class="mb-6" {
                     (Heading {
                         text: "Want any of this for your firm?",

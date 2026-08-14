@@ -451,7 +451,7 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
     html! {
         section id=(svc.slug) class=(format!("py-10 md:py-14 {bg}")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background. Anchor-link offset for the sticky header lives in static/style.css (section[id] { scroll-margin-top })
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: <details> container with scroll-reveal hook
-                details class="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 open:shadow-xl open:border-primary/30" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive; adds hover-lift + accent border on open
+                details class="group rounded-2xl border border-slate-200 bg-white shadow-sm pd-lift open:shadow-xl open:border-primary/30" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive; adds hover-lift + accent border on open
                     summary class="flex items-start gap-5 md:gap-7 p-7 md:p-9 cursor-pointer list-none" { // loom-allow: collapsible header row — bigger padding (p-7/p-9) + list-none to suppress disclosure marker
                         // Numbered prefix — light weight against bold title for typographic contrast.
                         div class="hidden md:flex flex-col items-end shrink-0 pt-1 select-none" { // loom-allow: numbered-prefix column, hidden on phones to keep card compact

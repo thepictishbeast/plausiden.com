@@ -199,10 +199,15 @@ fn post_card(post: &Post) -> Markup {
         }
     };
     html! {
-        div class="pd-reveal group relative transition-all duration-300 hover:-translate-y-1" { // loom-allow: post-card wrapper — vertical-lift + shadow-grow hover + accent-stripe; scroll-fade reveal layered on top
+        // pd-reveal and pd-lift must not share an element. Both animate
+        // `transform`, and a CSS animation wins over a hover rule, so the
+        // scroll reveal pinned the transform and the lift silently never
+        // rendered — measured as translateY(0) on hover. Reveal on the outer
+        // wrapper, lift on the inner card.
+        div class="pd-reveal group relative" { // loom-allow: post-card wrapper — accent-stripe + scroll-fade revealon top
             // Decorative accent stripe — invisible by default, animates in on hover from left edge, ties the hover state to the brand color.
             div class="absolute left-0 top-6 bottom-6 w-1 bg-primary rounded-full origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ease-out" {} // loom-allow: positioned accent stripe — animates scaleY 0→1 on parent group hover
-            (LinkCard { href: &href, body: &body }.render())
+            div class="pd-lift" { (LinkCard { href: &href, body: &body }.render()) } // loom-allow: lift wrapper, separated from the reveal above
         }
     }
 }

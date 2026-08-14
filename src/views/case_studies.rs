@@ -92,7 +92,7 @@ pub fn render() -> Markup {
 
         @for (i, c) in CASE_STUDIES.iter().enumerate() {
             section class=(if i % 2 == 0 { "py-16 bg-white" } else { "py-16 bg-slate-50" }) { // loom-allow: alternating zebra band — branchy class needs raw form
-                div class="container mx-auto px-4 md:px-6 max-w-3xl" { // loom-allow: case-study container max-w-3xl
+                div class="container mx-auto px-4 md:px-6 max-w-3xl pd-reveal" { // loom-allow: case-study container max-w-3xl + scroll-reveal hook, matching the per-service bands on /services
                     div class="mb-4" {
                         (Badge { label: c.industry, tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
                     }
@@ -144,7 +144,7 @@ pub fn render() -> Markup {
         }
 
         section class="py-20 bg-primary/5" { // loom-allow: tinted CTA band — py-20 cadence + primary/5 tint, not exactly Loom Section::Tinted
-            div class="container mx-auto px-4 md:px-6 text-center max-w-2xl" { // loom-allow: centred CTA container max-w-2xl
+            div class="pd-reveal container mx-auto px-4 md:px-6 text-center max-w-2xl" { // loom-allow: centred CTA container max-w-2xl
                 div class="mb-6" {
                     (Heading {
                         text: "Recognize your situation in any of these?",
