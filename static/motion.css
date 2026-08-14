@@ -746,9 +746,22 @@ h3 {
   margin-bottom: 1rem;
 }
 
+/* Markers hang in the gutter (`outside`) rather than sitting in the first
+ * line box (`inside`). With `inside`, the second and subsequent lines of an
+ * item wrap back under the bullet, so a multi-line item has no single left
+ * edge and the marker stops anchoring anything — worst on narrow screens,
+ * where most items wrap. `outside` gives every line one edge to align to.
+ *
+ * The 1.5rem padding is not decoration: `outside` markers are painted in
+ * that gutter, so without it they would sit outside the content box.
+ *
+ * 1.5rem matches the `pl-6` already used by the numbered list on /subscribe,
+ * which was the only list on the site rendering hanging indents correctly.
+ * This makes all four marker lists on the site share one treatment. */
 .pd-prose > ul {
   list-style-type: disc;
-  list-style-position: inside;
+  list-style-position: outside;
+  padding-left: 1.5rem;
   margin-bottom: 1.5rem;
   color: rgb(51 65 85);
 }

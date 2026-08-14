@@ -236,7 +236,10 @@ fn worked_finding_band() -> Markup {
 
                 div class="mt-12" { // loom-allow: sub-section rhythm
                     (Eyebrow { text: "Reproduction", size: EyebrowSize::Subhead }.render())
-                    ol class="list-decimal list-inside space-y-3 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
+                    // pl-6, not list-inside: numbered steps wrap, and `inside`
+                    // returns the wrapped line to the left of the number. Matches
+                    // the numbered list on /subscribe. See .pd-prose > ul in motion.css.
+                    ol class="list-decimal pl-6 space-y-3 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
                         @for step in REPRO_STEPS {
                             li { (step) }
                         }
