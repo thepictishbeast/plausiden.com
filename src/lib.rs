@@ -1018,6 +1018,62 @@ mod utility_class_coverage {
 }
 
 #[cfg(test)]
+mod eyebrow_contrast {
+    //! The section eyebrow must stay legible.
+    //!
+    //! A browser sweep of every text node on fourteen routes found 26 WCAG AA
+    //! failures. Sixteen came from one pattern I had repeated across four
+    //! pages: the 10px letterspaced eyebrow in `text-slate-400`, measuring
+    //! 2.45:1 against a 4.5 requirement. slate-400 measures 2.56 on white and
+    //! slate-300 measures 1.48, so neither can pass below 24px however it is
+    //! used; slate-500 measures 4.76 and is the lightest grey that clears it.
+    //!
+    //! Scoped deliberately to the eyebrow — small + uppercase + letterspaced —
+    //! rather than to all small text. A first attempt flagged every small grey
+    //! element and reported eleven failures the browser had already cleared:
+    //! all of them the footer tagline, where slate-400 on slate-900 is correct
+    //! and is there because of an earlier contrast fix. A static check cannot
+    //! see an ancestor's background, so it should only judge what it can
+    //! actually determine. The authoritative sweep runs in a browser; this
+    //! stops one specific regression from returning quietly.
+
+    /// Greys that cannot reach 4.5:1 against white at eyebrow sizes.
+    const TOO_LIGHT: &[&str] = &["text-slate-300", "text-slate-400"];
+
+    #[test]
+    fn section_eyebrows_use_a_legible_grey() {
+        let mut offenders: Vec<String> = Vec::new();
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            for attr in html.split("class=\"").skip(1) {
+                let Some(value) = attr.split('"').next() else {
+                    continue;
+                };
+                let classes: Vec<&str> = value.split_whitespace().collect();
+                // The eyebrow signature: tiny, capitalised, letterspaced.
+                let is_eyebrow = classes.iter().any(|c| c.starts_with("text-[1"))
+                    && classes.contains(&"uppercase")
+                    && classes.iter().any(|c| c.starts_with("tracking-["));
+                if !is_eyebrow {
+                    continue;
+                }
+                if let Some(grey) = classes.iter().find(|c| TOO_LIGHT.contains(c)) {
+                    offenders.push(format!("{route}: eyebrow uses {grey} in {value:?}"));
+                }
+            }
+        }
+        offenders.sort();
+        offenders.dedup();
+        assert!(
+            offenders.is_empty(),
+            "{} section eyebrow(s) use a grey that cannot reach 4.5:1 on white. \
+             Use text-slate-500 (4.76:1), the lightest grey that passes:\n{}",
+            offenders.len(),
+            offenders.join("\n")
+        );
+    }
+}
+
+#[cfg(test)]
 mod retired_class_names {
     //! Classes that were replaced and must not come back.
 

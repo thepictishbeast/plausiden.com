@@ -161,7 +161,7 @@ fn assessment_band() -> Markup {
     let total = testing + SETUP_REPORTING_FEE_USD;
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Security assessments" }
+            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Security assessments" }
             div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /about
                 (Heading {
                     text: "What a penetration test costs.",

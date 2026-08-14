@@ -177,7 +177,7 @@ fn anatomy_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: content band — py-24 primary cadence
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Anatomy" }
+                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Anatomy" }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "What is in the document.",
@@ -208,7 +208,7 @@ fn worked_finding_band() -> Markup {
     html! {
         section class="py-24 bg-slate-50" { // loom-allow: worked-example band — tinted to separate it from the anatomy band above
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Worked example" }
+                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Worked example" }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "One finding, all the way through.",
@@ -293,7 +293,7 @@ fn exclusions_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: content band — py-24 primary cadence
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Exclusions" }
+                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Exclusions" }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "What you will not find in it.",

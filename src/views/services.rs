@@ -283,7 +283,7 @@ fn methodology_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: methodology band — py-24 primary cadence, matches the services band
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article-width container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" {
+                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" {
                     "Method"
                 }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
@@ -466,10 +466,10 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                     summary class="flex items-start gap-5 md:gap-7 p-7 md:p-9 cursor-pointer list-none" { // loom-allow: collapsible header row — bigger padding (p-7/p-9) + list-none to suppress disclosure marker
                         // Numbered prefix — light weight against bold title for typographic contrast.
                         div class="hidden md:flex flex-col items-end shrink-0 pt-1 select-none" { // loom-allow: numbered-prefix column, hidden on phones to keep card compact
-                            span class="font-display text-5xl font-extralight text-slate-300 tabular-nums leading-none" { // loom-allow: extra-light large numeral; tabular-nums for column alignment
+                            span class="font-display text-5xl font-extralight text-slate-500 tabular-nums leading-none" { // loom-allow: extra-light large numeral; tabular-nums for column alignment
                                 (number)
                             }
-                            span class="mt-2 text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { // loom-allow: micro-label under the number
+                            span class="mt-2 text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { // loom-allow: micro-label under the number
                                 "Service"
                             }
                         }

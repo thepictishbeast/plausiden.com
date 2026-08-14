@@ -134,7 +134,7 @@ fn opening_band() -> Markup {
 fn facts_band() -> Markup {
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "The firm" }
+            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "The firm" }
             // Carries the H2 for this band. FeatureCard emits an H3 per card,
             // so without a heading here the document jumped H1 -> H3 and a
             // screen-reader user lost the level that groups the three.
@@ -174,7 +174,7 @@ fn facts_band() -> Markup {
 fn small_on_purpose_band() -> Markup {
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Scale" }
+            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Scale" }
             div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /sample-report
                 (Heading {
                     text: "Small on purpose.",
@@ -211,7 +211,7 @@ fn small_on_purpose_band() -> Markup {
 fn commitments_band() -> Markup {
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Commitments" }
+            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Commitments" }
             div class="mt-3 mb-8" { // loom-allow: eyebrow-to-heading spacer
                 (Heading {
                     text: "What you can hold us to.",

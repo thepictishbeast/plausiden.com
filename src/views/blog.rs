@@ -177,7 +177,14 @@ fn post_card(post: &Post) -> Markup {
         div class="flex items-center gap-3 text-xs uppercase tracking-wider font-semibold text-slate-500" { // loom-allow: card meta-row chrome — eyebrow + dot-separated dates with stronger letter-spacing for "label" feel
             (Badge { label: post.category, tone: BadgeTone::Primary, size: BadgeSize::Sm, shape: BadgeShape::default() }.render())
             span class="font-medium tracking-normal normal-case text-slate-500" { (post.published) } // loom-allow: nested meta date — overrides parent uppercase chrome
-            span class="text-slate-300" { "·" } // loom-allow: meta dot separator
+            // aria-hidden because it is pure decoration: the date and the read
+            // time are already separate elements, so the dot carries no
+            // information and a screen reader announcing "middle dot" between
+            // them is noise. Declaring it decorative is also what lets it stay
+            // this light — WCAG 1.4.3 exempts incidental text, and darkening a
+            // separator until it outweighs the metadata it separates would be
+            // the wrong fix.
+            span class="text-slate-300" aria-hidden="true" { "·" } // loom-allow: meta dot separator
             span class="font-medium tracking-normal normal-case text-slate-500" { (post.read_time) } // loom-allow: nested read-time — overrides parent uppercase chrome
         }
         h2 class="font-display text-2xl md:text-3xl lg:text-[2rem] font-bold text-slate-900 mt-4 leading-[1.2] tracking-tight group-hover:text-primary transition-colors duration-200" { // loom-allow: card-headline with tighter tracking + lg breakpoint scaling; Heading{Sub} omits group-hover hook for hover-state coupling with surrounding LinkCard

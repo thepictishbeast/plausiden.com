@@ -258,8 +258,15 @@
    several tenants share and theme differently — their primary may be light
    already, and silently repainting another tenant's brand mark is not this
    change's business. If the same fault shows up elsewhere, it belongs in Loom
-   as a tone-aware accent rather than as this override. */
-footer .text-primary {
+   as a tone-aware accent rather than as this override.
+
+   It did show up elsewhere. A contrast sweep of every text node on every route
+   found the same fault in the dark posture bands: the inline links reading
+   "how we work" and "pricing posture" render #073288 on slate-900 at 1.55
+   against a 4.5 requirement. Same cause, same fix, so the selector now covers
+   both places rather than growing a second rule that says the same thing. */
+footer .text-primary,
+.bg-slate-900 .text-primary {
   color: #60a5fa;
 }
 
