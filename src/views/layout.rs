@@ -167,6 +167,13 @@ fn head_tag(meta: &PageMeta<'_>) -> Markup {
             // xl:gap-8 beat the bundle's gap-4 at equal specificity.
             link rel="stylesheet" href="/static/nav-responsive.css";
             link rel="stylesheet" href="/static/animations.css";
+            // motion.css is the site's own motion + focus layer. Last, so it
+            // wins ties. Its reveal effect is gated behind
+            // `@supports (animation-timeline: view())` — a browser without
+            // scroll-driven animation never applies the hidden start state, so
+            // content cannot end up invisible the way it did when reveals were
+            // driven by an IntersectionObserver.
+            link rel="stylesheet" href="/static/motion.css";
             script src="/static/menu.js" defer {}
         }
     }
@@ -371,10 +378,14 @@ pub fn page_with_meta(meta: &PageMeta<'_>, body: Markup) -> Markup {
         html lang="en" {
             (head_tag(meta))
             body {
+                // First focusable element on every page: lets a keyboard or
+                // screen-reader user jump past the nav instead of tabbing
+                // through it on all 25 routes. Visible only when focused.
+                a class="pd-skip-link" href="#main" { "Skip to main content" }
                 div id="root" {
                     div class="flex flex-col min-h-screen font-body text-slate-900" {
                         (nav(meta.current))
-                        main class="flex-grow" {
+                        main id="main" tabindex="-1" class="flex-grow" {
                             (body)
                         }
                         (footer())
