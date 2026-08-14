@@ -142,6 +142,7 @@ pub fn render() -> Markup {
                                             input_type: InputType::Text,
                                             placeholder: Some("John Doe"),
                                             max_length: Some(100),
+                                            autocomplete: Some("name"),
                                             required: false,
         density: FormDensity::default(),
         style: FormStyle::default(),
@@ -153,6 +154,7 @@ pub fn render() -> Markup {
                                             input_type: InputType::Email,
                                             placeholder: Some("john@company.com"),
                                             max_length: Some(200),
+                                            autocomplete: Some("email"),
                                             required: true,
         density: FormDensity::default(),
         style: FormStyle::default(),
@@ -167,6 +169,7 @@ pub fn render() -> Markup {
                                             input_type: InputType::Tel,
                                             placeholder: Some("(555) 000-0000"),
                                             max_length: Some(50),
+                                            autocomplete: Some("tel"),
                                             required: false,
         density: FormDensity::default(),
         style: FormStyle::default(),
@@ -178,6 +181,7 @@ pub fn render() -> Markup {
                                             input_type: InputType::Text,
                                             placeholder: Some("Your Business LLC"),
                                             max_length: Some(200),
+                                            autocomplete: Some("organization"),
                                             required: false,
         density: FormDensity::default(),
         style: FormStyle::default(),
@@ -253,6 +257,105 @@ fn contact_row_text(svg: &str, label: &str, text: &str) -> Markup {
                 p class="text-slate-600" { (text) } // loom-allow: row value — plain prose
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod autofill {
+    //! Fields that collect information about the person must say so.
+    //!
+    //! WCAG 2.1 SC 1.3.5 (Identify Input Purpose, AA) asks that a field
+    //! collecting the user's own details name its purpose in a way software
+    //! can act on. Before this, neither form carried a single autocomplete
+    //! token, so nothing could be filled automatically. That is an
+    //! accessibility failure for anyone who finds typing expensive, and a
+    //! conversion cost for everyone else: the contact form is where the
+    //! business earns, and it was asking a prospect on a phone to type their
+    //! name, address, number and company by hand.
+    //!
+    //! The token has to be spelled correctly to do anything. A browser
+    //! silently resolves an unrecognised value to the empty string, so a typo
+    //! looks perfect in the markup and does nothing at all — the same class of
+    //! silent failure as the frozen CSS bundle. The list below is the exact
+    //! set of WHATWG autofill detail tokens this site uses.
+
+    /// (field id, expected token). Kept explicit rather than inferred so that
+    /// adding a field is a deliberate decision about what it collects.
+    const EXPECTED: &[(&str, &str)] = &[
+        ("contact-name", "name"),
+        ("contact-email", "email"),
+        ("contact-phone", "tel"),
+        ("contact-company", "organization"),
+    ];
+
+    /// Tokens the WHATWG autofill list actually defines. A value outside this
+    /// set is dead markup.
+    const VALID_TOKENS: &[&str] = &[
+        "name",
+        "email",
+        "tel",
+        "organization",
+        "organization-title",
+        "off",
+        "given-name",
+        "family-name",
+        "street-address",
+        "postal-code",
+        "country",
+    ];
+
+    #[test]
+    fn identifying_fields_declare_their_purpose() {
+        let page = super::render().into_string();
+        for (id, token) in EXPECTED {
+            let needle = format!(r#"id="{id}""#);
+            let at = page
+                .find(&needle)
+                .unwrap_or_else(|| panic!("{id} is no longer on the contact form"));
+            // The attribute belongs to this input, so look only as far as the
+            // end of the tag.
+            let tag_end = page[at..].find('>').map_or(page.len(), |e| at + e);
+            let tag = &page[at..tag_end];
+            assert!(
+                tag.contains(&format!(r#"autocomplete="{token}""#)),
+                "{id} should declare autocomplete=\"{token}\" so a browser can \
+                 fill it; found: {tag}"
+            );
+        }
+    }
+
+    #[test]
+    fn every_autocomplete_token_is_one_a_browser_recognises() {
+        for page in [
+            super::render().into_string(),
+            crate::views::feedback::render().into_string(),
+        ] {
+            for part in page.split(r#"autocomplete=""#).skip(1) {
+                let token = part.split('"').next().unwrap_or_default();
+                assert!(
+                    VALID_TOKENS.contains(&token),
+                    "autocomplete=\"{token}\" is not a token browsers act on; \
+                     an unrecognised value resolves to the empty string and does \
+                     nothing, while looking correct in the markup"
+                );
+            }
+        }
+    }
+
+    /// The honeypot must never be autofilled. A browser helpfully completing
+    /// the trap would classify a real person's inquiry as spam and drop it
+    /// silently — the worst possible failure on this page.
+    #[test]
+    fn the_honeypot_is_never_autofilled() {
+        let page = super::render().into_string();
+        let at = page
+            .find(r#"id="contact-website""#)
+            .expect("honeypot field is still present");
+        let tag_end = page[at..].find('>').map_or(page.len(), |e| at + e);
+        assert!(
+            page[at..tag_end].contains(r#"autocomplete="off""#),
+            "the honeypot no longer opts out of autofill"
+        );
     }
 }
 
