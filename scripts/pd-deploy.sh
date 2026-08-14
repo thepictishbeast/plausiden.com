@@ -69,6 +69,18 @@ run mv -f "$STAGING" "$BIN_DST"
 # 4. Mirror static assets (cp -r is fine — these are not held open).
 run cp -r "$STATIC_SRC" "$STATIC_DST"
 
+# 4a. Normalise ownership and mode on the copied assets.
+#
+# cp preserves whatever the source had, and the source is whatever umask the
+# person or script that generated the file happened to run under. The Open
+# Graph cards arrived as root:root 640 inside a 750 directory; the service runs
+# as `plausiden`, so every card 404'd while the page happily advertised it in a
+# meta tag. Same failure as the 750 binary in step 2a, one directory over:
+# a file's mode is a property of the deployment, not of its author.
+run chown -R root:root "$STATIC_DST"
+run find "$STATIC_DST" -type d -exec chmod 755 {} +
+run find "$STATIC_DST" -type f -exec chmod 644 {} +
+
 # 5. Restart service.
 run systemctl restart "$SERVICE"
 
