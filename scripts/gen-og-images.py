@@ -70,7 +70,7 @@ CARDS: list[tuple[str, str, str, str]] = [
     (
         "services",
         "Services",
-        "Comprehensive IT, specifically scoped",
+        "Eight services. Most firms need two or three",
         "PTES · NIST SP 800-115 · OWASP ASVS · MITRE ATT&CK",
     ),
     (
@@ -114,6 +114,42 @@ CARDS: list[tuple[str, str, str, str]] = [
         "Capabilities",
         "What we can actually do",
         "plausiden.com · Massachusetts",
+    ),
+    (
+        "blog",
+        "Insights",
+        "Notes from the build floor",
+        "How we build it, and why we chose it that way",
+    ),
+    (
+        "solutions-legal",
+        "For law firms",
+        "IT your duty of confidentiality can rest on",
+        "Matter-aware access · self-hosted mail · audit-ready posture",
+    ),
+    (
+        "solutions-healthcare",
+        "For healthcare practices",
+        "HIPAA's Security Rule, sized to a practice",
+        "Audit-ready ePHI handling · BAA-ready posture",
+    ),
+    (
+        "solutions-journalism",
+        "For newsrooms",
+        "Source confidentiality, by construction",
+        "Encrypted channels · threat-modeled endpoints · records discipline",
+    ),
+    (
+        "solutions-nonprofit",
+        "For nonprofits",
+        "Donor data hardened, grant reviews ready",
+        "Sized to a 5-50 person mission, not an enterprise",
+    ),
+    (
+        "solutions-financial-advisors",
+        "For RIAs and advisers",
+        "The posture custodians are starting to ask about",
+        "SEC custody-rule aware · SOC 2 friendly · BCP prepared",
     ),
 ]
 

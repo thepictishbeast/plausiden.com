@@ -209,6 +209,17 @@ fn og_card_for(route: &str) -> &'static str {
         "/how-we-work" => "/static/og/how-we-work.png",
         "/contact" => "/static/og/contact.png",
         "/capabilities" => "/static/og/capabilities.png",
+        // The five vertical landing pages and the blog index used to fall
+        // through to default.png. Those are the pages someone forwards — a
+        // partner sending /solutions/legal to the firm's managing partner —
+        // and a generic card on a page written for one industry throws away
+        // the targeting the page exists for.
+        "/blog" => "/static/og/blog.png",
+        "/solutions/legal" => "/static/og/solutions-legal.png",
+        "/solutions/healthcare" => "/static/og/solutions-healthcare.png",
+        "/solutions/journalism" => "/static/og/solutions-journalism.png",
+        "/solutions/nonprofit" => "/static/og/solutions-nonprofit.png",
+        "/solutions/financial-advisors" => "/static/og/solutions-financial-advisors.png",
         _ => "/static/og/default.png",
     }
 }
@@ -650,6 +661,59 @@ mod structured_data {
     //! Nothing renders it, so no screenshot shows the drift, no reader
     //! complains, and the comment above it went on claiming it came from
     //! /services for as long as it took someone to check.
+
+    /// Every og:image a route points at must be a file that exists.
+    ///
+    /// A link preview is the only part of this site that renders somewhere
+    /// nobody here is looking — in a Slack channel, in a forwarded email —
+    /// so a missing card is invisible from every page and every screenshot.
+    /// The cards once shipped as root:root 640 and all fifteen 404'd live
+    /// while every page happily advertised them.
+    #[test]
+    fn every_og_card_a_route_points_at_exists_on_disk() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/static/og/");
+        let mut missing: Vec<String> = Vec::new();
+        for (route, _) in crate::utility_class_coverage::rendered_pages() {
+            let card = super::og_card_for(route);
+            let file = card.rsplit('/').next().unwrap_or_default();
+            if !std::path::Path::new(&format!("{root}{file}")).exists() {
+                missing.push(format!("{route} -> {card}"));
+            }
+        }
+        missing.sort();
+        missing.dedup();
+        assert!(
+            missing.is_empty(),
+            "{} route(s) advertise an og:image that is not in static/og/. Run \
+             scripts/gen-og-images.py:\n{}",
+            missing.len(),
+            missing.join("\n")
+        );
+    }
+
+    /// A card must not quote copy the site has retired.
+    ///
+    /// The services card read "Comprehensive IT, specifically scoped" for two
+    /// commits after that headline was removed from the page and a test was
+    /// added forbidding it — so /services was guarded and its link preview,
+    /// which nothing on the site renders, quietly went on making the promise.
+    /// Card copy is copy; it belongs under the same rules.
+    #[test]
+    fn no_og_card_quotes_retired_copy() {
+        const GENERATOR: &str = include_str!("../../scripts/gen-og-images.py");
+        for retired in [
+            "Comprehensive IT",
+            "comprehensive solutions",
+            "Industry Leaders",
+            "digital landscape",
+        ] {
+            assert!(
+                !GENERATOR.contains(retired),
+                "the OG card table still says {retired:?}, which the site retired. \
+                 A link preview outlives the page it quotes."
+            );
+        }
+    }
 
     #[test]
     fn the_offer_catalog_lists_every_service() {
