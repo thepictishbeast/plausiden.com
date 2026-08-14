@@ -115,6 +115,11 @@ pub async fn solutions_nonprofit() -> Markup {
     crate::views::solutions::nonprofit::render()
 }
 
+/// Render `/sample-report` — the deliverable, published before purchase.
+pub async fn sample_report() -> Markup {
+    crate::views::sample_report::render()
+}
+
 /// Render `/how-we-work` — engagement model + four commitments.
 pub async fn how_we_work() -> Markup {
     crate::views::how_we_work::render()
@@ -287,6 +292,7 @@ const SITEMAP_ROUTES: &[(&str, &str, &str)] = &[
     ("/solutions/journalism", "monthly", "0.8"),
     ("/solutions/financial-advisors", "monthly", "0.8"),
     ("/solutions/nonprofit", "monthly", "0.8"),
+    ("/sample-report", "monthly", "0.8"),
     ("/how-we-work", "monthly", "0.7"),
     ("/pricing-transparency", "monthly", "0.7"),
     ("/privacy-directive", "yearly", "0.4"),

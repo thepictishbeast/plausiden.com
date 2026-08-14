@@ -23,6 +23,7 @@ pub mod legal;
 pub mod not_found;
 pub mod posts;
 pub mod pricing;
+pub mod sample_report;
 pub mod services;
 pub mod solutions;
 pub mod status;

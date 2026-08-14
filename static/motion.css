@@ -35,6 +35,19 @@
   /* Distance an element travels while arriving. Small on purpose — long
      travel reads as a slideshow, not a professional site. */
   --pd-rise: 14px;
+
+  /* The frozen bundle ships `.font-mono { font-family: var(--font-mono) }`
+     but never defines --font-mono anywhere, so the declaration is invalid at
+     computed-value time and the element silently inherits the body sans. The
+     evidence transcript on /sample-report measured as Plus Jakarta Sans: an
+     HTTP request/response that does not align in columns undermines the one
+     page whose entire job is looking like a real deliverable.
+
+     A system stack rather than a webfont — nothing to download, and every
+     platform already has a good monospace face. */
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 /* ------------------------------------------------------- reveal on scroll -- */
@@ -401,6 +414,14 @@ footer .text-slate-500 {
 /* -- sizing -------------------------------------------------------------- */
 .w-12 { width: 3rem; }
 .max-w-6xl { max-width: 72rem; }
+
+/* -- lists and scroll containers ---------------------------------------- */
+.list-decimal { list-style-type: decimal; }
+.list-inside { list-style-position: inside; }
+
+/* Wide content (evidence blocks, request/response dumps) must scroll inside
+   its own container so the page body never scrolls horizontally. */
+.overflow-x-auto { overflow-x: auto; }
 
 /* -- typography ---------------------------------------------------------- */
 .text-\[10px\] { font-size: 10px; }

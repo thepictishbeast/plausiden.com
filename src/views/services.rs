@@ -336,8 +336,10 @@ fn methodology_band() -> Markup {
                     }
                 }
 
-                p class="text-slate-500 text-sm mt-12" { // loom-allow: prose with inline link
-                    "Scope, price and the retest window are agreed in writing before any testing starts — see "
+                p class="text-slate-500 text-sm mt-12" { // loom-allow: prose with two inline links
+                    "You can "
+                    (TextLink { label: "read the report this produces", href: "/sample-report", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
+                    " before buying one. Scope, price and the retest window are agreed in writing before any testing starts — see "
                     (TextLink { label: "how we work", href: "/how-we-work", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
                     "."
                 }

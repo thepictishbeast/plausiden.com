@@ -130,6 +130,7 @@ pub fn build_router_with_state(state: AppState) -> Router {
             get(handlers::solutions_financial_advisors),
         )
         .route("/solutions/nonprofit", get(handlers::solutions_nonprofit))
+        .route("/sample-report", get(handlers::sample_report))
         .route("/how-we-work", get(handlers::how_we_work))
         .route("/pricing-transparency", get(handlers::pricing))
         .route("/sitemap.xml", get(handlers::sitemap_xml)) // COUPLING-EXEMPT: served to crawlers, not clicked from UI
@@ -671,6 +672,7 @@ mod snapshots {
         "/solutions/financial-advisors"
     );
     snap_route!(solutions_nonprofit, "/solutions/nonprofit");
+    snap_route!(sample_report, "/sample-report");
     snap_route!(how_we_work, "/how-we-work");
     snap_route!(pricing, "/pricing-transparency");
     snap_route!(privacy, "/privacy-directive");
@@ -735,6 +737,7 @@ mod cta_naming {
     fn no_page_uses_a_retired_call_to_action_name() {
         let pages: Vec<String> = vec![
             crate::views::home::render().into_string(),
+            crate::views::sample_report::render().into_string(),
             crate::views::how_we_work::render().into_string(),
             crate::views::pricing::render().into_string(),
             crate::views::services::render().into_string(),
@@ -807,6 +810,10 @@ mod plain_language {
             (
                 "/capabilities",
                 crate::views::capabilities::render().into_string(),
+            ),
+            (
+                "/sample-report",
+                crate::views::sample_report::render().into_string(),
             ),
             (
                 "/how-we-work",
@@ -951,6 +958,10 @@ mod utility_class_coverage {
             ("/", crate::views::home::render().into_string()),
             ("/services", crate::views::services::render().into_string()),
             ("/pricing", crate::views::pricing::render().into_string()),
+            (
+                "/sample-report",
+                crate::views::sample_report::render().into_string(),
+            ),
             (
                 "/how-we-work",
                 crate::views::how_we_work::render().into_string(),
