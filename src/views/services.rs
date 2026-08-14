@@ -196,7 +196,7 @@ pub fn render() -> Markup {
             eyebrow: Some("Our services"),
             headline_lead: "Comprehensive IT,",
             headline_accent: Some("specifically scoped."),
-            subheadline: "We offer a full suite of IT solutions designed for organizations that want infrastructure they can audit, retain, and eventually run without us. General scope, specific expertise — pick the area that's biting you, or schedule an intake to figure out where to start.",
+            subheadline: "Eight areas of work, for organisations that want infrastructure they can audit, retain and eventually run without us. Most firms need two or three of them. Pick the one that is biting you, or book a scoping call and we will work out where to start.",
             cta: None,
             background: HeroBackground::GridLight,
         }.render())

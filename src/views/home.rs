@@ -196,20 +196,20 @@ pub fn render() -> Markup {
             }
         }
 
-        // ---------- Everything Your Business Needs ----------
+        // ---------- What we do ----------
         section class="py-24 bg-white" { // loom-allow: services band — py-24 cadence above Loom Section{Loose}
             div class="container mx-auto px-4 md:px-6" { // loom-allow: full-width container
                 div class="text-center max-w-3xl mx-auto mb-16 pd-reveal" { // loom-allow: centred caption above grid + scroll-reveal hook
                     div class="mb-4" {
                         (Heading {
-                            text: "Everything Your Business Needs",
+                            text: "What we do, and where each one stops",
                             level: HeadingLevel::H2,
                             variant: HeadingVariant::Section,
                             tone: HeadingTone::Ink,
                         }.render())
                     }
                     (Lede {
-                        text: "We provide end-to-end solutions that cover every aspect of your technology stack.",
+                        text: "Most firms arrive with one problem that is on fire and find a second underneath it. Each card says what the work is and, where it matters, what we would tell you to buy from someone else. Disaster recovery and network architecture are the two areas not shown here; both are on the services page.",
                         tone: HeadingTone::Ink,
                     }.render())
                 }
@@ -223,9 +223,9 @@ pub fn render() -> Markup {
                     (service_card(&svg_server, "IT Operations", "Monitoring, documented patch windows, tested restores and real runbooks — so the answer to 'who fixes this' is never 'the person who is good with computers'."))
                     (service_card(&svg_shield, "Cyber Security", "Hardening, access reviews and the security questionnaires your clients send before they will sign. Findings reach you when we find them, not at the end."))
                     (service_card(&svg_brain, "Artificial Intelligence", "Practical automation of the work that eats your week — intake, document handling, reporting — kept on infrastructure you control."))
-                    (service_card(&svg_settings, "Automation & IoT", "Control and monitoring for equipment that has to keep running, with the network segmented so a sensor cannot reach your case files."))
-                    (service_card(&svg_code, "Software", "Small, well-scoped builds where an off-the-shelf tool does not fit — and an honest answer when one does."))
-                    (service_card(&svg_cpu, "Hardware", "Specification, procurement and deployment, including the disposal step most firms forget: drives leaving the building are wiped or destroyed."))
+                    (service_card(&svg_settings, "Industrial Automation", "Control and monitoring for equipment that has to keep running, with the network segmented so a sensor cannot reach your case files."))
+                    (service_card(&svg_code, "Software Development", "Small, well-scoped builds where an off-the-shelf tool does not fit — and an honest answer when one does."))
+                    (service_card(&svg_cpu, "Hardware Solutions", "Specification, procurement and deployment, including the disposal step most firms forget: drives leaving the building are wiped or destroyed."))
                 }
             }
         }
@@ -252,9 +252,9 @@ pub fn render() -> Markup {
                             (check_line("A retest after you fix things, included — not sold back to you"))
                         }
                         div class="mt-10" { // loom-allow: spacer above the dark-band CTA
-                            a href="/about" {
+                            a href="/how-we-work" {
                                 button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 border [border-color:var(--button-outline)] shadow-xs active:shadow-none min-h-9 text-white border-white/20 hover:bg-white/10 hover:text-white rounded-xl px-8 py-6 text-lg" { // loom-allow: outline-on-dark CTA — Loom Button{Outline} doesn't have a dark-band variant
-                                    "Learn About Our Mission"
+                                    "See the six commitments"
                                 }
                             }
                         }
@@ -305,9 +305,9 @@ mod tests {
             "IT Operations",
             "Cyber Security",
             "Artificial Intelligence",
-            "Automation &amp; IoT",
-            "Software",
-            "Hardware",
+            "Industrial Automation",
+            "Software Development",
+            "Hardware Solutions",
         ] {
             assert!(s.contains(name), "home services grid missing: {name}");
         }

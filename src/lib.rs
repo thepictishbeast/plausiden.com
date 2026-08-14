@@ -770,6 +770,17 @@ mod plain_language {
         "tailored to your",
         "digital landscape",
         "comprehensive solutions",
+        // Same species, caught on the homepage after the list already
+        // existed: "We provide end-to-end solutions that cover every aspect
+        // of your technology stack." Every word of it could be said by any
+        // vendor about any product, which is what makes it filler. The list
+        // was matching one phrasing of a claim that has several.
+        "end-to-end solutions",
+        "every aspect of",
+        "full suite of",
+        "one-stop",
+        "trusted partner",
+        "industry-leading",
         "turnkey",
         "next-generation",
         "ever-evolving",
@@ -1141,6 +1152,81 @@ mod retired_class_names {
                     );
                 }
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod service_naming {
+    //! One service, one name, on every surface.
+    //!
+    //! The homepage called them "Automation & IoT", "Software" and
+    //! "Hardware"; /services called the same three "Industrial Automation",
+    //! "Software Development" and "Hardware Solutions". A buyer reading the
+    //! homepage, clicking through, and scanning for what they just read finds
+    //! three of the six renamed. Nothing breaks, so nothing reports it — the
+    //! page just quietly reads as though two people wrote it.
+    //!
+    //! The services page is the source of truth: it carries the full entry
+    //! with scope, method and audience, so its title is the name.
+
+    #[test]
+    fn homepage_cards_use_the_service_page_names() {
+        // Exact titles, read from the service definitions themselves.
+        //
+        // A first version asked whether the rendered /services HTML *contained*
+        // the card name, which passed when the homepage said "Software" and
+        // the service was "Software Development" — the shorter name is a
+        // substring of the longer one, so the check silently approved the
+        // exact drift it existed to catch.
+        const SERVICES_SRC: &str = include_str!("views/services.rs");
+        let canonical: Vec<&str> = SERVICES_SRC
+            .split("title: \"")
+            .skip(1)
+            .filter_map(|p| p.split('"').next())
+            .collect();
+        assert!(
+            canonical.len() >= 6,
+            "failed to read the service titles, found {canonical:?}"
+        );
+        let home = crate::views::home::render().into_string();
+
+        // Card titles on the homepage, as rendered.
+        let mut cards: Vec<String> = Vec::new();
+        for part in home.split("<h3").skip(1) {
+            let Some(open_end) = part.find('>') else {
+                continue;
+            };
+            let Some(close) = part.find("</h3>") else {
+                continue;
+            };
+            if close <= open_end {
+                continue;
+            }
+            let text = part[open_end + 1..close].trim();
+            // Skip the footer column headings, which are not services.
+            if text.is_empty()
+                || text.len() > 40
+                || matches!(text, "Company" | "Solutions" | "Contact")
+            {
+                continue;
+            }
+            cards.push(text.to_owned());
+        }
+        assert!(
+            cards.len() >= 6,
+            "expected to find the homepage service cards, found {cards:?}"
+        );
+
+        for card in &cards {
+            let name = card.replace("&amp;", "&");
+            assert!(
+                canonical.iter().any(|c| *c == name),
+                "the homepage offers {name:?}, which is not one of the service \
+                 names: {canonical:?}. A buyer who clicks through cannot find \
+                 what they just read. /services holds the full entry, so its \
+                 title is the name."
+            );
         }
     }
 }
