@@ -73,7 +73,16 @@ pub fn render() -> Markup {
                 div class="container mx-auto px-4 md:px-6 text-center" { // loom-allow: centred container scope
                     div class="mb-4" {
                         (Heading {
-                            text: "Contact Us",
+                            // Was "Contact Us" — the nav label again, on the page
+                            // where hesitation actually costs money. The thing
+                            // stopping someone filling in this form is the
+                            // suspicion that a form turns into a sales call, so
+                            // the headline answers that instead of restating the
+                            // page name. Names the practice, never a firm. The
+                            // lede below still carries the mechanics (45 minutes,
+                            // NDA first, written fixed price), so the two lines
+                            // do different work.
+                            text: "No sales call. A scoping call.",
                             level: HeadingLevel::H1,
                             variant: HeadingVariant::Display,
                             tone: HeadingTone::OnDark,

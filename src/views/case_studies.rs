@@ -78,7 +78,14 @@ pub fn render() -> Markup {
                 div class="mb-6" { (Badge { label: "Selected work", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) }
                 div class="mb-6" {
                     (Heading {
-                        text: "Case studies",
+                        // Was "Case studies", which the nav link, the page title
+                        // and the "Selected work" badge above it already say. Three
+                        // restatements of the label and nothing about the content,
+                        // on the page carrying the strongest proof the firm has.
+                        // This names the shape each entry actually has below —
+                        // what mattered, what we shipped, what changed — and
+                        // claims nothing that is not already on the page.
+                        text: "What changed, and what it took.",
                         level: HeadingLevel::H1,
                         variant: HeadingVariant::Display,
                         tone: HeadingTone::Ink,
