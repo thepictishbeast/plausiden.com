@@ -6,7 +6,7 @@
 
 use maud::{Markup, PreEscaped, html};
 
-use super::layout::page;
+use super::layout::page_with_description;
 
 const ABOUT_HTML: &str = include_str!("../pages/about.html");
 
@@ -19,7 +19,12 @@ pub fn render() -> Markup {
     let body = html! {
         (PreEscaped(ABOUT_HTML))
     };
-    page("About — PlausiDen", "/about", body)
+    page_with_description(
+        "About PlausiDen — Woman-owned IT & Security Firm in Massachusetts",
+        "/about",
+        "A woman-owned IT, security and disaster-recovery firm in Greater Boston, working with law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff.",
+        body,
+    )
 }
 
 #[cfg(test)]

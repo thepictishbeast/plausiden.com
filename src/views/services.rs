@@ -17,7 +17,7 @@ use loom_components::{
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
-use super::layout::page;
+use super::layout::page_with_description;
 
 /// One service category as it appears on the services page.
 struct Service<'a> {
@@ -208,7 +208,12 @@ pub fn render() -> Markup {
         (posture_band())
         (final_cta())
     };
-    page("Services — PlausiDen", "/services", body)
+    page_with_description(
+        "IT, Security & Disaster Recovery Services — PlausiDen",
+        "/services",
+        "Managed IT operations, cyber security, disaster recovery, automation and software for practices of 5 to 100 staff. Fixed scope, fixed price, published rates.",
+        body,
+    )
 }
 
 /// Cross-cutting "how we approach every engagement" band — same dark

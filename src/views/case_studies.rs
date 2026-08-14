@@ -12,7 +12,7 @@ use loom_components::{
 };
 use maud::{Markup, html};
 
-use crate::views::layout::page;
+use crate::views::layout::page_with_description;
 
 /// One case study summary.
 struct CaseStudy {
@@ -163,7 +163,12 @@ pub fn render() -> Markup {
             }
         }
     };
-    page("Case studies — PlausiDen", "/case-studies", body)
+    page_with_description(
+        "Case Studies — Engagements and Outcomes — PlausiDen",
+        "/case-studies",
+        "Representative engagements with law firms, medical practices, financial advisers and nonprofits: the situation, the work, and what changed afterwards.",
+        body,
+    )
 }
 
 #[cfg(test)]

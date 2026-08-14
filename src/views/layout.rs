@@ -110,11 +110,23 @@ fn asset(path: &str) -> String {
 
 /// Default page description used when a caller doesn't supply one.
 /// Tuned for SEO + social previews — single sentence under 160 chars.
-pub const DEFAULT_DESCRIPTION: &str = "Comprehensive IT for the modern enterprise — cybersecurity, AI automation, cloud infrastructure, software development. Built for teams that take confidentiality seriously.";
+pub const DEFAULT_DESCRIPTION: &str = "IT operations, security and disaster recovery for Massachusetts law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff. Published rates, fixed-price proposals.";
 
-/// JSON-LD Organization schema. Helps search engines understand the
-/// site identity. Emitted once in every page head.
-const JSON_LD_ORGANIZATION: &str = r#"{"@context":"https://schema.org","@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com","email":"team@plausiden.com","telephone":"+1-978-351-6495","address":{"@type":"PostalAddress","addressRegion":"MA","addressCountry":"US"},"description":"Comprehensive IT solutions for the modern enterprise — cybersecurity, AI automation, cloud infrastructure, software development."}"#;
+/// JSON-LD for the firm itself, emitted in every page head.
+///
+/// Typed `ProfessionalService` (a subtype of `LocalBusiness`) rather than the
+/// bare `Organization` it used to be. That distinction is the point: a local
+/// buyer searching "IT support for law firms near me" is served by the local
+/// business graph, and an `Organization` with no service area, no opening
+/// hours and no catalogue does not appear in it. `areaServed` and
+/// `hasOfferCatalog` are what let a search engine answer "do they do this,
+/// and do they do it here" without parsing the page.
+///
+/// Everything asserted here is stated on the site: the service lines from
+/// /services, the audience from /services, the price band from
+/// /pricing-transparency. No review counts or ratings — those are structured
+/// data you can be penalised for inventing, and we have none to report.
+const JSON_LD_ORGANIZATION: &str = r#"{"@context":"https://schema.org","@type":"ProfessionalService","name":"PlausiDen LLC","url":"https://plausiden.com","email":"team@plausiden.com","telephone":"+1-978-351-6495","address":{"@type":"PostalAddress","addressRegion":"MA","addressCountry":"US"},"areaServed":[{"@type":"AdministrativeArea","name":"Greater Boston"},{"@type":"State","name":"Massachusetts"},{"@type":"Country","name":"United States"}],"priceRange":"$$","description":"IT operations, security and disaster recovery for law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff in Massachusetts. Published rates and fixed-price written proposals.","knowsAbout":["IT operations","Cyber security","Disaster recovery","Network segmentation","Access review","Backup and restore testing","Security questionnaires","Industrial automation","Software development"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"Services","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"IT Operations","description":"Monitoring, documented patch windows, tested restores and runbooks."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Cyber Security","description":"Hardening, access review, and the security questionnaires clients send before signing."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Disaster Recovery","description":"Recovery posture engineered to be tested, not just documented."}}]}}"#;
 
 /// Per-page metadata bundle for the shared `<head>`. Keeps the
 /// signature flat instead of growing positional arguments per

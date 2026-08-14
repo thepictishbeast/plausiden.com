@@ -16,7 +16,7 @@ use loom_components::{
 };
 use maud::{Markup, html};
 
-use crate::views::layout::page;
+use crate::views::layout::page_with_description;
 
 /// One capability category in the in-house stack.
 struct Capability {
@@ -151,7 +151,12 @@ pub fn render() -> Markup {
             }
         }
     };
-    page("Capabilities — PlausiDen", "/capabilities", body)
+    page_with_description(
+        "Capabilities — What PlausiDen Actually Does",
+        "/capabilities",
+        "The specific work behind the service lines: monitoring and patching, access review, tested restores, network segmentation, and the security questionnaires clients send before signing.",
+        body,
+    )
 }
 
 #[cfg(test)]

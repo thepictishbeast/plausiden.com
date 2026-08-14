@@ -6,7 +6,7 @@
 
 use maud::{Markup, html};
 
-use super::layout::{PageMeta, page, page_with_meta};
+use super::layout::{PageMeta, page_with_description, page_with_meta};
 use super::posts::{POSTS, Post, by_slug};
 use loom_components::card::LinkCard;
 use loom_components::{
@@ -87,7 +87,12 @@ pub fn index() -> Markup {
             }
         }
     };
-    page("Field Notes — PlausiDen", "/blog", body)
+    page_with_description(
+        "Insights — PlausiDen",
+        "/blog",
+        "Notes on IT operations, security and disaster recovery for small professional practices: what actually goes wrong, and what to do about it.",
+        body,
+    )
 }
 
 /// Render a single post page given its slug. Returns `None` if the

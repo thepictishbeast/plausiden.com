@@ -20,7 +20,7 @@ use loom_components::{
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
-use super::layout::page;
+use super::layout::page_with_description;
 
 const SERVICE_OPTIONS: &[SelectOption<'static>] = &[
     SelectOption {
@@ -222,7 +222,12 @@ pub fn render() -> Markup {
             }
         }
     };
-    page("Contact — PlausiDen", "/contact", body)
+    page_with_description(
+        "Contact PlausiDen — Book a 45-Minute Scoping Call",
+        "/contact",
+        "Book a 45-minute scoping call. Mutual NDA first, then a written proposal with specific scope and a specific price. Massachusetts, 978-351-6495.",
+        body,
+    )
 }
 
 fn contact_row(svg: &str, label: &str, href: &str, text: &str) -> Markup {
