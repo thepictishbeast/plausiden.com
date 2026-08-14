@@ -290,6 +290,8 @@ enum AckExit {
     /// tenant; browser back-forward cache restores form state on its own, and
     /// saying so is honest and costs nothing.
     Form,
+    /// The feedback form, for the same reason.
+    FeedbackForm,
 }
 
 /// Acknowledgement page shown after a POST to `/contact`.
@@ -302,6 +304,7 @@ fn ack_page(title: &str, eyebrow: &str, headline: &str, message: &str, exit: Ack
     let (label, href) = match exit {
         AckExit::Home => ("← Back home", "/"),
         AckExit::Form => ("← Back to the form", "/contact"),
+        AckExit::FeedbackForm => ("← Back to the form", "/feedback"),
     };
     let cta = html! {
         (TextLink {
@@ -576,26 +579,51 @@ fn validate_feedback(f: &FeedbackForm) -> Result<(), &'static str> {
     Ok(())
 }
 
-fn feedback_ack(message: &str) -> Markup {
-    let cta = html! {
-        (TextLink {
-            label: "← Back home",
-            href: "/",
-            variant: TextLinkVariant::PrimaryBold,
-            size: TextLinkSize::Default,
-        }.render())
+/// The feedback form was accepted.
+fn feedback_received() -> Markup {
+    ack_page(
+        "Feedback received — PlausiDen",
+        "Feedback",
+        "Thank you.",
+        "This goes to the people who did the work, not into a reporting dashboard. If you raised \
+         something that needs an answer and left an address, you will get one. And if you flagged a \
+         quote we can publish, we will email you the proposed wording before anything goes live.",
+        AckExit::Home,
+    )
+}
+
+/// The feedback form was not accepted.
+///
+/// Previously every outcome here rendered the headline "Thank you.",
+/// including validation failures — so a submission that did not send
+/// thanked the sender for sending it, then offered the homepage as the
+/// only way out. Errors now look like errors and lead back to the form.
+fn feedback_problem(message: &str) -> Markup {
+    ack_page(
+        "Feedback not sent — PlausiDen",
+        "Feedback",
+        "That did not send.",
+        message,
+        AckExit::FeedbackForm,
+    )
+}
+
+/// Turn a feedback validator code into something the sender can act on.
+fn feedback_validation_message(code: &str) -> String {
+    let detail = match code {
+        "name required" => "we need a name to attribute the feedback to",
+        "name too long" => "the name field is over its length limit",
+        "identity field too long" => "the role or company field is over its length limit",
+        "feedback field too long" => "one of the answers is over its length limit",
+        "at least one answer required" => {
+            "every answer was blank. All of them are optional, but at least one has to say something"
+        }
+        _ => "one of the fields did not pass validation",
     };
-    let body = html! {
-        (Hero {
-            eyebrow: Some("Feedback received"),
-            headline_lead: "Thank you.",
-            headline_accent: None,
-            subheadline: message,
-            cta: Some(&cta),
-            background: HeroBackground::GridLight,
-        }.render())
-    };
-    page("Feedback received — PlausiDen", "/feedback", body)
+    format!(
+        "It looks like {detail}. Going back will return you to the form with what you typed still \
+         in it — correct that one field and send again."
+    )
 }
 
 /// `POST /feedback` — validate, persist to the SQLite store, email
@@ -613,7 +641,10 @@ pub(crate) async fn feedback_submit(
     if state.limiter.check().is_err() {
         return (
             StatusCode::TOO_MANY_REQUESTS,
-            feedback_ack("The inbox is being flooded right now — please try again in a minute."),
+            feedback_problem(
+                "We are receiving an unusual number of submissions right now and this one was not \
+                 accepted. Try again in a minute, or email team@plausiden.com directly.",
+            ),
         )
             .into_response();
     }
@@ -621,9 +652,7 @@ pub(crate) async fn feedback_submit(
         tracing::warn!(error = e, "feedback rejected at validation");
         return (
             StatusCode::BAD_REQUEST,
-            feedback_ack(
-                "Your submission didn't pass basic validation. Every answer is optional, but at least one field has to be filled in.",
-            ),
+            feedback_problem(&feedback_validation_message(e)),
         )
             .into_response();
     }
@@ -650,8 +679,9 @@ pub(crate) async fn feedback_submit(
             tracing::warn!(error = %e, "feedback persist failed");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                feedback_ack(
-                    "Server error storing your submission. Please email team@plausiden.com directly.",
+                feedback_problem(
+                    "Something broke on our side while storing this — our fault, not yours. Please \
+                     email team@plausiden.com directly.",
                 ),
             )
                 .into_response();
@@ -717,13 +747,7 @@ pub(crate) async fn feedback_submit(
         }
     }
 
-    (
-        StatusCode::ACCEPTED,
-        feedback_ack(
-            "Your feedback is in our inbox. If you flagged a quote we can publish, we'll email you the proposed wording before anything goes live.",
-        ),
-    )
-        .into_response()
+    (StatusCode::ACCEPTED, feedback_received()).into_response()
 }
 
 #[derive(Debug, Deserialize)]
@@ -983,6 +1007,90 @@ mod acknowledgement_tests {
         assert!(
             received.contains(r#"href="/""#),
             "the received page should offer the way home"
+        );
+    }
+
+    /// Every code the feedback validator can emit must have its own
+    /// sentence. Written after mapping a code that did not exist
+    /// ("empty submission") while the real one — "at least one answer
+    /// required" — silently fell through to the generic case. Reading the
+    /// validator is not enough; assert against it.
+    #[test]
+    fn every_feedback_validator_code_has_a_specific_message() {
+        let src = include_str!("inquiry.rs");
+        let body = src
+            .split("fn validate_feedback")
+            .nth(1)
+            .expect("validate_feedback exists");
+        let body = body.split("\nfn ").next().unwrap_or(body);
+
+        let mut codes = Vec::new();
+        for part in body.split("Err(\"").skip(1) {
+            if let Some(code) = part.split('"').next() {
+                codes.push(code.to_owned());
+            }
+        }
+        assert!(
+            codes.len() >= 5,
+            "expected to find the validator's error codes, found {codes:?}"
+        );
+        for code in codes {
+            let msg = feedback_validation_message(&code);
+            assert!(
+                !msg.contains("one of the fields did not pass validation"),
+                "feedback validator emits {code:?} but feedback_validation_message has no case \
+                 for it, so the sender gets the generic fallback"
+            );
+        }
+    }
+
+    /// The contact validator, held to the same standard.
+    #[test]
+    fn every_contact_validator_code_has_a_specific_message() {
+        let src = include_str!("inquiry.rs");
+        let body = src.split("fn validate(").nth(1).expect("validate exists");
+        let body = body.split("\nfn ").next().unwrap_or(body);
+        let mut codes = Vec::new();
+        for part in body.split("Err(\"").skip(1) {
+            if let Some(code) = part.split('"').next() {
+                codes.push(code.to_owned());
+            }
+        }
+        assert!(
+            codes.len() >= 5,
+            "expected validator codes, found {codes:?}"
+        );
+        for code in codes {
+            let msg = validation_message(&code);
+            assert!(
+                !msg.contains("one of the fields did not pass validation"),
+                "contact validator emits {code:?} with no matching message case"
+            );
+        }
+    }
+
+    /// An error page must not thank the sender for a submission that did
+    /// not send. /feedback rendered "Thank you." for every outcome,
+    /// including validation failures.
+    #[test]
+    fn feedback_errors_do_not_thank_the_sender() {
+        let page = feedback_problem("something went wrong").into_string();
+        assert!(
+            !page.contains("Thank you."),
+            "the feedback error page still thanks the sender for a submission that failed"
+        );
+        assert!(
+            page.contains(r#"href="/feedback""#),
+            "the feedback error page does not lead back to the form"
+        );
+        let ok = feedback_received().into_string();
+        assert!(
+            ok.contains("Thank you."),
+            "the accepted page should thank the sender"
+        );
+        assert!(
+            ok.contains("before anything goes live"),
+            "the publishing-consent promise was lost from the accepted page"
         );
     }
 
