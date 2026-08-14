@@ -6,6 +6,7 @@
 //! interference with regulated records) and the compliance separation
 //! problem we still have to solve.
 
+use loom_components::ArticleHeading;
 use maud::{Markup, html};
 
 /// Render the post body. Wrapper supplies chrome, eyebrow, title, date.
@@ -19,9 +20,7 @@ pub fn render() -> Markup {
             ". The category move it implies is different from hiding. It's the difference between an empty room and a room so full of identical objects that nobody can tell which one is yours."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "Hiding is brittle. Unreliability is recoverable."
-        }
+        (ArticleHeading { text: "Hiding is brittle. Unreliability is recoverable." }.render())
 
         p class="mb-6" {
             "Every hiding-based privacy guarantee has a single point of failure. Encryption can be broken by key theft, traffic analysis, or a court order. VPNs can be compromised at the exit node. Tor can be deanonymized by correlation attacks given enough patience. The privacy property holds up to that one failure, then collapses entirely."
@@ -35,9 +34,7 @@ pub fn render() -> Markup {
             "This is what we mean when we say we sell unreliability. Not as a marketing flourish — as the actual architectural property the products are designed to produce."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "What \"publication-stage defense\" means"
-        }
+        (ArticleHeading { text: "What \"publication-stage defense\" means" }.render())
 
         p class="mb-6" {
             "Existing privacy stacks defend two stages of the data lifecycle. They protect data "
@@ -57,9 +54,7 @@ pub fn render() -> Markup {
             "Concretely: a search history that includes a single query for \"how to dispose of a body\" is one thing. A search history that includes that query alongside forty-seven other equally-improbable queries — entered systematically by software the user installed, with disclosed methodology — is a different artifact entirely. The first looks like evidence. The second looks like an unreliable substrate."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "Why this changes the burden of proof"
-        }
+        (ArticleHeading { text: "Why this changes the burden of proof" }.render())
 
         p class="mb-6" {
             "Plausible deniability has a traditional sense (intelligence-community usage: a principal can claim with some basis not to have known about a deniable operation). Our sense is more structural: a record is consistent with multiple competing inferences, and no one inference is supported strongly enough to carry weight. The two senses converge in practice. If your data record is genuinely ambiguous between many explanations, the principal can credibly say \"that's not me\" because the evidence does not in fact pick out them."
@@ -94,9 +89,7 @@ pub fn render() -> Markup {
             " The same shift applies to the substrate that strangers use to judge a person — social-graph adjacencies, public profile data, scraped activity. When everyone knows the substrate is noisy, no individual data point is reputation-bearing. A workplace investigation, a custody hearing, a journalist's pre-publication review — all become less reliant on \"the data says\" and more reliant on real evidence."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "Where this doesn't apply, and why we say so out loud"
-        }
+        (ArticleHeading { text: "Where this doesn't apply, and why we say so out loud" }.render())
 
         p class="mb-6" {
             "Pollution is not a license to falsify records you have a regulated duty to keep accurate. We will not build, and will not ship, tools that do any of the following:"
@@ -121,9 +114,7 @@ pub fn render() -> Markup {
             "These bright lines are not a marketing concession. They are the load-bearing wall that lets the rest of the architecture work. A pollution stack that doesn't respect them is — correctly — an obstruction tool, and obstruction tools collapse under the first serious legal scrutiny they encounter. The whole point is to ship something that survives that scrutiny."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "The compliance separation problem"
-        }
+        (ArticleHeading { text: "The compliance separation problem" }.render())
 
         p class="mb-6" {
             "Our hardest design problem isn't building the pollution. It's keeping the pollution out of the substrates that are supposed to be authoritative. A law firm using a search-noise tool to protect attorney browsing history cannot have that noise contaminate the firm's own case-management records. A healthcare practice cannot have its self-protection pollution land in the patient chart. A journalist cannot have decoy contacts visible in the documentation that proves a source's testimony."
@@ -135,9 +126,7 @@ pub fn render() -> Markup {
             "). When we design a pollution tool for a regulated context, we design the boundary first and the noise generator second."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "What this means for the products we ship"
-        }
+        (ArticleHeading { text: "What this means for the products we ship" }.render())
 
         p class="mb-6" {
             "The PlausiDen suite is not finished. The pieces that exist today (the rule-based mail client, the audit framework, the design system, the supersociety doctrine) are the substrate; the pollution layer is what makes the doctrine ship. We are deliberate about staging this. The hiding-stage products go first because they're easier to evaluate and harder to misuse. The publication-stage products go second, because they require the legal and ethical scaffolding to be in place before they're useful."
@@ -147,9 +136,7 @@ pub fn render() -> Markup {
             "The pollution tools we will eventually ship include: a search-noise generator that injects plausible queries on the user's behalf, with disclosed cadence and source; an ad-trap that engages with served ads to systematically degrade profile-building; a decoy-publication stream for social platforms that cannot be opted out of; a location-noise injector for the operating-system-level location services; and an email-decoy generator for the relationship-graph layer. Each of these is small. None of them is novel in isolation. The novelty is the suite, the typed boundary between pollution and regulated record, and the audit machinery that proves the boundary holds."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "Why this is the right time"
-        }
+        (ArticleHeading { text: "Why this is the right time" }.render())
 
         p class="mb-6" {
             "The threat models that pollution defends against — mass behavioral targeting, AI training scrape, broker segmentation, reputation inference — were not load-bearing fifteen years ago. They are now. The legal frameworks have not caught up; the market has not caught up. People who care about their privacy still default to hiding-stage tools because that's what the market sells. We think the architecture has matured to the point where the publication-stage layer is shippable, and we think the people most exposed to the asymmetric inference economy — clients of the legal, healthcare, journalism, and advocacy practices we serve — have the most to gain from a stack that explicitly defends it."

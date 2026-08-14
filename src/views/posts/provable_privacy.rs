@@ -4,6 +4,7 @@
 //! property of the architecture, not a runtime promise. Sanitized;
 //! does not name clients, repos, or specific files.
 
+use loom_components::ArticleHeading;
 use maud::{Markup, html};
 
 /// Render the post body. Wrapper supplies chrome, eyebrow, title, date.
@@ -15,9 +16,7 @@ pub fn render() -> Markup {
             "There are two ways a system can promise to protect your data. The first is a policy — a sentence in a privacy notice or a clause in a contract. The second is a property — a fact about the architecture that would have to stop being true for the promise to be broken. Most software in the world picks the first. We try to pick the second whenever the engineering allows."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "What \"provable by construction\" means"
-        }
+        (ArticleHeading { text: "What \"provable by construction\" means" }.render())
 
         p class="mb-6" {
             "Take a concrete example. Imagine a system that auto-categorizes incoming email — sorting newsletters into one folder, transactional alerts into another, social-platform notifications into a third. Most implementations of this read the message body. They have to: that's how you tell a marketing email from an order receipt."
@@ -37,9 +36,7 @@ pub fn render() -> Markup {
             "That's what \"provable by construction\" means in practice. Not \"we promise we won't.\" Instead: \"we wrote the function so that it can't.\""
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "What this changes about audits"
-        }
+        (ArticleHeading { text: "What this changes about audits" }.render())
 
         p class="mb-6" {
             "Most security audits we've watched run the same way: a reviewer with a checklist asks questions about controls, the IT team produces logs and screenshots, the auditor satisfies themselves that the controls were in place at some point. The conversation is fundamentally about evidence of behavior."
@@ -53,9 +50,7 @@ pub fn render() -> Markup {
             "This makes some classes of audit dramatically faster. Compliance reviewers, malpractice carriers, downstream vendors who want a SOC 2 Type 2 report — when the answer to their question is \"no, by construction,\" you don't need a paper trail. You need a code review, and the answer is durable across releases."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "What this changes about incident response"
-        }
+        (ArticleHeading { text: "What this changes about incident response" }.render())
 
         p class="mb-6" {
             "When something goes wrong — when a service gets compromised, when a credential leaks, when a disk image walks out of the data center — the first question is always: what could this have exposed?"
@@ -73,9 +68,7 @@ pub fn render() -> Markup {
             "This is why we design pipelines this way for the clients who actually have to live with regulators. \"By construction\" is a much shorter incident response than \"by policy.\""
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "Where it doesn't apply"
-        }
+        (ArticleHeading { text: "Where it doesn't apply" }.render())
 
         p class="mb-6" {
             "Not every privacy concern can be expressed as a type-system property. Spam filters need to read content because spam evades static signals. Search indexes have to look at the data they index. End-to-end encryption requires the decryption key to live somewhere a user has access to, which means a compromised user is a compromised key."
@@ -87,9 +80,7 @@ pub fn render() -> Markup {
             " become properties is much higher than most teams assume — and that the engineering effort to convert them pays back over years of audits, incident responses, and conversations with regulators."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "What this looks like in our work"
-        }
+        (ArticleHeading { text: "What this looks like in our work" }.render())
 
         p class="mb-6" {
             "When we design a mail pipeline for a law firm, the categorization code only sees headers, never bodies. When we design a case-management system for a nonprofit, the donor and beneficiary records live in separate access scopes that the application code can't cross-query — the type system enforces it. When we ship a federated rule-learning loop, the rule patterns are constrained at the AST level so they can't reference message content at all."
@@ -99,9 +90,7 @@ pub fn render() -> Markup {
             "These are not policies that we wrote down and hope to enforce. They're code-level facts that can be verified by reading the function signatures. The reviewer gets to leave with confidence that does not depend on our reputation."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "The cost"
-        }
+        (ArticleHeading { text: "The cost" }.render())
 
         p class="mb-6" {
             "It's slower upfront. A function that takes the entire message and decides what to do with it is shorter than a function that takes a typed feature struct that another function had to extract. Splitting the data flow across boundaries adds wiring; making those boundaries enforceable adds types."
@@ -111,9 +100,7 @@ pub fn render() -> Markup {
             "We accept that cost because our clients accept it. Law firms accept it because the alternative is a malpractice premium. Healthcare practices accept it because the alternative is an OCR letter. Newsrooms accept it because the alternative is a subpoena that would have been unanswerable in any other architecture. The cost is paid once, at design time. The audits, the responses, the regulator conversations — those payments would otherwise recur for the lifetime of the system."
         }
 
-        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-4" {
-            "Where this connects to everything else"
-        }
+        (ArticleHeading { text: "Where this connects to everything else" }.render())
 
         p class="mb-6" {
             "If you've worked with us, you've heard the phrase \"compose, don't compromise.\" The phrase is shorthand for: when two requirements look mutually exclusive, design until you find an architecture where both hold by construction. Privacy and continuous improvement, audit-friendliness and developer velocity, sovereignty and modern UX — these are the trade-offs people accept because they don't see the third option. We spend a lot of our engineering time looking for the third option."
