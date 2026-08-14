@@ -78,7 +78,7 @@ const CAPABILITIES: &[Capability] = &[
 #[must_use]
 pub fn render() -> Markup {
     let cta_button = Button {
-        label: "Start the conversation",
+        label: "Book a scoping call",
         variant: ButtonVariant::Primary,
         size: ButtonSize::Lg,
         aria_label: None,

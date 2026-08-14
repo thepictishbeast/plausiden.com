@@ -723,6 +723,11 @@ mod cta_naming {
         // "Insights". One section, two names, depending which page you landed
         // on first.
         "Field Notes",
+        // Live on /capabilities and /case-studies while the rest of the site
+        // offered "Book a scoping call". The list held "Want to start a
+        // conversation" but not this, so a near-miss string kept a second
+        // offer name on two pages.
+        "Start the conversation",
     ];
 
     const CURRENT_CTA_LABEL: &str = "Book a scoping call";
@@ -792,7 +797,7 @@ mod plain_language {
     /// mistaken for copy. Without this the check trips on the utility class
     /// `hover-elevate`, reporting the word "elevate" on a page whose text never
     /// uses it — a guard that cries wolf gets switched off.
-    fn visible_text(html: &str) -> String {
+    pub(super) fn visible_text(html: &str) -> String {
         let mut out = String::with_capacity(html.len());
         let mut inside_tag = false;
         for ch in html.chars() {
@@ -1153,6 +1158,92 @@ mod retired_class_names {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod house_spelling {
+    //! One spelling convention, and it is the reader's.
+    //!
+    //! The site mixed British and American forms: 32 American spellings
+    //! against seven British ones scattered through the copy, with /services
+    //! and /pricing internally inconsistent. Most of the British ones I wrote
+    //! myself while rewriting pages.
+    //!
+    //! American, because the audience decides. PlausiDen is a Massachusetts
+    //! firm selling to Massachusetts law offices and medical practices. A
+    //! reader who notices "organisation" on a local vendor's site has been
+    //! given a reason to wonder who actually wrote it, which is a strange
+    //! thing to spend credibility on for no gain.
+    //!
+    //! Only rendered text is checked. Rust identifiers, comments and test
+    //! names are not read by buyers and are left alone.
+
+    /// (British form, American form). Only pairs that actually differ, and
+    /// only ones plausible in this site's vocabulary.
+    const BRITISH: &[(&str, &str)] = &[
+        ("organisation", "organization"),
+        ("sanitise", "sanitize"),
+        ("sanitised", "sanitized"),
+        ("prioritise", "prioritize"),
+        ("recognise", "recognize"),
+        ("authorise", "authorize"),
+        ("authorisation", "authorization"),
+        ("analyse", "analyze"),
+        ("behaviour", "behavior"),
+        ("defence", "defense"),
+        ("catalogue", "catalog"),
+        ("centre", "center"),
+        ("colour", "color"),
+        ("licence", "license"),
+        ("modelling", "modeling"),
+        ("labelled", "labeled"),
+        ("minimise", "minimize"),
+        ("summarise", "summarize"),
+        ("specialise", "specialize"),
+        ("standardise", "standardize"),
+        ("utilise", "utilize"),
+    ];
+
+    #[test]
+    fn rendered_copy_uses_american_spelling() {
+        let mut found: Vec<String> = Vec::new();
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            let text = super::plain_language::visible_text(&html).to_lowercase();
+            for (british, american) in BRITISH {
+                // Word boundaries, so "centre" does not match "centred" in a
+                // class name that survived the tag strip, and "licence" does
+                // not fire on "licensed".
+                let mut from = 0;
+                while let Some(rel) = text[from..].find(british) {
+                    let at = from + rel;
+                    let before_ok = at == 0
+                        || !text[..at]
+                            .chars()
+                            .next_back()
+                            .is_some_and(|c| c.is_alphanumeric());
+                    // No trailing boundary on purpose. Requiring one meant
+                    // "organisation" did not match "organisations", so the
+                    // first version of this test passed while the word was
+                    // sitting in the /about hero. Every continuation of a
+                    // British stem is also British — organisations, centred,
+                    // licences, analysed — so matching the stem is correct
+                    // and matching the exact word is not.
+                    if before_ok {
+                        found.push(format!("{route}: {british:?} should be {american:?}"));
+                    }
+                    from = at + british.len();
+                }
+            }
+        }
+        found.sort();
+        found.dedup();
+        assert!(
+            found.is_empty(),
+            "{} British spelling(s) in copy written for American readers:\n{}",
+            found.len(),
+            found.join("\n")
+        );
     }
 }
 

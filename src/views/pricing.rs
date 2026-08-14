@@ -133,7 +133,7 @@ fn rate_card_rows() -> Vec<(String, String)> {
         ),
         (
             format!("{} flat, once per engagement", usd(SETUP_REPORTING_FEE_USD)),
-            "Scoping, threat modelling, report synthesis and the readout call. Charged once whether the assessment runs two days or twenty.".to_owned(),
+            "Scoping, threat modeling, report synthesis and the readout call. Charged once whether the assessment runs two days or twenty.".to_owned(),
         ),
         (
             "Included".to_owned(),

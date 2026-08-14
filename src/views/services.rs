@@ -196,7 +196,7 @@ pub fn render() -> Markup {
             eyebrow: Some("Our services"),
             headline_lead: "Comprehensive IT,",
             headline_accent: Some("specifically scoped."),
-            subheadline: "Eight areas of work, for organisations that want infrastructure they can audit, retain and eventually run without us. Most firms need two or three of them. Pick the one that is biting you, or book a scoping call and we will work out where to start.",
+            subheadline: "Eight areas of work, for organizations that want infrastructure they can audit, retain and eventually run without us. Most firms need two or three of them. Pick the one that is biting you, or book a scoping call and we will work out where to start.",
             cta: None,
             background: HeroBackground::GridLight,
         }.render())
@@ -227,7 +227,7 @@ pub fn render() -> Markup {
 const METHOD_STANDARDS: &[(&str, &str)] = &[
     (
         "PTES",
-        "Sets the engagement phases — pre-engagement scoping, intelligence gathering, threat modelling, vulnerability analysis, exploitation, post-exploitation, reporting. It is why the scope conversation happens before the invoice, not after.",
+        "Sets the engagement phases — pre-engagement scoping, intelligence gathering, threat modeling, vulnerability analysis, exploitation, post-exploitation, reporting. It is why the scope conversation happens before the invoice, not after.",
     ),
     (
         "NIST SP 800-115",

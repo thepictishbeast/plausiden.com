@@ -86,7 +86,7 @@ pub fn render() -> Markup {
             eyebrow: Some("About us"),
             headline_lead: "The unglamorous parts,",
             headline_accent: Some("done properly."),
-            subheadline: "PlausiDen runs the IT and security function for organisations that cannot afford to be careless with other people's information. We are a woman-owned business in Massachusetts, small on purpose, and we would rather turn work down than take an engagement we are the wrong firm for.",
+            subheadline: "PlausiDen runs the IT and security function for organizations that cannot afford to be careless with other people's information. We are a woman-owned business in Massachusetts, small on purpose, and we would rather turn work down than take an engagement we are the wrong firm for.",
             cta: None,
             background: HeroBackground::GridLight,
         }.render())

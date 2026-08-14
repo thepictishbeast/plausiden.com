@@ -83,7 +83,7 @@ const REPRO_STEPS: &[&str] = &[
     "Open any matter owned by that practice and note the numeric matter ID in the URL.",
     "Call the document listing endpoint directly, substituting a matter ID belonging to Practice B.",
     "Observe a 200 response containing document metadata and signed download URLs for the other practice's matter.",
-    "Fetch one of the returned URLs. The document downloads with no further authorisation check.",
+    "Fetch one of the returned URLs. The document downloads with no further authorization check.",
 ];
 
 /// A redacted request/response pair. Deliberately boring: real evidence
@@ -111,7 +111,7 @@ Content-Type: application/json
 /// and naming the practice is fair where naming a firm is not.
 const NOT_IN_THE_REPORT: &[&str] = &[
     "Raw scanner output pasted in as findings. Tool results are triage input, not a deliverable.",
-    "Severity inflated to justify the invoice. An informational finding is labelled informational.",
+    "Severity inflated to justify the invoice. An informational finding is labeled informational.",
     "Padding — no forty pages of generic advice about password policy wrapped around six real issues.",
     "Findings without reproduction steps. If your engineer cannot reproduce it, we have not finished writing it.",
     "A separate charge to check whether the fix worked.",
@@ -163,7 +163,7 @@ fn illustrative_notice() -> Markup {
                     p class="text-slate-600 text-[15px] leading-relaxed" {
                         span class="font-semibold text-slate-900" { "This example is illustrative. " }
                         "The practice, the hostname, the matter IDs and the finding are invented for this page. "
-                        "We do not publish client findings, sanitised or otherwise — a redacted real report is still a real report, "
+                        "We do not publish client findings, sanitized or otherwise — a redacted real report is still a real report, "
                         "and the industry it describes is small enough that details identify people."
                     }
                 }
@@ -268,7 +268,7 @@ fn worked_finding_band() -> Markup {
                 div class="mt-12" { // loom-allow: sub-section rhythm
                     (Eyebrow { text: "Remediation, and what happened next", size: EyebrowSize::Subhead }.render())
                     p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
-                        "Enforce the authorisation check server-side, on the practice ID carried by the session rather than the one supplied in the request, "
+                        "Enforce the authorization check server-side, on the practice ID carried by the session rather than the one supplied in the request, "
                         "and apply it to the document-fetch endpoint as well as the listing endpoint — fixing only the listing leaves the signed URLs reachable. "
                         "Add a regression test that asserts a cross-practice request returns 403."
                     }
