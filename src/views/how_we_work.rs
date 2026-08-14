@@ -99,7 +99,7 @@ fn step_item(n: usize, step: &Step<'_>) -> Markup {
 #[must_use]
 pub fn render() -> Markup {
     let commitments_body = html! {
-        div class="text-center max-w-3xl mx-auto mb-12 reveal" { // loom-allow: centered intro caption (same shape as solutions template)
+        div class="text-center max-w-3xl mx-auto mb-12 pd-reveal" { // loom-allow: centered intro caption (same shape as solutions template)
             div class="mb-4" {
                 (Heading {
                     text: "The six commitments",
@@ -113,7 +113,7 @@ pub fn render() -> Markup {
                 tone: HeadingTone::Ink,
             }.render())
         }
-        div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal reveal-delay-1" { // loom-allow: 2-col commitments grid; Loom doesn't ship a Grid primitive
+        div class="grid grid-cols-1 md:grid-cols-2 gap-6 pd-reveal" { // loom-allow: 2-col commitments grid; Loom doesn't ship a Grid primitive
             @for c in COMMITMENTS {
                 (FeatureCard {
                     icon_svg: c.icon,
@@ -132,7 +132,7 @@ pub fn render() -> Markup {
     };
 
     let steps_body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "The three-step engagement",
@@ -163,7 +163,7 @@ pub fn render() -> Markup {
     .render();
 
     let dark_body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             (Heading {
                 text: "We will tell you if we're not the right fit.",
                 level: HeadingLevel::H2,
@@ -202,7 +202,7 @@ pub fn render() -> Markup {
     }
     .render();
     let cta_body = html! {
-        div class="text-center reveal" {
+        div class="text-center pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "Want to know what this would cost you?",

@@ -1029,6 +1029,39 @@ mod utility_class_coverage {
 }
 
 #[cfg(test)]
+mod retired_class_names {
+    //! Classes that were replaced and must not come back.
+
+    /// The bare `reveal` class belonged to a JavaScript IntersectionObserver
+    /// whose CSS was neutered — `.reveal` and `.reveal.is-visible` both
+    /// declared `opacity: 1` — after it left content invisible on mobile.
+    /// What survived was an observer walking every tagged element on load to
+    /// produce no visual change. Scroll reveal is now `pd-reveal` in
+    /// motion.css, driven by CSS with no JavaScript in the path.
+    ///
+    /// A template that reaches for `reveal` again gets no animation and no
+    /// error, which is exactly the kind of silence this codebase keeps
+    /// getting caught by.
+    #[test]
+    fn no_page_uses_the_retired_reveal_class() {
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            for class_attr in html.split("class=\"").skip(1) {
+                let Some(value) = class_attr.split('"').next() else {
+                    continue;
+                };
+                for token in value.split_whitespace() {
+                    assert!(
+                        token != "reveal" && !token.starts_with("reveal-delay-"),
+                        "{route} still uses the retired {token:?} class; \
+                         scroll reveal is `pd-reveal`, defined in static/motion.css"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
 mod custom_property_coverage {
     //! The other way the frozen bundle fails silently.
     //!

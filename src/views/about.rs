@@ -108,7 +108,7 @@ pub fn render() -> Markup {
 /// What the work actually consists of.
 fn opening_band() -> Markup {
     let body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             (Lede {
                 text: "The work is patching on a schedule someone signed off, backups that have actually been restored from, access that is removed the day somebody leaves, and documentation good enough that your next vendor could take over without us. None of it is interesting. All of it is what fails.",
                 tone: HeadingTone::Ink,
@@ -133,7 +133,7 @@ fn opening_band() -> Markup {
 /// The three structural facts, as a card grid.
 fn facts_band() -> Markup {
     let body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "The firm" }
             // Carries the H2 for this band. FeatureCard emits an H3 per card,
             // so without a heading here the document jumped H1 -> H3 and a
@@ -147,7 +147,7 @@ fn facts_band() -> Markup {
                 }.render())
             }
         }
-        div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal" { // loom-allow: three-up FeatureCard grid, same shape as /how-we-work
+        div class="grid grid-cols-1 md:grid-cols-3 gap-8 pd-reveal" { // loom-allow: three-up FeatureCard grid, same shape as /how-we-work
             @for f in FACTS {
                 (FeatureCard {
                     icon_svg: f.icon,
@@ -173,7 +173,7 @@ fn facts_band() -> Markup {
 /// it in public is cheaper than answering it on every call.
 fn small_on_purpose_band() -> Markup {
     let body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Scale" }
             div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /sample-report
                 (Heading {
@@ -210,7 +210,7 @@ fn small_on_purpose_band() -> Markup {
 /// Checkable commitments, using the shared proof-rule treatment.
 fn commitments_band() -> Markup {
     let body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Commitments" }
             div class="mt-3 mb-8" { // loom-allow: eyebrow-to-heading spacer
                 (Heading {
@@ -250,7 +250,7 @@ fn closing_band() -> Markup {
     }
     .render();
     let body = html! {
-        div class="text-center reveal" {
+        div class="text-center pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "Tell us what is on your plate.",

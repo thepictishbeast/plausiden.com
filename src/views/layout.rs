@@ -631,6 +631,59 @@ mod motion_css_guards {
         );
     }
 
+    /// The scroll reveal must never be able to leave content invisible.
+    ///
+    /// An earlier version of this site hid every section with `opacity: 0`
+    /// and relied on an IntersectionObserver to bring it back. On mobile the
+    /// observer did not fire and the page rendered a hero above a blank void.
+    /// The replacement is only safe because of where the hidden state lives:
+    /// the baseline is visible, and the animation that starts from
+    /// transparent is nested inside `@supports (animation-timeline: view())`,
+    /// so a browser that cannot run the animation never applies its start
+    /// state. Nesting is the whole safety property, so assert the nesting.
+    #[test]
+    fn reveal_can_never_leave_content_invisible() {
+        let css = strip_comments(MOTION_CSS);
+
+        // The baseline, outside every gate, must be visible.
+        let baseline = css
+            .split(".pd-reveal {")
+            .nth(1)
+            .expect("motion.css must define a .pd-reveal baseline")
+            .split('}')
+            .next()
+            .expect("baseline block is closed");
+        assert!(
+            baseline.contains("opacity: 1"),
+            "the ungated .pd-reveal baseline no longer sets opacity: 1, so a browser \
+             that cannot animate could render the element invisible"
+        );
+
+        // Every use of a scroll timeline must sit inside the support gate.
+        let gate = "@supports (animation-timeline: view())";
+        assert!(
+            css.contains(gate),
+            "the scroll-timeline @supports gate is gone; the hidden start state is \
+             now unconditional"
+        );
+        let after_gate = css.split(gate).nth(1).expect("gate has a body");
+        assert!(
+            after_gate.trim_start().starts_with('{'),
+            "the @supports gate no longer opens a block"
+        );
+        assert!(
+            after_gate.contains("prefers-reduced-motion: no-preference"),
+            "the reveal animation is no longer also gated on reduced-motion"
+        );
+        assert_eq!(
+            css.matches("animation-timeline").count(),
+            2,
+            "animation-timeline appears somewhere other than the single gated rule \
+             (once in the @supports condition, once in the declaration); an ungated \
+             occurrence can hide content"
+        );
+    }
+
     #[test]
     fn shadows_are_ink_tinted_not_pure_black() {
         // The bundle's heavy shadows are pure black (shadow-2xl is 25% black at

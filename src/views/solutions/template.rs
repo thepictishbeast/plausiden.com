@@ -149,7 +149,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
 
     // Pain band — narrow article width, default white surface.
     let pain_body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             (Heading {
                 text: cfg.pain_heading,
                 level: HeadingLevel::H2,
@@ -177,7 +177,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
         // loom-allow: max-w-6xl exceeds Loom SectionWidth::Wide; capability grid needs the wider column for 3-up at lg+.
         section class="py-16 bg-slate-50" { // loom-allow: outer band — capability grid is wider than Loom Wide
             div class="container mx-auto px-4 md:px-6 max-w-6xl" { // loom-allow: container exceeds Loom Wide (max-w-6xl needed for 3-col)
-                div class="text-center max-w-3xl mx-auto mb-12 reveal" { // loom-allow: centered intro caption block — width mismatch with grid
+                div class="text-center max-w-3xl mx-auto mb-12 pd-reveal" { // loom-allow: centered intro caption block — width mismatch with grid
                     (Heading {
                         text: cfg.capabilities_heading,
                         level: HeadingLevel::H2,
@@ -188,7 +188,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
                         (Lede { text: cfg.capabilities_lede, tone: HeadingTone::Ink }.render())
                     }
                 }
-                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-1" { // loom-allow: Tailwind 3-col grid; Loom doesn't ship a Grid primitive yet
+                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pd-reveal" { // loom-allow: Tailwind 3-col grid; Loom doesn't ship a Grid primitive yet
                     @for cap in cfg.capabilities {
                         (FeatureCard {
                             icon_svg: cap.icon_svg,
@@ -209,7 +209,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
         section class="py-20 bg-slate-900 text-white relative overflow-hidden" { // loom-allow: dark posture band — slate-900 with decorative chrome
             // loom-allow: positioned decorative blur element; pure visual chrome with no text content.
             div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" {} // loom-allow: decorative blur element; pure visual chrome, no text
-            div class="container relative mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: container for posture band; max-w-4xl
+            div class="container relative mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: container for posture band; max-w-4xl
                 // loom-allow: glass-morphism badge — backdrop-blur shape with no Loom equivalent yet.
                 span class="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" { // loom-allow: glass-morphism eyebrow badge; no Loom equivalent
                     (cfg.posture_eyebrow)
@@ -238,7 +238,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
 
     // Engagement steps — Loom Section, Article width.
     let engagement_body = html! {
-        div class="reveal" { // loom-allow: reveal animation wrapper
+        div class="pd-reveal" { // loom-allow: reveal animation wrapper
             (Heading {
                 text: cfg.engagement_heading,
                 level: HeadingLevel::H2,
@@ -283,7 +283,7 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
     }
     .render();
     let cta_body = html! {
-        div class="text-center reveal" { // loom-allow: centered text wrapper for final CTA
+        div class="text-center pd-reveal" { // loom-allow: centered text wrapper for final CTA
             (Heading {
                 text: cfg.cta_heading,
                 level: HeadingLevel::H2,

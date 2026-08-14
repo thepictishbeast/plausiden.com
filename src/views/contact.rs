@@ -90,7 +90,7 @@ pub fn render() -> Markup {
                 div class="grid grid-cols-1 lg:grid-cols-3 gap-8" { // loom-allow: 1/3+2/3 split layout — no Loom 1+2 grid primitive
 
                     // Left card — contact details
-                    div class="lg:col-span-1 space-y-6 reveal" { // loom-allow: 1/3 column with scroll-reveal hook
+                    div class="lg:col-span-1 space-y-6 pd-reveal" { // loom-allow: 1/3 column with scroll-reveal hook
                         div class="shadcn-card rounded-xl border border-card-border text-card-foreground border-none shadow-xl bg-white overflow-hidden" { // loom-allow: inset card chrome with overflow-hidden for primary-band header
                             div class="bg-primary p-6" { // loom-allow: primary-bg card-header band
                                 h3 class="text-white font-display text-xl font-bold" { "Get in touch" } // loom-allow: card-internal heading on primary band; Heading{Sub,OnDark} would re-introduce text-slate-* defaults
@@ -107,7 +107,7 @@ pub fn render() -> Markup {
                     }
 
                     // Right card — the actual form
-                    div class="lg:col-span-2 reveal" { // loom-allow: 2/3 form column with scroll-reveal hook
+                    div class="lg:col-span-2 pd-reveal" { // loom-allow: 2/3 form column with scroll-reveal hook
                         div class="shadcn-card rounded-xl border bg-card border-card-border text-card-foreground border-none shadow-xl" { // loom-allow: form card chrome
                             div class="p-8 md:p-10" { // loom-allow: form-card padding
                                 div class="mb-6" {

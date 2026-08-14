@@ -282,7 +282,7 @@ const METHOD_DELIVERABLES: &[&str] = &[
 fn methodology_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: methodology band — py-24 primary cadence, matches the services band
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: article-width container with scroll-reveal hook
+            div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article-width container with scroll-reveal hook
                 span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" {
                     "Method"
                 }
@@ -355,7 +355,7 @@ fn posture_band() -> Markup {
     html! {
         section class="py-20 bg-slate-900 text-white relative overflow-hidden" { // loom-allow: dark posture band — slate-900 with decorative blur exceeds Loom Section{Dark} skeleton
             div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" {} // loom-allow: positioned decorative primary-blob blur
-            div class="container relative mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: container exceeds Loom Wide
+            div class="container relative mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: container exceeds Loom Wide
                 span class="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" { // loom-allow: glass-morphism eyebrow badge — pending Badge::Eyebrow with Compact size
                     "How we approach every engagement"
                 }
@@ -407,7 +407,7 @@ fn final_cta() -> Markup {
     }
     .render();
     let body = html! {
-        div class="text-center reveal" {
+        div class="text-center pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "Not sure where to start?",
@@ -461,7 +461,7 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
     let number = format!("{index:02}");
     html! {
         section id=(svc.slug) class=(format!("py-10 md:py-14 {bg}")) { // loom-allow: <details> card band — wider py-10/14 cadence + alternating zebra background. Anchor-link offset for the sticky header lives in static/style.css (section[id] { scroll-margin-top })
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: <details> container with scroll-reveal hook
+            div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: <details> container with scroll-reveal hook
                 details class="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 open:shadow-xl open:border-primary/30" { // loom-allow: <details>/<summary> shell — pending Loom CollapsibleCard primitive; adds hover-lift + accent border on open
                     summary class="flex items-start gap-5 md:gap-7 p-7 md:p-9 cursor-pointer list-none" { // loom-allow: collapsible header row — bigger padding (p-7/p-9) + list-none to suppress disclosure marker
                         // Numbered prefix — light weight against bold title for typographic contrast.

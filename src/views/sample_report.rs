@@ -176,7 +176,7 @@ fn illustrative_notice() -> Markup {
 fn anatomy_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: content band — py-24 primary cadence
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: article container with scroll-reveal hook
+            div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
                 span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Anatomy" }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
@@ -207,7 +207,7 @@ fn anatomy_band() -> Markup {
 fn worked_finding_band() -> Markup {
     html! {
         section class="py-24 bg-slate-50" { // loom-allow: worked-example band — tinted to separate it from the anatomy band above
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: article container with scroll-reveal hook
+            div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
                 span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Worked example" }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
@@ -292,7 +292,7 @@ fn worked_finding_band() -> Markup {
 fn exclusions_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: content band — py-24 primary cadence
-            div class="container mx-auto px-4 md:px-6 max-w-4xl reveal" { // loom-allow: article container with scroll-reveal hook
+            div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
                 span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Exclusions" }
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
@@ -332,7 +332,7 @@ fn final_cta() -> Markup {
     }
     .render();
     let body = html! {
-        div class="text-center reveal" {
+        div class="text-center pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "Want one of these about your own systems?",

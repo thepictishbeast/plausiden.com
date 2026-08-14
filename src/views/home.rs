@@ -45,7 +45,7 @@ fn final_cta_band() -> Markup {
     }
     .render();
     let body = html! {
-        div class="text-center reveal" {
+        div class="text-center pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "Want to know what this would cost you?",
@@ -161,7 +161,7 @@ pub fn render() -> Markup {
         // field of an existing study, shortened, and links to the full one.
         section class="py-20 bg-white border-b border-slate-100" { // loom-allow: proof strip — lighter cadence than the py-24 bands either side so it reads as a supporting row, not a third pillar
             div class="container mx-auto px-4 md:px-6" { // loom-allow: full-width container
-                div class="text-center max-w-3xl mx-auto mb-12 reveal" { // loom-allow: centred caption; matches the services band above
+                div class="text-center max-w-3xl mx-auto mb-12 pd-reveal" { // loom-allow: centred caption; matches the services band above
                     div class="mb-4" {
                         (Heading {
                             text: "What changed for three clients",
@@ -175,7 +175,7 @@ pub fn render() -> Markup {
                         tone: HeadingTone::Ink,
                     }.render())
                 }
-                div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal reveal-delay-1" { // loom-allow: 3-up proof row; Loom ships no Grid primitive
+                div class="grid grid-cols-1 md:grid-cols-3 gap-8 pd-reveal" { // loom-allow: 3-up proof row; Loom ships no Grid primitive
                     @for (who, what) in [
                         ("Boutique law firm",
                          "Their malpractice carrier reduced the policy premium on the strength of the audit. The next litigation hold was answered in one paragraph instead of a forensic engagement."),
@@ -199,7 +199,7 @@ pub fn render() -> Markup {
         // ---------- Everything Your Business Needs ----------
         section class="py-24 bg-white" { // loom-allow: services band — py-24 cadence above Loom Section{Loose}
             div class="container mx-auto px-4 md:px-6" { // loom-allow: full-width container
-                div class="text-center max-w-3xl mx-auto mb-16 reveal" { // loom-allow: centred caption above grid + scroll-reveal hook
+                div class="text-center max-w-3xl mx-auto mb-16 pd-reveal" { // loom-allow: centred caption above grid + scroll-reveal hook
                     div class="mb-4" {
                         (Heading {
                             text: "Everything Your Business Needs",
@@ -219,7 +219,7 @@ pub fn render() -> Markup {
                 @let svg_settings = icons::SETTINGS.render();
                 @let svg_code = icons::CODE.render();
                 @let svg_cpu = icons::CPU.render();
-                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal reveal-delay-1" { // loom-allow: 3-up service-card grid + scroll-reveal hook
+                div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pd-reveal" { // loom-allow: 3-up service-card grid + scroll-reveal hook
                     (service_card(&svg_server, "IT Operations", "Monitoring, documented patch windows, tested restores and real runbooks — so the answer to 'who fixes this' is never 'the person who is good with computers'."))
                     (service_card(&svg_shield, "Cyber Security", "Hardening, access reviews and the security questionnaires your clients send before they will sign. Findings reach you when we find them, not at the end."))
                     (service_card(&svg_brain, "Artificial Intelligence", "Practical automation of the work that eats your week — intake, document handling, reporting — kept on infrastructure you control."))
@@ -236,7 +236,7 @@ pub fn render() -> Markup {
             div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" {} // loom-allow: bottom-left blue-blob blur
             div class="container relative mx-auto px-4 md:px-6" { // loom-allow: container with blob stacking
                 div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center" { // loom-allow: 2-up split — text left, image right
-                    div class="reveal" { // loom-allow: text-column scroll-reveal hook
+                    div class="pd-reveal" { // loom-allow: text-column scroll-reveal hook
                         div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" { // loom-allow: glass-morphism eyebrow with inline icon — pending Badge::Eyebrow with icon slot
                             (PreEscaped(icons::TERMINAL.render()))
                             span { "How we run an engagement" }
@@ -259,7 +259,7 @@ pub fn render() -> Markup {
                             }
                         }
                     }
-                    div class="relative reveal reveal-delay-2" { // loom-allow: image-column scroll-reveal hook
+                    div class="relative pd-reveal" { // loom-allow: image-column scroll-reveal hook
                         div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent rounded-2xl transform rotate-3 scale-105" {} // loom-allow: brand-tinted glow behind image
                         div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl" { // loom-allow: image card chrome
                             img src="/static/images/hero-team.jpg" alt="Team collaboration" class="w-full h-auto object-cover"; // loom-allow: full-width responsive image

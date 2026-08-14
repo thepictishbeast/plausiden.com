@@ -12,17 +12,16 @@
  * visual effect.
  */
 
-.reveal,
-.reveal.is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-/* Stagger helpers: add `.reveal-delay-1` etc. for sequential reveals. */
-.reveal-delay-1 { transition-delay: 80ms; }
-.reveal-delay-2 { transition-delay: 160ms; }
-.reveal-delay-3 { transition-delay: 240ms; }
-.reveal-delay-4 { transition-delay: 320ms; }
+/* The `.reveal` / `.is-visible` pair and its stagger helpers lived here.
+ * Both states declared the same thing — opacity 1, no transform — because the
+ * rule was neutered after an earlier version left content invisible on mobile
+ * when the observer did not fire. What remained was an IntersectionObserver
+ * walking 34 elements on every page load to produce no visual change at all.
+ *
+ * Scroll reveal now lives in motion.css as `.pd-reveal`, driven by CSS
+ * scroll-timeline with its hidden start state inside
+ * `@supports (animation-timeline: view())`. No JavaScript is involved in
+ * making text visible, which is the property that matters. */
 
 /* Hero fade-in on load — independent of scroll. */
 @keyframes pd-fade-in-up {

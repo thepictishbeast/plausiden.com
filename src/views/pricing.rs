@@ -160,7 +160,7 @@ fn assessment_band() -> Markup {
     let testing = EXAMPLE_HALF_DAYS * DAY_RATE_USD / 2;
     let total = testing + SETUP_REPORTING_FEE_USD;
     let body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400" { "Security assessments" }
             div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /about
                 (Heading {
@@ -211,7 +211,7 @@ fn assessment_band() -> Markup {
 
 fn tier_card(tier: &Tier<'_>) -> Markup {
     html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             div class="mb-4" {
                 (Heading {
                     text: tier.title,
@@ -254,7 +254,7 @@ pub fn render() -> Markup {
     let assessment_section = assessment_band();
 
     let promises_body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "What we don't do",
@@ -282,7 +282,7 @@ pub fn render() -> Markup {
     .render();
 
     let dark_body = html! {
-        div class="reveal" {
+        div class="pd-reveal" {
             (Heading {
                 text: "If our rates don't fit, we'll tell you who does.",
                 level: HeadingLevel::H2,
@@ -317,7 +317,7 @@ pub fn render() -> Markup {
     }
     .render();
     let cta_body = html! {
-        div class="text-center reveal" {
+        div class="text-center pd-reveal" {
             div class="mb-6" {
                 (Heading {
                     text: "Ready to talk numbers?",
