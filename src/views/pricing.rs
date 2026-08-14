@@ -141,10 +141,21 @@ fn rate_card_rows() -> Vec<(String, String)> {
         ),
         (
             format!("+{EXPEDITED_SURCHARGE_PCT}%"),
-            "Rush turnaround or testing outside business hours. Applied to the testing days, and only when you ask for it.".to_owned(),
+            // "Applied to the testing days" was wrong, and wrong in the
+            // direction that costs the client. salesman-quote applies the
+            // surcharge to the whole assessment subtotal minus the optional
+            // extended retest, so the flat fee is inside the base. On this
+            // page's own worked example that is 25% of $11,600 ($2,900), not
+            // 25% of $10,400 ($2,600): a prospect doing the arithmetic here
+            // would be $300 short of the quote they receive — on the page that
+            // promises "the proposal we send is what you pay".
+            format!(
+                "Rush turnaround or testing outside business hours. Applied to the testing days and the {} fee, and only when you ask for it. The extended retest below is never rushed, so it is never surcharged.",
+                usd(SETUP_REPORTING_FEE_USD)
+            ),
         ),
         (
-            format!("{}", usd(EXTENDED_RETEST_FEE_USD)),
+            usd(EXTENDED_RETEST_FEE_USD),
             format!("Optional. Extends the retest window from {RETEST_WINDOW_DAYS} to 60 days when a fix has to wait on a release train."),
         ),
     ]
@@ -394,9 +405,6 @@ mod tests {
         }
     }
 
-    /// Final CTA must point to /contact; otherwise the page can't
-    /// produce a conversion.
-    #[test]
     /// The worked example must be arithmetic a reader can redo, and it
     /// must come from the constants rather than from a number typed into
     /// prose. A pricing page whose example does not add up is worse than
@@ -484,8 +492,55 @@ mod tests {
         }
     }
 
+    /// Final CTA must point to /contact; otherwise the page can't produce a
+    /// conversion.
+    ///
+    /// This had never run once. The function was moved to the bottom of the
+    /// file and its doc comment and `#[test]` were left behind eighty lines
+    /// up, where the orphaned attribute silently attached itself to the next
+    /// test — which already had one. The compiler reported both halves of the
+    /// accident the whole time, "duplicated attribute" and "function is never
+    /// used", and grepping `cargo test` output for `test result:` hides both.
+    /// A dead test is worse than no test: the file looks covered.
+    #[test]
     fn final_cta_points_to_contact() {
         let s = render().into_string();
         assert!(s.contains(r#"href="/contact""#));
+    }
+
+    /// The surcharge must be described against the base the tool charges on.
+    ///
+    /// `rate_card_matches_the_quoting_tool` above checks the four numbers, and
+    /// passed happily while this page described the 25% as applying "to the
+    /// testing days". It does not: `surcharge_usd` takes the whole subtotal and
+    /// subtracts only the optional extended retest, so the $1,200 flat fee is
+    /// inside the base. Matching numbers are not matching meaning, and a
+    /// constant-by-constant check cannot see the difference.
+    #[test]
+    fn surcharge_base_matches_the_quoting_tool() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../PlausiDen-Salesman/crates/salesman-quote/src/lib.rs"
+        );
+        let Ok(src) = std::fs::read_to_string(path) else {
+            eprintln!(
+                "NOTE: {path} is not present, so the surcharge base was NOT checked against \
+                 the quoting tool. Clone PlausiDen-Salesman alongside this repo to enable it."
+            );
+            return;
+        };
+        assert!(
+            src.contains("let base = self.subtotal_usd() - self.extended_retest_fee();"),
+            "salesman-quote no longer computes the rush surcharge as \
+             `subtotal - extended_retest`, so the rate-card copy on this page may now describe \
+             the wrong base. Re-read surcharge_usd() and update rate_card_rows()."
+        );
+        assert!(
+            !render()
+                .into_string()
+                .contains("Applied to the testing days, and only when"),
+            "the page is describing the surcharge as testing-days-only again; the flat fee is \
+             inside the base the tool charges on"
+        );
     }
 }
