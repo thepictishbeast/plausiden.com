@@ -170,7 +170,7 @@ pub fn render() -> Markup {
     .render();
 
     let cta_button = Button {
-        label: "Schedule an intake call",
+        label: "Book a scoping call",
         variant: ButtonVariant::Primary,
         size: ButtonSize::Lg,
         aria_label: None,

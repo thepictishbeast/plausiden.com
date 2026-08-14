@@ -711,3 +711,45 @@ mod snapshots {
         insta::assert_snapshot!("cms_doc_why_pps", s);
     }
 }
+
+#[cfg(test)]
+mod cta_naming {
+    //! The site sells one first step. It should have one name.
+
+    /// Every wording the offer has carried at some point. Each was a real
+    /// button on a real page: the homepage hero said one thing, the nav
+    /// another, /services and /pricing a third, /how-we-work a fourth. A buyer
+    /// moving between pages could reasonably conclude they were four different
+    /// offers, and the one that converts is the one they recognise.
+    const RETIRED_CTA_LABELS: &[&str] = &[
+        "Get a Free Consultation",
+        "Start Your Journey",
+        "Schedule an intake call",
+        "Want to start a conversation",
+        "Encrypted Inquiry",
+    ];
+
+    const CURRENT_CTA_LABEL: &str = "Book a scoping call";
+
+    #[test]
+    fn no_page_uses_a_retired_call_to_action_name() {
+        let pages: Vec<String> = vec![
+            crate::views::home::render().into_string(),
+            crate::views::how_we_work::render().into_string(),
+            crate::views::pricing::render().into_string(),
+            crate::views::services::render().into_string(),
+            crate::views::case_studies::render().into_string(),
+            crate::views::capabilities::render().into_string(),
+            crate::views::about::render().into_string(),
+        ];
+        for (i, page) in pages.iter().enumerate() {
+            for label in RETIRED_CTA_LABELS {
+                assert!(
+                    !page.contains(label),
+                    "page {i} still uses the retired call-to-action {label:?}; \
+                     the site offers one first step and it is {CURRENT_CTA_LABEL:?}"
+                );
+            }
+        }
+    }
+}

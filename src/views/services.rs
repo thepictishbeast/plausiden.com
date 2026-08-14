@@ -257,7 +257,7 @@ fn posture_band() -> Markup {
 
 fn final_cta() -> Markup {
     let cta_button = Button {
-        label: "Schedule an intake call",
+        label: "Book a scoping call",
         variant: ButtonVariant::Primary,
         size: ButtonSize::Lg,
         aria_label: None,

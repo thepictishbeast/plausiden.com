@@ -47,6 +47,19 @@ const COMMITMENTS: &[Commitment<'_>] = &[
         title: "Real handoff",
         description: "We aim for engagements you can run without us. The deliverable is documentation a competent successor can use to take over. If you eventually hire in-house IT, we hand them a clean baton — not a black box.",
     },
+    // The two below were missing, and they are the pair buyers actually compare
+    // on. The page already promised written scope and no lock-in; it said
+    // nothing about who does the work or when you hear about a problem.
+    Commitment {
+        icon: ICON_USERS,
+        title: "The engineer you meet is the engineer you get",
+        description: "The person on your scoping call does the work and answers the phone afterwards. Nobody is sold a senior engineer and handed a junior on day one, and there is no account manager in between relaying questions they cannot answer.",
+    },
+    Commitment {
+        icon: ICON_SHIELD,
+        title: "Findings the day we find them",
+        description: "Anything critical reaches you within hours, not in a report three weeks later — you cannot act on a problem you have not been told about. Everything else lands in the written report, and for security work we re-check what you fixed at no extra cost. A retest is part of the job, not an upsell.",
+    },
 ];
 
 struct Step<'a> {
@@ -89,7 +102,7 @@ pub fn render() -> Markup {
         div class="text-center max-w-3xl mx-auto mb-12 reveal" { // loom-allow: centered intro caption (same shape as solutions template)
             div class="mb-4" {
                 (Heading {
-                    text: "The four commitments",
+                    text: "The six commitments",
                     level: HeadingLevel::H2,
                     variant: HeadingVariant::Section,
                     tone: HeadingTone::Ink,
@@ -178,7 +191,7 @@ pub fn render() -> Markup {
     .render();
 
     let cta_button = Button {
-        label: "Schedule an intake call",
+        label: "Book a scoping call",
         variant: ButtonVariant::Primary,
         size: ButtonSize::Lg,
         aria_label: None,
@@ -192,7 +205,7 @@ pub fn render() -> Markup {
         div class="text-center reveal" {
             div class="mb-6" {
                 (Heading {
-                    text: "Want to start a conversation?",
+                    text: "Want to know what this would cost you?",
                     level: HeadingLevel::H2,
                     variant: HeadingVariant::Section,
                     tone: HeadingTone::Ink,
@@ -242,16 +255,33 @@ mod tests {
     }
 
     #[test]
-    fn lists_four_commitments() {
+    fn lists_every_commitment_and_says_how_many() {
+        // Two commitments were added because the page promised written scope
+        // and no lock-in but said nothing about who does the work or when you
+        // hear about a problem — the two things a buyer comparing vendors
+        // actually asks. The heading states a count, so the count and the list
+        // have to move together or the page contradicts itself.
         let s = render().into_string();
         for c in &[
             "Written proposals",
             "Scope-limited access",
             "Audit-ready documentation",
             "Real handoff",
+            "The engineer you meet is the engineer you get",
+            "Findings the day we find them",
         ] {
             assert!(s.contains(c), "missing commitment: {c}");
         }
+        assert_eq!(COMMITMENTS.len(), 6);
+        assert!(
+            s.contains("The six commitments"),
+            "heading must state the real number of commitments"
+        );
+        // One action, one name. This page called it "Schedule an intake call"
+        // while the nav, hero and homepage closing band said "Book a scoping
+        // call" — the site named a single offer five different ways.
+        assert!(s.contains("Book a scoping call"));
+        assert!(!s.contains("Schedule an intake call"));
     }
 
     #[test]
