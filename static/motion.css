@@ -782,3 +782,35 @@ h3 {
 /* The opening paragraph keeps its own larger treatment; it is a lede, not
    body copy, and carries its classes explicitly so nothing has to infer
    "first paragraph means different" from position. */
+
+/* ---------------------------------------------------------------------------
+   HOME HERO — desktop geometry
+
+   Paul, looking at 1440px: "the desktop site looks poor". He was right, and
+   the measurement said why. The hero copy sat in a max-w-3xl box: 768px of
+   content ending at x=872 inside a 1440px viewport, so the right 40% of the
+   screen was empty and the 72px headline was folded into three ragged lines
+   with room to spare. That is a phone layout stretched to a desktop.
+
+   The band was also 912px tall — nearly a full viewport — mostly padding.
+
+   Only the headline is released. The lede and the trust strip keep their own
+   max-w-2xl, because 672px is a 68-character measure and widening body copy
+   to match a headline is how you get an unreadable wall. Wide headline over
+   narrow body is ordinary editorial practice, not a compromise.
+
+   These are md/lg-only. Below 768px nothing changes: the phone layout was
+   never the problem, and max-width only ever removes space it cannot use.
+   --------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .pd-hero {
+    padding-top: 9rem;
+    padding-bottom: 6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pd-hero-copy {
+    max-width: 70rem;
+  }
+}

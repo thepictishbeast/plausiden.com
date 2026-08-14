@@ -90,11 +90,11 @@ fn final_cta_band() -> Markup {
 pub fn render() -> Markup {
     let body = html! {
         // ---------- Hero ----------
-        section class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-slate-50" { // loom-allow: home hero shell — pt-32/48 pb-20/32 cadence is bigger than Loom Hero's pt-32/44 pb-16/24, intentional for the front door
+        section class="pd-hero relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-slate-50" { // loom-allow: home hero shell — pd-hero trims the md+ padding (see motion.css); the pt/pb utilities remain as the sub-768px cadence
             div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" {} // loom-allow: SVG grid fleck
             div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/5 to-transparent skew-x-12 transform origin-top-right translate-x-32" {} // loom-allow: skewed primary-tint accent — same shape Loom Hero emits, kept here because home hero shell diverges from Loom Hero's outer
             div class="container relative mx-auto px-4 md:px-6 z-10" { // loom-allow: hero container with fleck stacking
-                div class="max-w-3xl" { // loom-allow: hero content max-w-3xl
+                div class="pd-hero-copy max-w-3xl" { // loom-allow: hero content — max-w-3xl below lg, widened by pd-hero-copy at lg+ so the 72px headline is not folded into three lines with half the screen empty
                     div {
                         // The badge used to read "Professional IT Solutions",
                         // which asserts nothing a competitor could not also
