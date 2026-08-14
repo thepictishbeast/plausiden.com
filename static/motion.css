@@ -430,6 +430,7 @@ footer .text-slate-500 {
 /* -- spacing ------------------------------------------------------------- */
 .mb-2 { margin-bottom: 0.5rem; }
 .mb-9 { margin-bottom: 2.25rem; }
+.mb-10 { margin-bottom: 2.5rem; }
 .mb-12 { margin-bottom: 3rem; }
 .mt-3 { margin-top: 0.75rem; }
 .mt-6 { margin-top: 1.5rem; }
@@ -458,6 +459,24 @@ footer .text-slate-500 {
 /* Wide content (evidence blocks, request/response dumps) must scroll inside
    its own container so the page body never scrolls horizontally. */
 .overflow-x-auto { overflow-x: auto; }
+
+/* -- heading line balance ------------------------------------------------ */
+
+/* Headings distribute their text evenly across lines instead of filling each
+   line greedily and dropping whatever is left onto the last one. Without this,
+   a two-line hero regularly strands a single word — "properly." alone under a
+   full line — which reads as a mistake at the exact moment a visitor is
+   forming an impression.
+
+   Progressive enhancement: a browser without text-wrap keeps today's greedy
+   breaking, so nothing is lost. Applied to headings only; `balance` is capped
+   at a handful of lines by implementations and is the wrong tool for body
+   copy, which wants `pretty` at most. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
 
 /* -- typography ---------------------------------------------------------- */
 .text-\[10px\] { font-size: 10px; }
