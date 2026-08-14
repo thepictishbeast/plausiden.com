@@ -170,7 +170,7 @@ const SERVICES: &[Service] = &[
         slug: "network-architecture",
         icon: &icons::GLOBE,
         title: "Network Architecture",
-        lede: "Robust network architecture that ensures high availability + speed without enterprise-tier complexity. We design connectivity that scales with you and stays operable by your eventual in-house IT person.",
+        lede: "Network architecture that stays up and stays fast, without enterprise-tier complexity. We design connectivity that scales with you and stays operable by your eventual in-house IT person.",
         practice: "Most small-organization networks accumulate complexity over years until nobody understands them anymore. We start with a documented current-state diagram, then design a target state that's simpler, faster, and properly segmented. No mesh-of-tunnels architectures that nobody can debug at 2am.",
         capabilities: &[
             "Network design + documentation (the diagram + the rationale behind every decision)",

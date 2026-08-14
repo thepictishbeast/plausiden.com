@@ -753,3 +753,72 @@ mod cta_naming {
         }
     }
 }
+
+#[cfg(test)]
+mod plain_language {
+    //! Vocabulary that survives only because nobody objects to it.
+
+    /// Words a reader has seen on a thousand vendor sites and therefore reads
+    /// past. Each carries no information a competitor could not also claim, so
+    /// each is space spent saying nothing. They are cheap to write and cheap to
+    /// disbelieve, which is the worst combination for a firm selling judgement.
+    const FILLER: &[&str] = &[
+        "empower",
+        "elevate",
+        "leverage",
+        "seamless",
+        "holistic",
+        "cutting-edge",
+        "best-in-class",
+        "world-class",
+        "tailored to your",
+        "digital landscape",
+        "comprehensive solutions",
+        "turnkey",
+        "next-generation",
+        "ever-evolving",
+        "synergy",
+        "in today's",
+    ];
+
+    /// Visible prose only: strip tags so class names and attributes are not
+    /// mistaken for copy. Without this the check trips on the utility class
+    /// `hover-elevate`, reporting the word "elevate" on a page whose text never
+    /// uses it — a guard that cries wolf gets switched off.
+    fn visible_text(html: &str) -> String {
+        let mut out = String::with_capacity(html.len());
+        let mut inside_tag = false;
+        for ch in html.chars() {
+            match ch {
+                '<' => inside_tag = true,
+                '>' => inside_tag = false,
+                c if !inside_tag => out.push(c),
+                _ => {}
+            }
+        }
+        out
+    }
+
+    #[test]
+    fn marketing_pages_avoid_filler_vocabulary() {
+        let pages: Vec<(&str, String)> = vec![
+            ("/", crate::views::home::render().into_string()),
+            ("/services", crate::views::services::render().into_string()),
+            ("/capabilities", crate::views::capabilities::render().into_string()),
+            ("/how-we-work", crate::views::how_we_work::render().into_string()),
+            ("/pricing-transparency", crate::views::pricing::render().into_string()),
+            ("/case-studies", crate::views::case_studies::render().into_string()),
+            ("/about", crate::views::about::render().into_string()),
+        ];
+        for (route, html) in &pages {
+            let lower = visible_text(html).to_lowercase();
+            for word in FILLER {
+                assert!(
+                    !lower.contains(word),
+                    "{route} contains the filler word {word:?}; say the specific \
+                     thing instead, or say nothing"
+                );
+            }
+        }
+    }
+}
