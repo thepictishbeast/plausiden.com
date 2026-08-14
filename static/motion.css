@@ -178,6 +178,32 @@
   left: 0;
 }
 
+/* ---------------------------------------------------------- dark footer -- */
+
+/* Two measured contrast failures, on every one of the 25 routes because the
+   footer is shared:
+     - the "LLC" brand accent renders text-primary (#073288) on the slate-900
+       footer: ratio 1.55 against a 3.0 requirement for 20px bold,
+     - the legal row renders slate-500 (#64748b) at 12px: ratio 3.75 against
+       a 4.5 requirement.
+   A dark brand colour on a dark band is a normal way to lose a logo. The fix
+   is not to abandon the brand colour but to use its light-on-dark variant,
+   which is what a brand palette is for: blue-400 measures 7.02 here and still
+   reads as the same blue. The legal row moves to slate-400 at 6.96.
+
+   Scoped to this site rather than fixed in the Loom footer component, which
+   several tenants share and theme differently — their primary may be light
+   already, and silently repainting another tenant's brand mark is not this
+   change's business. If the same fault shows up elsewhere, it belongs in Loom
+   as a tone-aware accent rather than as this override. */
+footer .text-primary {
+  color: #60a5fa;
+}
+
+footer .text-slate-500 {
+  color: #94a3b8;
+}
+
 /* ------------------------------------------------------ headings on dark -- */
 
 /* The frozen bundle contains a base rule:
