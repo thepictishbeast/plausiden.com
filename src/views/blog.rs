@@ -143,7 +143,13 @@ pub fn post(slug: &str) -> Option<Markup> {
     };
     let title = format!("{} — PlausiDen", post.title);
     let current = format!("/blog/{}", post.slug);
-    let og_image = format!("/og/blog/{}.svg", post.slug);
+    // Pre-rendered by scripts/gen-og-images.py, one card per post, derived
+    // from this same POSTS list. Previously this pointed at /og/blog/<slug>.svg,
+    // which the server rendered on demand as image/svg+xml — a format no link
+    // preview renders, so every post shared in Slack or on LinkedIn showed
+    // nothing. `every_post_has_an_og_card` fails the build if a post is added
+    // without regenerating.
+    let og_image = format!("/static/og/blog-{}.png", post.slug);
     let article_jsonld = format!(
         r#"{{"@context":"https://schema.org","@type":"Article","headline":"{title}","description":"{desc}","datePublished":"{date}","mainEntityOfPage":"https://plausiden.com{path}","image":"https://plausiden.com{img}","author":{{"@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com"}},"publisher":{{"@type":"Organization","name":"PlausiDen LLC","url":"https://plausiden.com","logo":{{"@type":"ImageObject","url":"https://plausiden.com/static/favicon-96x96.png"}}}}}}"#,
         title = json_escape(post.title),

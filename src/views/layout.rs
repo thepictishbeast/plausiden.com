@@ -675,6 +675,31 @@ mod motion_css_guards {
     /// in someone else's Slack, weeks later, as a link with no preview. The
     /// generator writes these; this makes sure nobody renames a card without
     /// updating the mapping, or adds a mapping before running the generator.
+    /// Every published post must have a pre-rendered card on disk.
+    ///
+    /// Posts are the one part of this site that grows without touching the
+    /// layout, so this is where a missing card is most likely: someone adds a
+    /// post, ships it, and the share preview is blank until somebody notices
+    /// months later. The generator derives its list from the same POSTS slice,
+    /// so the fix is always "run scripts/gen-og-images.py".
+    #[test]
+    fn every_post_has_an_og_card() {
+        for post in crate::views::posts::POSTS {
+            let card = format!(
+                "{}/static/og/blog-{}.png",
+                env!("CARGO_MANIFEST_DIR"),
+                post.slug
+            );
+            assert!(
+                std::path::Path::new(&card).is_file(),
+                "post {:?} has no Open Graph card at static/og/blog-{}.png; \
+                 run scripts/gen-og-images.py",
+                post.title,
+                post.slug
+            );
+        }
+    }
+
     #[test]
     fn og_cards_exist_for_every_route() {
         let routes = [

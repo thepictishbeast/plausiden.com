@@ -34,6 +34,7 @@ different company's artwork.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -116,6 +117,40 @@ CARDS: list[tuple[str, str, str, str]] = [
     ),
 ]
 
+def blog_cards() -> list[tuple[str, str, str, str]]:
+    """Derive one card per published post from src/views/posts/mod.rs.
+
+    Parsed rather than restated. The post list is already the single place
+    that wires a slug to its metadata, and a second copy here would drift the
+    first time someone edits a title — silently, because a wrong headline on a
+    link preview looks exactly as correct as a right one.
+    """
+    src = (REPO / "src" / "views" / "posts" / "mod.rs").read_text(encoding="utf-8")
+    cards: list[tuple[str, str, str, str]] = []
+    for block in src.split("Post {")[1:]:
+        block = block.split("},")[0]
+        fields: dict[str, str] = {}
+        for key in ("slug", "title", "category", "read_time"):
+            m = re.search(rf'{key}:\s*"((?:[^"\\]|\\.)*)"', block)
+            if m:
+                fields[key] = m.group(1).replace('\\"', '"').replace("\\\\", "\\")
+        if {"slug", "title"} <= fields.keys():
+            note = "plausiden.com/blog"
+            if fields.get("read_time"):
+                note += f" · {fields['read_time']}"
+            cards.append(
+                (
+                    f"blog-{fields['slug']}",
+                    fields.get("category", "Insights"),
+                    fields["title"],
+                    note,
+                )
+            )
+    if not cards:
+        raise SystemExit("parsed no posts from posts/mod.rs — the format changed")
+    return cards
+
+
 # Baked faces: (unique family name, source family, weight on the wght axis).
 FACE_DISPLAY = "PDDisplay600"
 FACE_DISPLAY_BOLD = "PDDisplay700"
@@ -132,6 +167,8 @@ FACES: list[tuple[str, str, int]] = [
 # only to decide line breaks. Being a little conservative costs a few pixels of
 # right margin; being wrong the other way clips a headline.
 WORDMARK = "PlausiDen LLC"
+
+ALL_CARDS: list[tuple[str, str, str, str]] = []
 
 CHAR_W = 0.52
 
@@ -260,7 +297,7 @@ def build_font_dir(scratch: Path) -> Path:
     # text on an otherwise typeset card. Score against the real corpus and the
     # right slice wins on merit.
     needed = set(WORDMARK)
-    for _slug, eyebrow, headline, note in CARDS:
+    for _slug, eyebrow, headline, note in ALL_CARDS:
         needed |= set(eyebrow.upper()) | set(eyebrow) | set(headline) | set(note)
     needed.discard("\n")
 
@@ -324,6 +361,8 @@ def build_font_dir(scratch: Path) -> Path:
 
 
 def main() -> int:
+    global ALL_CARDS
+    ALL_CARDS = CARDS + blog_cards()
     if not shutil.which("rsvg-convert"):
         print("rsvg-convert not found (install librsvg2-bin)", file=sys.stderr)
         return 1
@@ -334,7 +373,7 @@ def main() -> int:
         conf = build_font_dir(scratch)
         env = dict(os.environ, FONTCONFIG_FILE=str(conf))
 
-        for slug, eyebrow, headline, note in CARDS:
+        for slug, eyebrow, headline, note in ALL_CARDS:
             svg_path = scratch / f"{slug}.svg"
             svg_path.write_text(card_svg(eyebrow, headline, note), encoding="utf-8")
             png_path = OUT / f"{slug}.png"
@@ -353,7 +392,7 @@ def main() -> int:
             )
             print(f"  {png_path.relative_to(REPO)}  {png_path.stat().st_size // 1024} KB")
 
-    print(f"generated {len(CARDS)} cards")
+    print(f"generated {len(ALL_CARDS)} cards")
     return 0
 
 

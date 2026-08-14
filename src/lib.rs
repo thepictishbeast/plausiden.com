@@ -121,7 +121,6 @@ pub fn build_router_with_state(state: AppState) -> Router {
         .route("/admin/feedback", get(admin::feedback_dashboard)) // COUPLING-EXEMPT: reached via /admin redirect after sign-in, not via a UI href
         .route("/blog", get(handlers::blog_index))
         .route("/blog/{slug}", get(handlers::blog_post))
-        .route("/og/blog/{slug}", get(handlers::og_blog)) // COUPLING-EXEMPT: rendered into per-post og:image meta, not clicked from UI
         .route("/solutions/legal", get(handlers::solutions_legal))
         .route("/solutions/healthcare", get(handlers::solutions_healthcare))
         .route("/solutions/journalism", get(handlers::solutions_journalism))
@@ -392,15 +391,18 @@ mod tests {
         assert!(s.contains("\"PlausiDen LLC\""));
     }
 
-    /// `/og/blog/<slug>` returns an SVG with the post title rendered
-    /// into the card chrome.
+    /// A post's Open Graph card is served as a real PNG.
+    ///
+    /// This replaced `/og/blog/<slug>.svg`, a route that rendered a card on
+    /// demand as image/svg+xml. No link preview renders SVG, so every post
+    /// shared anywhere showed no image. The cards are now pre-rendered files.
     #[tokio::test]
-    async fn og_blog_returns_svg_with_title() {
+    async fn blog_og_card_is_a_real_png() {
         let app = build_router(crate::inquiry::InquiryState::new());
         let resp = app
             .oneshot(
                 Request::builder()
-                    .uri("/og/blog/federated-rule-learning")
+                    .uri("/static/og/blog-federated-rule-learning.png")
                     .body(axum::body::Body::empty())
                     .unwrap(),
             )
@@ -410,31 +412,18 @@ mod tests {
         let ct = resp
             .headers()
             .get("content-type")
-            .unwrap()
-            .to_str()
-            .unwrap();
-        assert!(ct.contains("svg"), "expected SVG content-type, got {ct}");
-        let body = to_bytes(resp.into_body(), 32 * 1024).await.unwrap();
-        let s = std::str::from_utf8(&body).unwrap();
-        assert!(s.starts_with("<svg"));
-        assert!(s.contains("PlausiDen"));
-        assert!(s.contains("Federated"));
-    }
-
-    /// `/og/blog/<unknown>` returns 404, not a malformed SVG.
-    #[tokio::test]
-    async fn og_blog_returns_404_for_unknown_slug() {
-        let app = build_router(crate::inquiry::InquiryState::new());
-        let resp = app
-            .oneshot(
-                Request::builder()
-                    .uri("/og/blog/never-written")
-                    .body(axum::body::Body::empty())
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or_default()
+            .to_owned();
+        assert!(ct.contains("png"), "expected a PNG content-type, got {ct}");
+        let body = to_bytes(resp.into_body(), 512 * 1024).await.unwrap();
+        // PNG magic. A card that is secretly still SVG would sail past a
+        // filename check, which is exactly how the old one survived.
+        assert_eq!(
+            &body[..8],
+            b"\x89PNG\r\n\x1a\n",
+            "the card is not a PNG despite the .png extension"
+        );
     }
 
     /// Per-post pages emit the per-post og:image URL and og:type=article.
@@ -453,7 +442,7 @@ mod tests {
         let body = to_bytes(resp.into_body(), 128 * 1024).await.unwrap();
         let s = std::str::from_utf8(&body).unwrap();
         assert!(
-            s.contains("/og/blog/federated-rule-learning.svg"),
+            s.contains("/static/og/blog-federated-rule-learning.png"),
             "per-post og:image URL missing"
         );
         assert!(
