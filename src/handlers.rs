@@ -448,11 +448,22 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn contact_contains_encrypted_inquiry_heading() {
+    async fn contact_offers_a_way_to_make_contact() {
+        // This replaces a test that claimed to check for an "Encrypted Inquiry"
+        // heading in the /contact body. There was never such a heading — the
+        // assertion was satisfied by the nav CTA that every page embeds, so it
+        // passed while testing nothing about this page. Worse, the label
+        // advertised an encrypted intake the page does not implement.
+        //
+        // Assert what the page must genuinely provide instead: a reachable
+        // human and a working form.
         let markup = contact().await.into_string();
+        assert!(markup.contains("team@plausiden.com"), "email address present");
+        assert!(markup.contains("978-351-6495"), "phone number present");
+        assert!(markup.contains("<form"), "message form present");
         assert!(
-            markup.contains("Encrypted Inquiry"),
-            "expected 'Encrypted Inquiry' heading in /contact body"
+            !markup.contains("Encrypted Inquiry"),
+            "do not advertise an encrypted intake until one exists"
         );
     }
 

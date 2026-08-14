@@ -12,55 +12,101 @@ const ICON_SHIELD_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="2
 
 const ICON_PHONE_SM: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-4 h-4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>"#;
 
-/// Top-nav links shown on every page. Order is left-to-right.
+/// Top-nav links shown on every page, ordered the way a prospective client
+/// evaluates a firm: what you do, proof you have done it, what it costs, who
+/// you are, whether you know your subject.
+///
+/// Deliberately five, not six. The nav strip is width-constrained (it has to
+/// fit beside the brand and the CTA before the mobile breakpoint), so every
+/// slot has to earn itself:
+/// - "Home" was removed: the brand lock-up already links there, so it spent a
+///   slot on a destination the user already has.
+/// - "Contact" was removed as a *link* because the CTA button beside it goes to
+///   the same page. Two controls for one action split attention instead of
+///   directing it.
+/// - "Ecosystem" and "Field Notes" were internal names. A buyer scanning a nav
+///   for ten seconds cannot tell what either contains. Both pages still exist
+///   and stay linked from the footer; the nav now says "Insights".
+/// - "Pricing" was added. It is one of the highest-intent pages on the site and
+///   was previously reachable only from the footer — hiding the answer to the
+///   question every buyer has does not delay the question, it sends them to a
+///   competitor who answers it.
 const NAV_LINKS: &[NavLink<'static>] = &[
-    NavLink {
-        href: "/",
-        label: "Home",
-    },
     NavLink {
         href: "/services",
         label: "Services",
+    },
+    NavLink {
+        href: "/case-studies",
+        label: "Case Studies",
+    },
+    NavLink {
+        href: "/pricing-transparency",
+        label: "Pricing",
     },
     NavLink {
         href: "/about",
         label: "About",
     },
     NavLink {
-        href: "/docs/ecosystem",
-        label: "Ecosystem",
-    },
-    NavLink {
         href: "/blog",
-        label: "Field Notes",
-    },
-    NavLink {
-        href: "/contact",
-        label: "Contact",
+        label: "Insights",
     },
 ];
 
-/// Top-nav CTA buttons. Both route to /contact today; the variant /
-/// icon distinguish the two affordances visually.
-const NAV_CTAS: &[NavCta<'static>] = &[
-    NavCta {
-        href: "/contact",
-        label: "Encrypted Inquiry",
-        variant: ButtonVariant::OutlineSuccess,
-        icon: Some(ICON_SHIELD_SM),
-        aria_label: Some("Encrypted Inquiry"),
-    },
-    NavCta {
-        href: "/contact",
-        label: "Get a Quote",
-        variant: ButtonVariant::Primary,
-        icon: Some(ICON_PHONE_SM),
-        aria_label: Some("Get a Quote"),
-    },
-];
+/// The single top-nav call to action.
+///
+/// There used to be two, "Encrypted Inquiry" and "Get a Quote", and both
+/// pointed at /contact. Offering one action twice is a conversion problem, not
+/// a choice: the eye has to decide which button is the real one.
+///
+/// The wording is deliberate. "Encrypted Inquiry" describes our transport, not
+/// the buyer's benefit, and reads as a hurdle. "Get a Quote" implies a
+/// procurement process before anyone has established the work is worth doing.
+/// A short scoping call is the smallest honest first step: it costs the buyer
+/// twenty minutes, and it is the step that actually has to happen first.
+const NAV_CTAS: &[NavCta<'static>] = &[NavCta {
+    href: "/contact",
+    label: "Book a scoping call",
+    variant: ButtonVariant::Primary,
+    icon: Some(ICON_PHONE_SM),
+    aria_label: Some("Book a 20-minute scoping call"),
+}];
 
 /// Canonical site origin used for absolute URLs in metadata.
 const SITE_ORIGIN: &str = "https://plausiden.com";
+
+/// Build stamp appended to unversioned static assets.
+///
+/// The static handler serves `cache-control: public, max-age=604800, immutable`.
+/// That is correct for the Tailwind bundle, whose filename contains a content
+/// hash and therefore changes whenever its bytes do. It was actively wrong for
+/// `motion.css`, `animations.css`, `nav-responsive.css`, `loom-tokens.css`,
+/// `self-hosted-fonts.css` and `menu.js`, whose names never change: a returning
+/// visitor kept the previous copy for a week, so a style or script fix silently
+/// failed to reach exactly the people who had visited before.
+///
+/// (Found the honest way: a verified tap-target fix measured as not applied in
+/// the browser while the server was demonstrably serving the new file.)
+///
+/// The stamp is the compile timestamp, so it changes on every build — which is
+/// also every deploy — and never changes between requests to the same binary.
+///
+/// Under `cfg(test)` it is pinned to a constant. The snapshot suite renders
+/// every route byte-for-byte, so a value that changes on each compile would put
+/// a fresh number into all 24 snapshots and fail the suite on the next build —
+/// a test that reports a problem where none exists is worse than no test, and
+/// teaches you to accept snapshots without reading them.
+#[cfg(not(test))]
+const ASSET_VERSION: &str = env!("PLAUSIDEN_BUILD_STAMP");
+#[cfg(test)]
+const ASSET_VERSION: &str = "test";
+
+/// Append the build stamp to a static asset path, so a new deploy busts the
+/// cache for files whose names carry no content hash.
+fn asset(path: &str) -> String {
+    format!("{path}?v={ASSET_VERSION}")
+}
 
 /// Default page description used when a caller doesn't supply one.
 /// Tuned for SEO + social previews — single sentence under 160 chars.
@@ -155,26 +201,26 @@ fn head_tag(meta: &PageMeta<'_>) -> Markup {
             link rel="shortcut icon" href="/static/favicon.ico";
             link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png";
             link rel="manifest" href="/static/site.webmanifest";
-            link rel="stylesheet" href="/static/self-hosted-fonts.css";
+            link rel="stylesheet" href=(asset("/static/self-hosted-fonts.css"));
             // loom-tokens.css must precede the Tailwind bundle so
             // overrides via `var(--loom-color-*)` win the cascade
             // when a custom rule references the token.
-            link rel="stylesheet" href="/static/loom-tokens.css";
+            link rel="stylesheet" href=(asset("/static/loom-tokens.css"));
             link rel="stylesheet" href="/static/index-CWVVhmVm.css";
             // nav-responsive.css supplies the lg:/xl: nav utilities the
             // frozen Tailwind bundle predates (nav landscape-overflow
             // fix). Must come after the bundle — cascade order lets
             // xl:gap-8 beat the bundle's gap-4 at equal specificity.
-            link rel="stylesheet" href="/static/nav-responsive.css";
-            link rel="stylesheet" href="/static/animations.css";
+            link rel="stylesheet" href=(asset("/static/nav-responsive.css"));
+            link rel="stylesheet" href=(asset("/static/animations.css"));
             // motion.css is the site's own motion + focus layer. Last, so it
             // wins ties. Its reveal effect is gated behind
             // `@supports (animation-timeline: view())` — a browser without
             // scroll-driven animation never applies the hidden start state, so
             // content cannot end up invisible the way it did when reveals were
             // driven by an IntersectionObserver.
-            link rel="stylesheet" href="/static/motion.css";
-            script src="/static/menu.js" defer {}
+            link rel="stylesheet" href=(asset("/static/motion.css"));
+            script src=(asset("/static/menu.js")) defer {}
         }
     }
 }
@@ -226,9 +272,12 @@ const FOOTER_COMPANY: &[FooterItem<'static>] = &[
         href: "/docs/why-pps",
         label: "Why PPS",
     },
+    // Same destination as the nav, so it carries the same label. A page that is
+    // "Insights" in the header and "Field Notes" in the footer reads as two
+    // different sections to anyone who did not build the site.
     FooterItem::Link {
         href: "/blog",
-        label: "Field Notes",
+        label: "Insights",
     },
     FooterItem::Link {
         href: "/how-we-work",
@@ -328,7 +377,13 @@ fn footer() -> Markup {
         brand_logo: &icons::SHIELD,
         brand_name: "PlausiDen",
         brand_accent: "LLC",
-        brand_tagline: "Providing comprehensive, high-quality IT solutions that empower modern enterprises. General yet specific excellence in technology.",
+        // Appears on all 25 routes, so it was also the single largest source of
+        // filler language on the site: the previous wording ("comprehensive,
+        // high-quality IT solutions that empower modern enterprises. General
+        // yet specific excellence in technology.") put "empower" on every page
+        // and told a reader nothing they could act on. Replaced with what the
+        // firm actually does and who for.
+        brand_tagline: "Security and IT engineering for firms that hold sensitive client data. Fixed scope, fixed price, and the engineer who did the work on the call.",
         columns: FOOTER_COLUMNS,
         copyright: "© PlausiDen LLC. All rights reserved.",
         legal_links: FOOTER_LEGAL,
@@ -420,12 +475,27 @@ mod tests {
     }
 
     #[test]
-    fn page_nav_uses_encrypted_inquiry_not_secure_drop() {
-        // REGRESSION-GUARD: the renamed call-to-action must not silently
-        // revert to the old 'Secure Drop' wording.
+    fn page_nav_offers_exactly_one_call_to_action() {
+        // The nav used to carry two CTAs, "Encrypted Inquiry" and "Get a
+        // Quote", both pointing at /contact — one action offered twice, which
+        // splits the click rather than directing it. This pins the single-CTA
+        // decision, and keeps the original guard against reverting to the older
+        // "Secure Drop" wording.
         let s = page("X", "/", html! {}).into_string();
-        assert!(s.contains("Encrypted Inquiry"));
-        assert!(!s.contains("Secure Drop"));
+        assert!(s.contains("Book a scoping call"), "primary CTA present");
+        assert!(!s.contains("Secure Drop"), "must not revert to 'Secure Drop'");
+        assert!(
+            !s.contains("Encrypted Inquiry"),
+            "the second CTA promised an encrypted intake that /contact does not \
+             actually provide — do not reinstate it without building the thing"
+        );
+        // Counting the nav CTA container is brittle; counting the label is not.
+        assert_eq!(
+            s.matches("Book a scoping call").count(),
+            2,
+            "exactly one CTA, rendered once in the desktop strip and once in \
+             the mobile drawer"
+        );
     }
 
     #[test]

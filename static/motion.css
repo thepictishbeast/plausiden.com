@@ -178,6 +178,27 @@
   left: 0;
 }
 
+/* ------------------------------------------------------------ tap targets -- */
+
+/* Measured on a 390px viewport: the menu button rendered 40x40 and every link
+   in the mobile drawer was under 44px tall. WCAG 2.1 AA (2.5.5) asks for 44x44,
+   and below that a thumb starts hitting the wrong row — on the nav, which is
+   the one control every mobile visitor uses.
+   Set as min-* so nothing shrinks and the existing padding still applies. */
+#mobile-menu-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mobile-menu a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
 /* --------------------------------------------------------------- headings -- */
 
 /* A hairline accent under section headings, for rhythm between bands. */
