@@ -10,9 +10,9 @@
 
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
-    HeadingTone, HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
-    TextLink, TextLinkSize, TextLinkVariant,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, DefinitionRow, Eyebrow,
+    EyebrowSize, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
+    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
@@ -283,9 +283,7 @@ fn methodology_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: methodology band — py-24 primary cadence, matches the services band
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article-width container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" {
-                    "Method"
-                }
+                (Eyebrow { text: "Method", size: EyebrowSize::Section }.render())
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "How the security work is actually done.",
@@ -300,24 +298,17 @@ fn methodology_band() -> Markup {
                 }.render())
 
                 div class="mt-12" { // loom-allow: band-internal rhythm between lede and standards list
-                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" {
-                        "Standards the work runs against"
-                    }
+                    (Eyebrow { text: "Standards the work runs against", size: EyebrowSize::Subhead }.render())
                     dl class="border-t border-slate-200" { // loom-allow: hairline definition list — lighter than card chrome at this density
                         @for (name, purpose) in METHOD_STANDARDS {
-                            div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-7 py-5 border-b border-slate-200" { // loom-allow: two-column definition row
-                                dt class="font-semibold text-slate-900" { (name) }
-                                dd class="md:col-span-2 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" { (purpose) }
-                            }
+                            (DefinitionRow { term: name, description: purpose }.render())
                         }
                     }
                 }
 
                 div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12" { // loom-allow: paired blind-spots / deliverables columns
                     div {
-                        h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" {
-                            "What a scanner cannot find"
-                        }
+                        (Eyebrow { text: "What a scanner cannot find", size: EyebrowSize::Subhead }.render())
                         ul class="space-y-4" {
                             @for item in SCANNER_BLIND_SPOTS {
                                 li class="pd-proof text-slate-600 text-[15px] leading-relaxed font-light" { (item) }
@@ -325,9 +316,7 @@ fn methodology_band() -> Markup {
                         }
                     }
                     div {
-                        h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" {
-                            "What lands on your desk"
-                        }
+                        (Eyebrow { text: "What lands on your desk", size: EyebrowSize::Subhead }.render())
                         ul class="space-y-4" {
                             @for item in METHOD_DELIVERABLES {
                                 li class="pd-proof text-slate-600 text-[15px] leading-relaxed font-light" { (item) }

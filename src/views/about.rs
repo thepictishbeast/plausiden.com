@@ -22,9 +22,9 @@
 use loom_components::card::FeatureCard;
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
-    HeadingTone, HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
-    TextLink, TextLinkSize, TextLinkVariant,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Eyebrow, EyebrowSize,
+    Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
+    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
 
@@ -134,7 +134,7 @@ fn opening_band() -> Markup {
 fn facts_band() -> Markup {
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "The firm" }
+            (Eyebrow { text: "The firm", size: EyebrowSize::Section }.render())
             // Carries the H2 for this band. FeatureCard emits an H3 per card,
             // so without a heading here the document jumped H1 -> H3 and a
             // screen-reader user lost the level that groups the three.
@@ -174,7 +174,7 @@ fn facts_band() -> Markup {
 fn small_on_purpose_band() -> Markup {
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Scale" }
+            (Eyebrow { text: "Scale", size: EyebrowSize::Section }.render())
             div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /sample-report
                 (Heading {
                     text: "Small on purpose.",
@@ -211,7 +211,7 @@ fn small_on_purpose_band() -> Markup {
 fn commitments_band() -> Markup {
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Commitments" }
+            (Eyebrow { text: "Commitments", size: EyebrowSize::Section }.render())
             div class="mt-3 mb-8" { // loom-allow: eyebrow-to-heading spacer
                 (Heading {
                     text: "What you can hold us to.",

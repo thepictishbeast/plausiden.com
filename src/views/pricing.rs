@@ -4,9 +4,9 @@
 
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
-    HeadingTone, HeadingVariant, HelperSize, HelperText, Lede, Section, SectionPadding,
-    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, DefinitionRow, Eyebrow,
+    EyebrowSize, Heading, HeadingLevel, HeadingTone, HeadingVariant, HelperSize, HelperText, Lede,
+    Section, SectionPadding, SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, PreEscaped, html};
 
@@ -161,7 +161,7 @@ fn assessment_band() -> Markup {
     let total = testing + SETUP_REPORTING_FEE_USD;
     let body = html! {
         div class="pd-reveal" {
-            span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Security assessments" }
+            (Eyebrow { text: "Security assessments", size: EyebrowSize::Section }.render())
             div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer, matches /services and /about
                 (Heading {
                     text: "What a penetration test costs.",
@@ -176,14 +176,11 @@ fn assessment_band() -> Markup {
             }.render())
             dl class="border-t border-slate-200 mt-12" { // loom-allow: hairline definition list, same pattern as the /services standards table
                 @for (amount, detail) in rate_card_rows() {
-                    div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-7 py-5 border-b border-slate-200" { // loom-allow: definition row
-                        dt class="font-semibold text-slate-900" { (amount) }
-                        dd class="md:col-span-2 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" { (detail) }
-                    }
+                    (DefinitionRow { term: &amount, description: &detail }.render())
                 }
             }
             div class="mt-12" { // loom-allow: worked-example block rhythm
-                h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Worked example" }
+                (Eyebrow { text: "Worked example", size: EyebrowSize::Subhead }.render())
                 p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
                     "A web application with roughly " (EXAMPLE_ENDPOINTS) " endpoints and two user roles scopes to "
                     (days_label(EXAMPLE_HALF_DAYS)) " days of testing. That is " (usd(testing)) " of testing time plus the "

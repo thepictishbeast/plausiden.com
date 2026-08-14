@@ -17,9 +17,9 @@
 
 use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
-    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
-    HeadingTone, HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
-    TextLink, TextLinkSize, TextLinkVariant,
+    Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, DefinitionRow, Eyebrow,
+    EyebrowSize, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
+    SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
 
@@ -177,7 +177,7 @@ fn anatomy_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: content band — py-24 primary cadence
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Anatomy" }
+                (Eyebrow { text: "Anatomy", size: EyebrowSize::Section }.render())
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "What is in the document.",
@@ -192,10 +192,7 @@ fn anatomy_band() -> Markup {
                 }.render())
                 dl class="border-t border-slate-200 mt-12" { // loom-allow: hairline definition list — same pattern as the /services standards table
                     @for (name, detail) in REPORT_ANATOMY {
-                        div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-7 py-5 border-b border-slate-200" { // loom-allow: definition row
-                            dt class="font-semibold text-slate-900" { (name) }
-                            dd class="md:col-span-2 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" { (detail) }
-                        }
+                        (DefinitionRow { term: name, description: detail }.render())
                     }
                 }
             }
@@ -208,7 +205,7 @@ fn worked_finding_band() -> Markup {
     html! {
         section class="py-24 bg-slate-50" { // loom-allow: worked-example band — tinted to separate it from the anatomy band above
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Worked example" }
+                (Eyebrow { text: "Worked example", size: EyebrowSize::Section }.render())
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "One finding, all the way through.",
@@ -224,15 +221,12 @@ fn worked_finding_band() -> Markup {
 
                 dl class="border-t border-slate-200 mt-12" { // loom-allow: finding metadata as hairline rows — matches the anatomy table
                     @for (label, value) in FINDING_META {
-                        div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-7 py-5 border-b border-slate-200" { // loom-allow: definition row
-                            dt class="font-semibold text-slate-900" { (label) }
-                            dd class="md:col-span-2 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" { (value) }
-                        }
+                        (DefinitionRow { term: label, description: value }.render())
                     }
                 }
 
                 div class="mt-12" { // loom-allow: sub-section rhythm inside the worked example
-                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Summary, as the client reads it" }
+                    (Eyebrow { text: "Summary, as the client reads it", size: EyebrowSize::Subhead }.render())
                     p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
                         "A logged-in user at one practice can retrieve documents belonging to a different practice by changing a number in a web address. "
                         "No password is needed beyond the user's own, no software is required, and the application records the access as normal activity. "
@@ -241,7 +235,7 @@ fn worked_finding_band() -> Markup {
                 }
 
                 div class="mt-12" { // loom-allow: sub-section rhythm
-                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Reproduction" }
+                    (Eyebrow { text: "Reproduction", size: EyebrowSize::Subhead }.render())
                     ol class="list-decimal list-inside space-y-3 text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
                         @for step in REPRO_STEPS {
                             li { (step) }
@@ -250,7 +244,7 @@ fn worked_finding_band() -> Markup {
                 }
 
                 div class="mt-12" { // loom-allow: sub-section rhythm
-                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Evidence" }
+                    (Eyebrow { text: "Evidence", size: EyebrowSize::Subhead }.render())
                     // Wide content scrolls inside its own container so the page
                     // body never scrolls sideways on a phone.
                     div class="overflow-x-auto rounded-xl border border-slate-200 bg-white" { // loom-allow: evidence transcript container
@@ -262,7 +256,7 @@ fn worked_finding_band() -> Markup {
                 }
 
                 div class="mt-12" { // loom-allow: sub-section rhythm
-                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Why the two ratings differ" }
+                    (Eyebrow { text: "Why the two ratings differ", size: EyebrowSize::Subhead }.render())
                     p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
                         "CVSS scores this 6.5, Medium. We record the business impact as High, and we say so in the same row rather than quietly overriding the number. "
                         "CVSS measures the technical characteristics of the flaw; it has no way to know that the records are client-confidential, that the practice owes a notification duty if they were disclosed, "
@@ -272,7 +266,7 @@ fn worked_finding_band() -> Markup {
                 }
 
                 div class="mt-12" { // loom-allow: sub-section rhythm
-                    h3 class="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-500 mb-6" { "Remediation, and what happened next" }
+                    (Eyebrow { text: "Remediation, and what happened next", size: EyebrowSize::Subhead }.render())
                     p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light" {
                         "Enforce the authorisation check server-side, on the practice ID carried by the session rather than the one supplied in the request, "
                         "and apply it to the document-fetch endpoint as well as the listing endpoint — fixing only the listing leaves the signed URLs reachable. "
@@ -293,7 +287,7 @@ fn exclusions_band() -> Markup {
     html! {
         section class="py-24 bg-white" { // loom-allow: content band — py-24 primary cadence
             div class="container mx-auto px-4 md:px-6 max-w-4xl pd-reveal" { // loom-allow: article container with scroll-reveal hook
-                span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { "Exclusions" }
+                (Eyebrow { text: "Exclusions", size: EyebrowSize::Section }.render())
                 div class="mt-3 mb-6" { // loom-allow: eyebrow-to-heading spacer
                     (Heading {
                         text: "What you will not find in it.",
