@@ -251,6 +251,28 @@ fn validate(f: &InquiryForm) -> Result<(), &'static str> {
     if f.service.len() > MAX_SERVICE_LEN {
         return Err("service too long");
     }
+    // An address we cannot parse is an address we cannot reply to.
+    //
+    // The send path sets Reply-To only `if let Ok(rt) = parse()`. So an
+    // unparseable address is silently dropped from the headers, the mail still
+    // arrives, and the sender is told "we will reply to the address you gave
+    // us" — a promise that cannot be kept. They wait, hear nothing, and
+    // conclude they were ignored.
+    //
+    // Scope, honestly: the form field is `type="email"`, so a normal browser
+    // rejects a typo before it ever reaches here. This closes the path where
+    // that check is not in play — scripted posts, and clients that do not
+    // enforce it — rather than catching everyday typing mistakes.
+    //
+    // Using lettre's own parser rather than a pattern is what makes it safe to
+    // reject at all: it is the same parser the send path uses, so it cannot
+    // refuse an address the mail would have accepted, and measurably it is
+    // more permissive than the browser (`a@b`, `user@localhost` and `x@y.z`
+    // all parse). Pinned by `server_never_rejects_what_the_form_accepts`.
+    // An empty reply_to is untouched — that is the deliberate silent-drop path.
+    if !f.reply_to.is_empty() && f.reply_to.parse::<Mailbox>().is_err() {
+        return Err("reply-to unparseable");
+    }
     if f.message.is_empty() {
         return Err("message required");
     }
@@ -338,6 +360,10 @@ fn validation_message(code: &str) -> String {
     let detail = match code {
         "name too long" => "the name field is over its 100-character limit",
         "reply-to too long" => "the email address is over its 200-character limit",
+        "reply-to unparseable" => {
+            "we could not read the email address, so we would have no way to reply to you — \
+             check it for a typo and send again"
+        }
         "phone too long" => "the phone number is over its 50-character limit",
         "company too long" => "the company field is over its 200-character limit",
         "service too long" => "the service selection was not one of the listed options",
@@ -826,6 +852,96 @@ mod tests {
         let mut f = empty_form();
         f.message = "hi".into();
         assert!(validate(&f).is_ok());
+    }
+
+    /// The check must never be stricter than the form that fed it.
+    ///
+    /// `type="email"` is what a browser enforces before the request is sent,
+    /// and it is loose: it accepts `a@b`, `user@localhost` and `x@y.z`. If the
+    /// server refused any of those, a visitor whose address the form accepted
+    /// would be bounced by an error they cannot act on — which is worse than
+    /// the problem this rule exists to fix. Measured: lettre parses all of
+    /// them, so the server is the more permissive of the two.
+    #[test]
+    fn server_never_rejects_what_the_form_accepts() {
+        for address in ["a@b", "user@localhost", "x@y.z", "a@b.co"] {
+            let mut f = empty_form();
+            f.message = "hi".into();
+            f.reply_to = address.into();
+            assert!(
+                validate(&f).is_ok(),
+                "{address} passes the form's own type=email check but the server rejected it"
+            );
+        }
+    }
+
+    /// Addresses a hand-rolled pattern would wrongly refuse. Parsing rather
+    /// than pattern-matching is the whole point; if this fails, someone has
+    /// swapped the parser for a regex and is now turning away real work.
+    #[test]
+    fn validate_accepts_awkward_but_real_addresses() {
+        for address in [
+            "paul+plausiden-contact@example.com",
+            "first.last@sub.domain.example",
+            "someone@example.technology",
+            "Jane Doe <jane@example.com>",
+        ] {
+            let mut f = empty_form();
+            f.message = "hi".into();
+            f.reply_to = address.into();
+            assert!(
+                validate(&f).is_ok(),
+                "{address} is deliverable but was rejected"
+            );
+        }
+    }
+
+    /// An address no reply could leave from must be refused at the form rather
+    /// than accepted, stripped of its Reply-To header, and answered with a
+    /// promise of a reply.
+    #[test]
+    fn validate_rejects_addresses_that_cannot_receive_a_reply() {
+        for address in [
+            "not-an-email",
+            "missing-domain@",
+            "@missing-local",
+            "two@@at.example",
+        ] {
+            let mut f = empty_form();
+            f.message = "hi".into();
+            f.reply_to = address.into();
+            assert_eq!(
+                validate(&f),
+                Err("reply-to unparseable"),
+                "{address} cannot receive a reply but was accepted"
+            );
+        }
+    }
+
+    /// An empty reply-to is not a typo and keeps its existing path: the
+    /// deliberate silent drop, not a 400. Changing it would hand bots a
+    /// distinguishable response.
+    #[test]
+    fn validate_leaves_an_empty_reply_to_alone() {
+        let mut f = empty_form();
+        f.message = "hi".into();
+        assert!(validate(&f).is_ok());
+    }
+
+    /// Every validator code needs its own sentence. Falling through to the
+    /// catch-all means the sender is told "one of the fields did not pass
+    /// validation" — the vague message this page deliberately replaced.
+    #[test]
+    fn the_unparseable_code_has_its_own_message() {
+        let msg = validation_message("reply-to unparseable");
+        assert!(
+            msg.contains("no way to reply"),
+            "unexpected message for the unparseable-address code: {msg}"
+        );
+        assert!(
+            !msg.contains("one of the fields"),
+            "the code fell through to the catch-all instead of naming the problem"
+        );
     }
 
     #[test]
