@@ -633,6 +633,64 @@ mod motion_css_guards {
         out
     }
 
+    /// Every `pd-` class this file defines must be on something.
+    ///
+    /// `utility_class_coverage` checks the other direction — a class in the
+    /// markup with no CSS behind it, which fails silently and visibly. This is
+    /// the mirror: CSS with no markup behind it, which fails silently and
+    /// invisibly, and is worse in one specific way. Dead vocabulary reads as
+    /// available. `.pd-enter` sat here unused while 46 elements ran the same
+    /// entrance animation from animations.css, so the site had two ways to do
+    /// one thing and the documented-looking one was the dead one. `.pd-press`
+    /// and `.pd-rule` were the same story.
+    ///
+    /// Scoped to the `pd-` prefix on purpose. The rest of this file is gap-fill
+    /// for classes the frozen Tailwind bundle ships without CSS, and those
+    /// legitimately exist ahead of any particular page using them.
+    #[test]
+    fn every_pd_class_this_file_defines_is_used_somewhere() {
+        let css = strip_comments(MOTION_CSS);
+
+        let mut defined: Vec<String> = Vec::new();
+        for (idx, _) in css.match_indices(".pd-") {
+            let name: String = css[idx + 1..]
+                .chars()
+                .take_while(|c| c.is_ascii_alphanumeric() || *c == '-')
+                .collect();
+            // `.pd-lift:hover` and `.pd-prose > p` both yield the bare class.
+            if !name.is_empty() && !defined.contains(&name) {
+                defined.push(name);
+            }
+        }
+        assert!(
+            defined.len() >= 5,
+            "failed to parse class names out of motion.css, found {defined:?}"
+        );
+
+        let mut used: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for (_, html) in crate::utility_class_coverage::rendered_pages() {
+            for attr in html.split("class=\"").skip(1) {
+                let Some(value) = attr.split('"').next() else {
+                    continue;
+                };
+                for token in value.split_whitespace() {
+                    used.insert(token.to_owned());
+                }
+            }
+        }
+
+        let dead: Vec<&String> = defined.iter().filter(|c| !used.contains(*c)).collect();
+        assert!(
+            dead.is_empty(),
+            "{} class(es) defined in motion.css are on no element anywhere: {:?}\n\
+             Either apply them or delete them — an unused class in the site's own \
+             vocabulary reads as an available pattern and quietly becomes a second \
+             way to do something that already works.",
+            dead.len(),
+            dead
+        );
+    }
+
     #[test]
     fn nav_toggle_display_stays_inside_a_mobile_media_query() {
         // REGRESSION-GUARD. A tap-target fix once set `display: inline-flex` on

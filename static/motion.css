@@ -120,18 +120,12 @@
 
 /* ------------------------------------------------------------ on arrival -- */
 
-/* For above-the-fold content, which is on screen before any scrolling and so
-   cannot use a scroll timeline. Plays once, on load. */
-@media (prefers-reduced-motion: no-preference) {
-  .pd-enter {
-    animation: pd-rise-in var(--pd-slow) var(--pd-ease) both;
-  }
-
-  .pd-enter-1 { animation-delay: 60ms; }
-  .pd-enter-2 { animation-delay: 140ms; }
-  .pd-enter-3 { animation-delay: 220ms; }
-  .pd-enter-4 { animation-delay: 300ms; }
-}
+/* Above-the-fold entrance lives in animations.css as `.animate-fade-in-up`
+   (46 elements use it) with `delay-1..3` for stagger. There was a second,
+   unused implementation here — `.pd-enter` plus `.pd-enter-1..4` — offering
+   the same effect with the same easing and nobody calling it. Two ways to do
+   one thing, and the one this file defined was the one nothing used, so it is
+   gone. If entrance timing needs changing, animations.css is the place. */
 
 /* ------------------------------------------------------------ interaction -- */
 
@@ -164,24 +158,12 @@
     0 3px 8px -3px rgb(15 23 42 / 0.07);
 }
 
-/* Buttons acknowledge the press. Kept very small: a call to action that moves
-   a lot feels like a game, not a booking. */
-@media (prefers-reduced-motion: no-preference) {
-  .pd-press {
-    transition:
-      transform var(--pd-fast) var(--pd-ease),
-      box-shadow var(--pd-fast) var(--pd-ease),
-      background-color var(--pd-fast) var(--pd-ease);
-  }
-}
-
-.pd-press:hover {
-  transform: translateY(-1px);
-}
-
-.pd-press:active {
-  transform: translateY(0);
-}
+/* `.pd-press` used to live here — a 1px lift on hover, released on :active.
+   Nothing ever used it, and it should stay gone. Every button on the site
+   answers a hover by shifting its background, verified as one behaviour
+   across all of them, and movement is now the signal that a *card* is a
+   link. A button that also moved would spend that signal where it carries
+   no information: a button is already obviously a button. */
 
 /* An underline that grows from the left on hover/focus. Used for nav links. */
 .pd-underline {
@@ -413,36 +395,28 @@ footer .text-slate-500 {
 
 /* --------------------------------------------------------------- headings -- */
 
-/* A hairline accent under section headings, for rhythm between bands. */
-.pd-rule::after {
-  content: "";
-  display: block;
-  width: 44px;
-  height: 3px;
-  margin-top: 0.75rem;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #0f4c81, #2f80c2);
-}
-
-.pd-rule-center::after {
-  margin-left: auto;
-  margin-right: auto;
-}
+/* `.pd-rule` and `.pd-rule-center` used to draw a 44x3 gradient dash under
+   section headings. Never applied to anything, and worth not reviving: a
+   gradient bar under every heading is the decoration the rest of this design
+   deliberately avoids — the brief asks for hairline rules and restraint, and
+   section separation here already comes from alternating band backgrounds. */
 
 /* ------------------------------------------------- global reduced motion -- */
 
 @media (prefers-reduced-motion: reduce) {
+  /* `.animate-fade-in-up`, the live entrance animation, is switched off in
+     animations.css rather than here. It sets `animation: none`, which drops
+     the `both` fill along with it, so the element renders at its natural
+     opacity — the property that matters after an earlier version of this site
+     shipped content stuck at opacity 0. */
   .pd-reveal,
-  .pd-enter,
   .pd-lift,
-  .pd-press,
   .pd-underline::after {
     animation: none !important;
     transition: none !important;
   }
 
-  .pd-reveal,
-  .pd-enter {
+  .pd-reveal {
     opacity: 1 !important;
     transform: none !important;
   }
