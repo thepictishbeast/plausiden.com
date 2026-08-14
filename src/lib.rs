@@ -804,10 +804,22 @@ mod plain_language {
         let pages: Vec<(&str, String)> = vec![
             ("/", crate::views::home::render().into_string()),
             ("/services", crate::views::services::render().into_string()),
-            ("/capabilities", crate::views::capabilities::render().into_string()),
-            ("/how-we-work", crate::views::how_we_work::render().into_string()),
-            ("/pricing-transparency", crate::views::pricing::render().into_string()),
-            ("/case-studies", crate::views::case_studies::render().into_string()),
+            (
+                "/capabilities",
+                crate::views::capabilities::render().into_string(),
+            ),
+            (
+                "/how-we-work",
+                crate::views::how_we_work::render().into_string(),
+            ),
+            (
+                "/pricing-transparency",
+                crate::views::pricing::render().into_string(),
+            ),
+            (
+                "/case-studies",
+                crate::views::case_studies::render().into_string(),
+            ),
             ("/about", crate::views::about::render().into_string()),
         ];
         for (route, html) in &pages {
@@ -820,5 +832,178 @@ mod plain_language {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod utility_class_coverage {
+    //! The frozen bundle fails silently, so we measure instead of trusting it.
+    //!
+    //! `static/index-*.css` is a Tailwind build produced by a React app that no
+    //! longer exists, and there is no build tool wired up to regenerate it.
+    //! Tailwind only emits CSS for classes it saw at build time, so any utility
+    //! added to a template afterwards resolves to nothing at all: no warning, no
+    //! console error, no visual hint beyond "that section looks a bit off".
+    //!
+    //! This has shipped three separate defects. `pl-6` collapsed to zero indent
+    //! on the homepage proof columns. Every `mb-2` on the site applied no margin
+    //! (measured: `margin-bottom: 0px` on a live paragraph). The service-card
+    //! icon tiles asked for `bg-gradient-to-br ... ring-1` and painted nothing,
+    //! because gradients were never compiled. A census found 71 such classes in
+    //! live use across 8 routes.
+    //!
+    //! The fix is a gap-fill layer at the end of `static/motion.css`. This test
+    //! is what stops that layer from drifting out of date: it renders every
+    //! page, harvests every class actually emitted, and asserts each one has a
+    //! definition in some stylesheet we ship. Adding a class the bundle never
+    //! compiled now fails the build instead of quietly doing nothing.
+
+    use std::collections::BTreeSet;
+
+    /// Classes that deliberately carry no styling of their own.
+    ///
+    /// `group` and `peer` exist only so descendants can target them
+    /// (`.group:hover .group-hover\:x`). Lucide stamps `lucide lucide-<name>`
+    /// on every icon as a hook for consumers. `shadcn-card` is a leftover
+    /// component marker whose visual treatment comes from the utilities sitting
+    /// next to it. None of these should be "fixed" by inventing CSS for them.
+    fn is_marker(class: &str) -> bool {
+        matches!(class, "group" | "peer" | "shadcn-card" | "lucide")
+            || class.starts_with("lucide-")
+            || class.starts_with("group/")
+            || class.starts_with("peer/")
+    }
+
+    /// Every stylesheet we serve, concatenated.
+    ///
+    /// Read from disk rather than `include_str!` so a newly added stylesheet is
+    /// picked up without anyone remembering to update this list.
+    fn all_stylesheets() -> String {
+        let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+        let mut css = String::new();
+        for entry in std::fs::read_dir(dir).expect("static/ must be readable") {
+            let path = entry.expect("readable dir entry").path();
+            if path.extension().is_some_and(|e| e == "css") {
+                css.push_str(&std::fs::read_to_string(&path).expect("readable stylesheet"));
+                css.push('\n');
+            }
+        }
+        assert!(!css.is_empty(), "no stylesheets found in static/");
+        css
+    }
+
+    /// Render a class name the way Tailwind writes it into a selector.
+    ///
+    /// `md:p-6` is emitted as `.md\:p-6`, `bg-primary/10` as `.bg-primary\/10`,
+    /// `text-[15px]` as `.text-\[15px\]`.
+    fn css_escape(class: &str) -> String {
+        const NEEDS_ESCAPE: &str = r#":[]./&%!#(),<>+*~='"$^|?{}\ "#;
+        let mut out = String::with_capacity(class.len() * 2);
+        for ch in class.chars() {
+            if NEEDS_ESCAPE.contains(ch) {
+                out.push('\\');
+            }
+            out.push(ch);
+        }
+        out
+    }
+
+    /// Does any stylesheet define a rule for this class?
+    ///
+    /// The trailing character matters. Without it `.mb-1` would match inside
+    /// `.mb-12` and report a missing class as present — the exact failure mode
+    /// that made an earlier hand-rolled census claim `space-y-4` was undefined
+    /// when the real selector was `.space-y-4>:not([hidden])`.
+    fn is_defined(class: &str, css: &str) -> bool {
+        let needle = format!(".{}", css_escape(class));
+        css.match_indices(&needle).any(|(at, _)| {
+            css[at + needle.len()..].chars().next().is_some_and(|c| {
+                matches!(
+                    c,
+                    '{' | ',' | ':' | '>' | '~' | '[' | '.' | ')' | ' ' | '\n' | '\t' | '\r'
+                )
+            })
+        })
+    }
+
+    /// Pull every class off every `class="..."` attribute in rendered markup.
+    fn classes_in(html: &str) -> BTreeSet<String> {
+        let mut found = BTreeSet::new();
+        let mut rest = html;
+        while let Some(start) = rest.find("class=\"") {
+            rest = &rest[start + 7..];
+            let Some(end) = rest.find('"') else { break };
+            let value = rest[..end]
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'");
+            found.extend(value.split_whitespace().map(str::to_owned));
+            rest = &rest[end..];
+        }
+        found
+    }
+
+    #[test]
+    fn every_class_we_render_has_css_behind_it() {
+        let pages: Vec<(&str, String)> = vec![
+            ("/", crate::views::home::render().into_string()),
+            ("/services", crate::views::services::render().into_string()),
+            ("/pricing", crate::views::pricing::render().into_string()),
+            (
+                "/how-we-work",
+                crate::views::how_we_work::render().into_string(),
+            ),
+            (
+                "/case-studies",
+                crate::views::case_studies::render().into_string(),
+            ),
+            (
+                "/capabilities",
+                crate::views::capabilities::render().into_string(),
+            ),
+            ("/about", crate::views::about::render().into_string()),
+            ("/contact", crate::views::contact::render().into_string()),
+            ("/feedback", crate::views::feedback::render().into_string()),
+            ("/404", crate::views::not_found::render().into_string()),
+        ];
+
+        let css = all_stylesheets();
+        let mut undefined: Vec<(String, Vec<&str>)> = Vec::new();
+
+        let mut all: BTreeSet<String> = BTreeSet::new();
+        for (_, html) in &pages {
+            all.extend(classes_in(html));
+        }
+
+        for class in &all {
+            if is_marker(class) || is_defined(class, &css) {
+                continue;
+            }
+            let routes: Vec<&str> = pages
+                .iter()
+                .filter(|(_, html)| classes_in(html).contains(class))
+                .map(|(route, _)| *route)
+                .collect();
+            undefined.push((class.clone(), routes));
+        }
+
+        assert!(
+            undefined.is_empty(),
+            "{} utility class(es) are used in rendered markup but defined in no \
+             stylesheet we ship, so they apply nothing at all:\n{}\n\n\
+             static/index-*.css is a frozen Tailwind build with no build tool: it \
+             only contains classes the original React app happened to use. Add the \
+             missing rules to the gap-fill section at the end of static/motion.css \
+             (site-owned, loaded last), or switch to a class the bundle already \
+             compiled. If a class is a styling-free marker, add it to is_marker().",
+            undefined.len(),
+            undefined
+                .iter()
+                .map(|(c, routes)| format!("  {c}  (on {})", routes.join(", ")))
+                .collect::<Vec<_>>()
+                .join("\n"),
+        );
     }
 }
