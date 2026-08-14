@@ -47,7 +47,7 @@ const SERVICES: &[Service] = &[
         slug: "it-operations",
         icon: &icons::SERVER,
         title: "IT Operations",
-        lede: "Complete infrastructure management designed to keep your business running smoothly. We handle monitoring, maintenance, patching, and support so your team can focus on the work that earns revenue.",
+        lede: "Patch windows agreed in advance, restores that are actually tested, and runbooks written before the outage rather than during it. Monitoring you can read without a dashboard PhD, and tickets that close with documentation rather than the word \"fixed\".",
         practice: "We operate IT the way ops engineers do at companies that take uptime seriously: written runbooks, change management with rollback paths, monitoring you can interpret without a dashboard PhD, and tickets that close with documentation, not just \"fixed.\"",
         capabilities: &[
             "24/7 monitoring with alert routing tuned for your team's actual on-call hours",
@@ -82,7 +82,7 @@ const SERVICES: &[Service] = &[
         slug: "cyber-security",
         icon: &icons::SHIELD,
         title: "Cyber Security",
-        lede: "Defense-in-depth strategies sized to your actual threat model. From compliance audits to real-time threat detection, we secure your digital perimeter without the enterprise theater you can't operate.",
+        lede: "Defense sized to what would actually hurt you: threat modeling first, then endpoint defense, then all four email authentication records — SPF, DKIM, DMARC and MTA-STS — properly tuned. Without the enterprise theater you cannot operate.",
         practice: "Most small organizations don't need a SOC; they need correctly-configured defaults, a written incident-response plan, and someone whose phone rings when the canary trips. We design the posture that matches that reality — and produces evidence regulators, carriers, and clients are starting to ask for.",
         capabilities: &[
             "Threat modeling — what would actually hurt us, vs. checklist theater",
@@ -117,7 +117,7 @@ const SERVICES: &[Service] = &[
         slug: "industrial-automation",
         icon: &icons::SETTINGS,
         title: "Industrial Automation",
-        lede: "Operational efficiency through automation systems designed for reliability and auditability. We bridge the gap between OT and IT — without exposing your control plane to the corporate network's threat model.",
+        lede: "Control and monitoring for equipment that has to keep running, with the production network properly isolated from the corporate one. Your control plane does not inherit the office's threat model.",
         practice: "Industrial environments have safety, regulatory, and uptime requirements that consumer-IT vendors don't take seriously. We design with those constraints first: air-gapped where it matters, segmented where it doesn't, and documented at a level that survives the operator turnover that eventually happens.",
         capabilities: &[
             "Robotic process automation (RPA) for back-office workflows that crossed the line from \"manual\" to \"a person's full-time job\"",
@@ -153,7 +153,7 @@ const SERVICES: &[Service] = &[
         slug: "hardware-solutions",
         icon: &icons::CPU,
         title: "Hardware Solutions",
-        lede: "Strategic procurement and lifecycle management of enterprise hardware. We make sure your team has the right tools — and that the procurement process doesn't become an operational liability.",
+        lede: "Procurement at pass-through pricing, standardized device images, and an asset register that knows who has what. Hardware is where small-organization IT quietly loses money, usually on a refresh cycle nobody owns.",
         practice: "Hardware is where small-organization IT often hemorrhages money: refresh cycles nobody owns, BYOD chaos that breaks compliance, and surprise vendor markups on \"managed\" purchases. We standardize the fleet, write the lifecycle policy, and source competitively.",
         capabilities: &[
             "Procurement at pass-through pricing — no license-arbitrage markup",
@@ -595,6 +595,48 @@ mod tests {
             page.contains(&format!("{expected} services.")),
             "the page lists {} services but its headline does not say {expected:?}",
             SERVICES.len()
+        );
+    }
+
+    /// A service lede must open with something, not with a category name.
+    ///
+    /// Four of the eight opened on an abstract noun phrase — "Complete
+    /// infrastructure management", "Defense-in-depth strategies", "Operational
+    /// efficiency through automation systems", "Strategic procurement and
+    /// lifecycle management" — and only became specific in the second
+    /// sentence. A reader skimming eight sections reads eight first sentences,
+    /// so that is the sentence that has to earn the section.
+    ///
+    /// The other four already did it: Disaster Recovery opens "tested, not
+    /// just documented", Software Development opens on "typed, tested,
+    /// documented, deployable". This keeps the soft register from creeping
+    /// back into the half that was fixed.
+    #[test]
+    fn no_service_lede_opens_on_an_empty_category_phrase() {
+        const RETIRED: &[&str] = &[
+            "Complete infrastructure management",
+            "Defense-in-depth strategies sized",
+            "Operational efficiency through",
+            "Strategic procurement and lifecycle",
+            // Same register as the banned "digital landscape".
+            "digital perimeter",
+            "bridge the gap",
+        ];
+        let mut offenders: Vec<String> = Vec::new();
+        for svc in SERVICES {
+            for phrase in RETIRED {
+                if svc.lede.contains(phrase) {
+                    offenders.push(format!("{}: {phrase:?}", svc.title));
+                }
+            }
+        }
+        assert!(
+            offenders.is_empty(),
+            "{} service lede(s) opened on a phrase a competitor could print \
+             verbatim. Each service has `practice`, `capabilities` and `sample` \
+             full of specifics — open on one of those:\n{}",
+            offenders.len(),
+            offenders.join("\n")
         );
     }
 
