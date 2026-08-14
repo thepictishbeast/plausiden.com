@@ -293,6 +293,17 @@ fn validate(f: &InquiryForm) -> Result<(), &'static str> {
 /// It describes what happens next in the same terms as the rest of the site
 /// and deliberately states no response time. A reply-within commitment is
 /// Paul's to make, not this page's to invent.
+/// Read-only view of [`RECEIVED_MESSAGE`] for the /contact page's test.
+///
+/// The contact page now states these same commitments up front, so a reader
+/// learns what submitting does before submitting. Two copies of one promise
+/// drift silently, and this lets the page's test compare against the real
+/// string rather than a second transcription of it.
+#[cfg(test)]
+pub(crate) fn received_message_for_test() -> &'static str {
+    RECEIVED_MESSAGE
+}
+
 const RECEIVED_MESSAGE: &str = "We have your message and will reply to the address you gave us. \
      If a scoping call makes sense, we will suggest a time: it runs 45 minutes, we sign a mutual \
      NDA first, and you get a written proposal with a specific scope and a specific price \

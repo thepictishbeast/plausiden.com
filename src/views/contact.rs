@@ -116,6 +116,8 @@ pub fn render() -> Markup {
                                 (contact_row_text(&icons::MAP_PIN.render(), "Location", "Massachusetts, USA"))
                             }
                         }
+
+                        (what_happens_next())
                     }
 
                     // Right card — the actual form
@@ -260,6 +262,45 @@ fn contact_row(svg: &str, label: &str, href: &str, text: &str) -> Markup {
     }
 }
 
+/// The four steps between sending this form and having a price.
+///
+/// Every one of these sentences already existed — in `RECEIVED_MESSAGE` in
+/// inquiry.rs, which is the acknowledgement shown *after* a submission goes
+/// through. So the page answered "what happens if I send this?" only once you
+/// had already sent it. That is backwards on the one page where hesitation
+/// costs money: the reassurance belongs in front of the decision, not behind
+/// it. `contact_page_states_the_same_promises_as_the_acknowledgement` keeps
+/// the two from drifting apart.
+///
+/// Deliberately no response time. The comment on `RECEIVED_MESSAGE` says a
+/// reply-within commitment is Paul's to make rather than this page's to
+/// invent, and that holds here too — so the list says what happens, never
+/// how fast.
+fn what_happens_next() -> Markup {
+    const STEPS: &[&str] = &[
+        "We reply to the address you give us.",
+        "If a scoping call makes sense, we suggest a time. It runs 45 minutes, and we sign a mutual NDA before it starts.",
+        "You get a written proposal afterwards, with a specific scope and a specific price.",
+        "If we are not the right firm for the work, we say so rather than book a call to find out.",
+    ];
+    html! {
+        div class="shadcn-card rounded-xl border border-card-border text-card-foreground border-none shadow-xl bg-white overflow-hidden" { // loom-allow: matches the contact-details card above it exactly — same chrome, same column
+            div class="bg-primary p-6" { // loom-allow: primary-bg card-header band, mirroring the card above
+                // h2, like the two cards either side of it. The heading_outline
+                // guard checks the whole document, so an h3 here would skip a level.
+                h2 class="text-white font-display text-xl font-bold" { "What happens next" } // loom-allow: card-internal heading on primary band; Heading{Sub,OnDark} would re-introduce text-slate-* defaults
+            }
+            div class="p-8" { // loom-allow: card body padding
+                ol class="list-decimal pl-6 space-y-3 text-slate-600 text-sm leading-relaxed" { // loom-allow: numbered steps; pl-6 is the house list treatment, see .pd-prose in motion.css
+                    @for step in STEPS {
+                        li { (step) }
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn contact_row_text(svg: &str, label: &str, text: &str) -> Markup {
     html! {
         div class="flex items-start gap-4" { // loom-allow: icon-row layout — same as contact_row but plain text value
@@ -383,6 +424,50 @@ mod tests {
             "contact page unexpectedly short: {} bytes",
             s.len()
         );
+    }
+
+    /// What the page promises before you send, and what the acknowledgement
+    /// promises after, must stay the same promises.
+    ///
+    /// The "What happens next" list was lifted from `RECEIVED_MESSAGE` in
+    /// inquiry.rs so a reader gets it before deciding rather than after. Two
+    /// copies of one commitment drift: someone edits the acknowledgement,
+    /// nothing complains, and the page keeps promising a 45-minute call while
+    /// the confirmation says something else.
+    ///
+    /// Checks the load-bearing terms rather than the prose, so either side can
+    /// be reworded freely and only a changed *commitment* fails.
+    #[test]
+    fn contact_page_states_the_same_promises_as_the_acknowledgement() {
+        let page = render().into_string();
+        let ack = crate::inquiry::received_message_for_test();
+        for term in [
+            "45 minutes",
+            "mutual NDA",
+            "specific scope",
+            "specific price",
+        ] {
+            assert!(
+                ack.contains(term),
+                "the acknowledgement no longer promises {term:?} — update the \
+                 What happens next list on /contact to match, or this page is \
+                 promising something the confirmation does not"
+            );
+            assert!(
+                page.contains(term),
+                "/contact does not state {term:?}, which the post-submit \
+                 acknowledgement promises. A reader should not have to submit \
+                 the form to find out what submitting it does."
+            );
+        }
+        // The deliberate omission, on both sides: no reply-within commitment.
+        for haystack in [page.as_str(), ack] {
+            assert!(
+                !haystack.contains("within 24 hours") && !haystack.contains("same business day"),
+                "a response-time promise appeared; that commitment is Paul's to \
+                 make, not this page's to invent"
+            );
+        }
     }
 
     #[test]
