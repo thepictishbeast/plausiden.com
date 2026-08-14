@@ -78,7 +78,7 @@ pub fn render() -> Markup {
                         }.render())
                     }
                     (Lede {
-                        text: "Reach out for a quote and free consultation today.",
+                        text: "Book a 45-minute scoping call. Mutual NDA first, then a written proposal with specific scope and a specific price — not an hourly estimate that moves.",
                         tone: HeadingTone::OnDark,
                     }.render())
                 }
@@ -93,7 +93,7 @@ pub fn render() -> Markup {
                             div class="bg-primary p-6" { // loom-allow: primary-bg card-header band
                                 h3 class="text-white font-display text-xl font-bold" { "Get in touch" } // loom-allow: card-internal heading on primary band; Heading{Sub,OnDark} would re-introduce text-slate-* defaults
                                 p class="text-primary-foreground/80 mt-2 text-sm" { // loom-allow: card sub-line on primary band
-                                    "We're here to answer any questions about our IT solutions."
+                                    "You will be talking to the engineer who would do the work, not a call centre or an account manager."
                                 }
                             }
                             div class="p-8 space-y-8" { // loom-allow: card body padding + vertical rhythm between contact rows
