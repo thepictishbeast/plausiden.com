@@ -125,7 +125,33 @@ pub const DEFAULT_DESCRIPTION: &str = "IT operations, security and disaster reco
 /// /services, the audience from /services, the price band from
 /// /pricing-transparency. No review counts or ratings — those are structured
 /// data you can be penalised for inventing, and we have none to report.
-const JSON_LD_ORGANIZATION: &str = r#"{"@context":"https://schema.org","@type":"ProfessionalService","name":"PlausiDen LLC","url":"https://plausiden.com","email":"team@plausiden.com","telephone":"+1-978-351-6495","address":{"@type":"PostalAddress","addressRegion":"MA","addressCountry":"US"},"areaServed":[{"@type":"AdministrativeArea","name":"Greater Boston"},{"@type":"State","name":"Massachusetts"},{"@type":"Country","name":"United States"}],"priceRange":"$$","description":"IT operations, security and disaster recovery for law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff in Massachusetts. Published rates and fixed-price written proposals.","knowsAbout":["IT operations","Cyber security","Disaster recovery","Network segmentation","Access review","Backup and restore testing","Security questionnaires","Industrial automation","Software development"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"Services","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"IT Operations","description":"Monitoring, documented patch windows, tested restores and runbooks."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Cyber Security","description":"Hardening, access review, and the security questionnaires clients send before signing."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Disaster Recovery","description":"Recovery posture engineered to be tested, not just documented."}}]}}"#;
+const JSON_LD_ORGANIZATION_HEAD: &str = r#"{"@context":"https://schema.org","@type":"ProfessionalService","name":"PlausiDen LLC","url":"https://plausiden.com","email":"team@plausiden.com","telephone":"+1-978-351-6495","address":{"@type":"PostalAddress","addressRegion":"MA","addressCountry":"US"},"areaServed":[{"@type":"AdministrativeArea","name":"Greater Boston"},{"@type":"State","name":"Massachusetts"},{"@type":"Country","name":"United States"}],"priceRange":"$$","description":"IT operations, security and disaster recovery for law firms, medical practices, financial advisers, newsrooms and nonprofits of 5 to 100 staff in Massachusetts. Published rates and fixed-price written proposals.","knowsAbout":["IT operations","Cyber security","Disaster recovery","Network segmentation","Access review","Backup and restore testing","Security questionnaires","Industrial automation","Software development"]"#;
+
+/// The Organization schema, with its offer catalog built from the real service
+/// list rather than typed out beside it.
+///
+/// It was a single hand-written literal naming three services while /services
+/// rendered eight — so a crawler was told this firm does not sell Artificial
+/// Intelligence, Industrial Automation, Software Development, Hardware
+/// Solutions or Network Architecture. Structured data drifts silently by
+/// design: nothing renders it, so nobody sees it go stale.
+///
+/// Each offer carries the deep link to its own section, which is more useful
+/// than the prose descriptions that were there before and cannot fall out of
+/// step with the copy, because there is no copy to fall out of step with.
+fn organization_json_ld() -> String {
+    let offers: Vec<String> = crate::views::services::catalog_entries()
+        .map(|(name, slug)| {
+            format!(
+                r#"{{"@type":"Offer","itemOffered":{{"@type":"Service","name":"{name}","url":"https://plausiden.com/services#{slug}"}}}}"#
+            )
+        })
+        .collect();
+    format!(
+        r#"{JSON_LD_ORGANIZATION_HEAD},"hasOfferCatalog":{{"@type":"OfferCatalog","name":"Services","itemListElement":[{}]}}}}"#,
+        offers.join(",")
+    )
+}
 
 /// Per-page metadata bundle for the shared `<head>`. Keeps the
 /// signature flat instead of growing positional arguments per
@@ -230,7 +256,7 @@ fn head_tag(meta: &PageMeta<'_>) -> Markup {
             meta name="twitter:image" content=(og_image_url);
 
             // JSON-LD: tells crawlers who we are without parsing the page body.
-            script type="application/ld+json" { (PreEscaped(JSON_LD_ORGANIZATION)) }
+            script type="application/ld+json" { (PreEscaped(organization_json_ld())) }
             @if !meta.extra_json_ld.is_empty() {
                 script type="application/ld+json" { (PreEscaped(meta.extra_json_ld)) }
             }
@@ -607,6 +633,73 @@ mod tests {
         );
         // Non-active links keep text-slate-600.
         assert!(s.contains("text-slate-600"));
+    }
+}
+
+#[cfg(test)]
+mod structured_data {
+    //! What crawlers are told must match what the site sells.
+    //!
+    //! The offer catalog was a hand-typed literal listing three services while
+    //! /services rendered eight, so anything reading structured data rather
+    //! than the page was told this firm does not do Artificial Intelligence,
+    //! Industrial Automation, Software Development, Hardware Solutions or
+    //! Network Architecture. Five of eight service lines, invisible.
+    //!
+    //! Structured data is the worst place in a site for a hand-kept list.
+    //! Nothing renders it, so no screenshot shows the drift, no reader
+    //! complains, and the comment above it went on claiming it came from
+    //! /services for as long as it took someone to check.
+
+    #[test]
+    fn the_offer_catalog_lists_every_service() {
+        let json = super::organization_json_ld();
+        let parsed: serde_json::Value =
+            serde_json::from_str(&json).expect("the Organization JSON-LD must be valid JSON");
+
+        let offers = parsed["hasOfferCatalog"]["itemListElement"]
+            .as_array()
+            .expect("hasOfferCatalog.itemListElement must be an array");
+
+        let listed: Vec<&str> = offers
+            .iter()
+            .filter_map(|o| o["itemOffered"]["name"].as_str())
+            .collect();
+        let expected: Vec<&str> = crate::views::services::catalog_entries()
+            .map(|(name, _)| name)
+            .collect();
+
+        assert_eq!(
+            listed, expected,
+            "the JSON-LD offer catalog and the services page disagree about what \
+             this firm sells"
+        );
+
+        // Each offer deep-links to its own section, which is the part that makes
+        // the catalog worth emitting rather than just correct.
+        for (name, slug) in crate::views::services::catalog_entries() {
+            let want = format!("https://plausiden.com/services#{slug}");
+            assert!(
+                offers.iter().any(|o| o["itemOffered"]["url"] == want),
+                "{name} has no deep link to its section in the offer catalog"
+            );
+        }
+    }
+
+    #[test]
+    fn the_page_actually_emits_that_json_ld() {
+        // The builder being right is worth nothing if the head stopped calling it.
+        let html = crate::views::home::render().into_string();
+        assert!(
+            html.contains(r#"<script type="application/ld+json">"#),
+            "no JSON-LD in the rendered head"
+        );
+        for (name, _) in crate::views::services::catalog_entries() {
+            assert!(
+                html.contains(name),
+                "{name} is missing from the rendered page's structured data"
+            );
+        }
     }
 }
 

@@ -42,6 +42,19 @@ struct Service<'a> {
     sample: &'a str,
 }
 
+/// Every service, as `(title, anchor slug)`, for anyone that needs the list
+/// without the prose.
+///
+/// The site's JSON-LD offer catalog used to be a hand-written literal in
+/// layout.rs naming three services while this list held eight, so a crawler
+/// was told PlausiDen sells IT Operations, Cyber Security and Disaster
+/// Recovery and nothing else. Five service lines were invisible to anything
+/// reading structured data rather than the page. Deriving the catalog from
+/// here is what stops that happening again.
+pub(crate) fn catalog_entries() -> impl Iterator<Item = (&'static str, &'static str)> {
+    SERVICES.iter().map(|s| (s.title, s.slug))
+}
+
 const SERVICES: &[Service] = &[
     Service {
         slug: "it-operations",
