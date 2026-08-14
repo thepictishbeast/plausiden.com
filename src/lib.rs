@@ -1129,6 +1129,102 @@ mod eyebrow_contrast {
 }
 
 #[cfg(test)]
+mod no_bare_paths_in_copy {
+    //! A route path must never appear as visible text.
+    //!
+    //! /capabilities closed with "The engagement model is in /services; the
+    //! contact form is the start." — a destination printed where the reader
+    //! cannot click it, inside a `Lede` that accepts no markup, so the author
+    //! wrote the path instead of a link. It reads like a note-to-self left in
+    //! the copy, which is exactly the impression a security firm cannot afford.
+    //!
+    //! The route list is not written down here. It is collected from the hrefs
+    //! the site actually links, so a new page is covered the moment anything
+    //! links to it — hand-kept lists in this file have gone stale twice before.
+
+    /// Drop `<script>` and `<style>` bodies before reading copy.
+    ///
+    /// The shared `visible_text` keeps them, which is right for the banned-word
+    /// check — a JSON-LD description is visible in search results. It is wrong
+    /// here: every blog post embeds its own canonical URL in JSON-LD, and all
+    /// five reported as printing their own route. That is metadata doing its
+    /// job, not copy.
+    fn strip_embedded_code(html: &str) -> String {
+        let mut out = String::with_capacity(html.len());
+        let mut rest = html;
+        while let Some(start) = rest.find("<script").or_else(|| rest.find("<style")) {
+            out.push_str(&rest[..start]);
+            let after = &rest[start..];
+            let end = after
+                .find("</script>")
+                .map(|i| i + "</script>".len())
+                .or_else(|| after.find("</style>").map(|i| i + "</style>".len()));
+            match end {
+                Some(e) => rest = &after[e..],
+                None => return out,
+            }
+        }
+        out.push_str(rest);
+        out
+    }
+
+    /// Every internal path the site links to, gathered across all pages.
+    fn linked_paths(pages: &[(&str, String)]) -> Vec<String> {
+        let mut paths: Vec<String> = Vec::new();
+        for (_, html) in pages {
+            for part in html.split("href=\"/").skip(1) {
+                let Some(rest) = part.split('"').next() else {
+                    continue;
+                };
+                // Skip assets and anchors; we care about page routes.
+                if rest.is_empty() || rest.contains('.') || rest.contains('#') {
+                    continue;
+                }
+                let path = format!("/{rest}");
+                if !paths.contains(&path) {
+                    paths.push(path);
+                }
+            }
+        }
+        paths
+    }
+
+    #[test]
+    fn no_page_prints_a_route_as_text() {
+        let pages = super::utility_class_coverage::rendered_pages();
+        let paths = linked_paths(&pages);
+        assert!(
+            paths.len() >= 8,
+            "failed to collect the site's routes, found {paths:?}"
+        );
+
+        let mut offenders: Vec<String> = Vec::new();
+        for (route, html) in &pages {
+            let text = super::plain_language::visible_text(&strip_embedded_code(html));
+            for path in &paths {
+                // Bare path, not a longer word: "/services" but not "/servicesx".
+                for (idx, _) in text.match_indices(path.as_str()) {
+                    let next = text[idx + path.len()..].chars().next();
+                    if next.is_none_or(|c| !c.is_alphanumeric() && c != '-' && c != '/') {
+                        offenders.push(format!("{route}: prints {path:?} as text"));
+                        break;
+                    }
+                }
+            }
+        }
+        offenders.sort();
+        offenders.dedup();
+        assert!(
+            offenders.is_empty(),
+            "{} page(s) print a route path in visible copy. Link to it instead — \
+             a path the reader has to retype is a dead end:\n{}",
+            offenders.len(),
+            offenders.join("\n")
+        );
+    }
+}
+
+#[cfg(test)]
 mod heading_outline {
     //! Every page has exactly one h1 and skips no heading level.
     //!

@@ -212,6 +212,7 @@ pub fn render() -> Markup {
                 }.render())
             }
             a href="/contact" { (cta_button) }
+            (crate::views::layout::published_before_you_book())
         }
     };
     let cta_section = Section {

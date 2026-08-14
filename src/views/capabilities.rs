@@ -143,11 +143,17 @@ pub fn render() -> Markup {
                 }
                 div class="mb-8" {
                     (Lede {
-                        text: "The tools we operate ourselves are the tools we deploy for clients. The engagement model is in /services; the contact form is the start.",
+                        // Was: "The engagement model is in /services; the contact
+                        // form is the start." That printed a bare path as plain
+                        // text — a destination the reader cannot click, in a
+                        // Lede that takes no markup. The note under the button
+                        // carries the links instead.
+                        text: "The tools we operate ourselves are the tools we deploy for clients. A scoping call is where it starts.",
                         tone: HeadingTone::Ink,
                     }.render())
                 }
                 a href="/contact" { (cta_button) }
+                (crate::views::layout::published_before_you_book())
             }
         }
     };

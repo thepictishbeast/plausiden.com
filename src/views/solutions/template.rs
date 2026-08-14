@@ -306,6 +306,10 @@ pub fn render_vertical_landing(cfg: &VerticalLanding<'_>) -> Markup {
                     " · 978-351-6495"
                 }
             }
+            // Last, because it is a different action from the two above: those
+            // are other ways to start the same conversation, this is for the
+            // reader who is not ready to start one yet.
+            (crate::views::layout::published_before_you_book())
         }
     };
     let cta_section = Section {

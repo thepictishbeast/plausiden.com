@@ -5,6 +5,7 @@
 use loom_components::ButtonVariant;
 use loom_components::footer::{Footer, FooterColumn, FooterItem, FooterLegalLink, FooterStyle};
 use loom_components::nav::{Nav, NavCta, NavLink, NavStyle};
+use loom_components::{TextLink, TextLinkSize, TextLinkVariant};
 use loom_icons as icons;
 use maud::{DOCTYPE, Markup, PreEscaped, html};
 
@@ -431,6 +432,46 @@ fn footer() -> Markup {
         style: FooterStyle::default(),
     }
     .render()
+}
+
+/// The line that sits under a page's closing call to action.
+///
+/// Every page ended its argument by asking for a call, and a reader who is
+/// not ready to book had nowhere to go: seven of the eleven marketing pages
+/// — including all five vertical landing pages, which are where a law firm
+/// or a medical practice actually arrives — contained no prose link to
+/// anywhere else on the site. The two things a buyer wants before booking
+/// are the deliverable and the price, and both are already published, so the
+/// only thing missing was the pointer.
+///
+/// One function rather than four copies: the wording is a sales decision and
+/// should be changed in one place, and it keeps the pattern identical on
+/// every page that uses it.
+#[must_use]
+pub fn published_before_you_book() -> Markup {
+    let report = TextLink {
+        label: "the report we deliver",
+        href: "/sample-report",
+        variant: TextLinkVariant::PrimaryMedium,
+        size: TextLinkSize::Default,
+    }
+    .render();
+    let rates = TextLink {
+        label: "what it costs",
+        href: "/pricing-transparency",
+        variant: TextLinkVariant::PrimaryMedium,
+        size: TextLinkSize::Default,
+    }
+    .render();
+    html! {
+        p class="text-slate-600 text-sm mt-6" { // loom-allow: post-CTA note; HelperText is bound to slate-500 and reads too faint under a button
+            "Not ready to book? Read "
+            (report)
+            " and "
+            (rates)
+            " first. Both are published in full."
+        }
+    }
 }
 
 /// Render a page with the site-wide chrome and the default site
