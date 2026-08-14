@@ -178,6 +178,20 @@
   left: 0;
 }
 
+/* ------------------------------------------------------------- proof row -- */
+
+/* The homepage proof columns: a hairline accent rule with the client outcome
+   beside it. Written here as one class rather than assembled from utilities,
+   because the obvious utilities do not exist in the frozen bundle — `pl-6`
+   resolves to nothing (only pl-4 and pl-8 were compiled) and
+   `border-primary/30` has no opacity variant, so the first attempt rendered
+   as 2px of padding against a default-grey line. The browser reports that
+   honestly; the markup does not. */
+.pd-proof {
+  border-left: 2px solid rgb(30 64 175 / 0.35);
+  padding-left: 1.25rem;
+}
+
 /* ---------------------------------------------------------- dark footer -- */
 
 /* Two measured contrast failures, on every one of the 25 routes because the

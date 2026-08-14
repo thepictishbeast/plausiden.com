@@ -84,7 +84,7 @@ pub fn render() -> Markup {
                     }.render())
                 }
                 (Lede {
-                    text: "Sanitized engagement summaries from our active practice. Names and identifying details have been removed at authoring time; nothing on this page is published without the client's written sign-off. If a study reads like your situation, the contact form is the right next step.",
+                    text: "Sanitized engagement summaries from our active practice. Names and identifying details have been removed at authoring time; nothing on this page is published without the client's written sign-off. If a study reads like your situation, book a scoping call and we will tell you whether it maps to yours.",
                     tone: HeadingTone::Ink,
                 }.render())
             }

@@ -150,6 +150,52 @@ pub fn render() -> Markup {
             }
         }
 
+        // ---------- What changed for three clients ----------
+        //
+        // These outcomes were already published on /case-studies and had never
+        // appeared on the page people actually land on. They are the strongest
+        // evidence the firm has — a carrier repricing a policy, a state audit
+        // passed first time, counsel signing off on a source-protection
+        // posture — and a buyer had to find the Case Studies tab to see any of
+        // it. Nothing here is new or embellished: each line is the outcome
+        // field of an existing study, shortened, and links to the full one.
+        section class="py-20 bg-white border-b border-slate-100" { // loom-allow: proof strip — lighter cadence than the py-24 bands either side so it reads as a supporting row, not a third pillar
+            div class="container mx-auto px-4 md:px-6" { // loom-allow: full-width container
+                div class="text-center max-w-3xl mx-auto mb-12 reveal" { // loom-allow: centred caption; matches the services band above
+                    div class="mb-4" {
+                        (Heading {
+                            text: "What changed for three clients",
+                            level: HeadingLevel::H2,
+                            variant: HeadingVariant::Section,
+                            tone: HeadingTone::Ink,
+                        }.render())
+                    }
+                    (Lede {
+                        text: "Sanitized summaries of real engagements. Identifying details are removed, and nothing appears here without the client's written sign-off.",
+                        tone: HeadingTone::Ink,
+                    }.render())
+                }
+                div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal reveal-delay-1" { // loom-allow: 3-up proof row; Loom ships no Grid primitive
+                    @for (who, what) in [
+                        ("Boutique law firm",
+                         "Their malpractice carrier reduced the policy premium on the strength of the audit. The next litigation hold was answered in one paragraph instead of a forensic engagement."),
+                        ("Specialty healthcare practice",
+                         "Passed a state-level audit on the first try. Time to answer an audit request dropped from weeks to a single day."),
+                        ("Investigative newsroom",
+                         "The investigation was published. No subpoenas have surfaced, and a separate counsel review confirmed the substrate would not be probative if one arrived."),
+                    ] {
+                        div class="pd-proof" { // loom-allow: site-owned hairline-rule treatment (motion.css) — quieter than the FeatureCards above so proof reads as evidence, not another product tile. Deliberately NOT bundle utilities: pl-6 and border-primary/30 are absent from the frozen CSS and silently render as 0 padding and default grey.
+                            p class="text-sm font-semibold text-primary mb-2" { (who) } // loom-allow: attribution eyebrow
+                            p class="text-slate-600 leading-relaxed" { (what) } // loom-allow: body copy matching the services-band description size
+                        }
+                    }
+                }
+                div class="text-center mt-12" { // loom-allow: single centred link below the proof row
+                    a href="/case-studies" class="text-primary font-semibold pd-underline" { "Read the full case studies" } // loom-allow: inline text link using the site-owned underline animation
+                }
+            }
+        }
+
         // ---------- Everything Your Business Needs ----------
         section class="py-24 bg-white" { // loom-allow: services band — py-24 cadence above Loom Section{Loose}
             div class="container mx-auto px-4 md:px-6" { // loom-allow: full-width container
