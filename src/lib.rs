@@ -885,7 +885,7 @@ mod utility_class_coverage {
     ///
     /// Read from disk rather than `include_str!` so a newly added stylesheet is
     /// picked up without anyone remembering to update this list.
-    fn all_stylesheets() -> String {
+    pub(super) fn all_stylesheets() -> String {
         let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
         let mut css = String::new();
         for entry in std::fs::read_dir(dir).expect("static/ must be readable") {
@@ -934,7 +934,7 @@ mod utility_class_coverage {
     }
 
     /// Pull every class off every `class="..."` attribute in rendered markup.
-    fn classes_in(html: &str) -> BTreeSet<String> {
+    pub(super) fn classes_in(html: &str) -> BTreeSet<String> {
         let mut found = BTreeSet::new();
         let mut rest = html;
         while let Some(start) = rest.find("class=\"") {
@@ -952,9 +952,13 @@ mod utility_class_coverage {
         found
     }
 
-    #[test]
-    fn every_class_we_render_has_css_behind_it() {
-        let pages: Vec<(&str, String)> = vec![
+    /// Every route we render, as (path, markup).
+    ///
+    /// Shared with `custom_property_coverage` so both guards always look at
+    /// exactly the same set of pages — a route added to one and not the other
+    /// is a hole neither test would report.
+    pub(super) fn rendered_pages() -> Vec<(&'static str, String)> {
+        vec![
             ("/", crate::views::home::render().into_string()),
             ("/services", crate::views::services::render().into_string()),
             ("/pricing", crate::views::pricing::render().into_string()),
@@ -978,7 +982,12 @@ mod utility_class_coverage {
             ("/contact", crate::views::contact::render().into_string()),
             ("/feedback", crate::views::feedback::render().into_string()),
             ("/404", crate::views::not_found::render().into_string()),
-        ];
+        ]
+    }
+
+    #[test]
+    fn every_class_we_render_has_css_behind_it() {
+        let pages = rendered_pages();
 
         let css = all_stylesheets();
         let mut undefined: Vec<(String, Vec<&str>)> = Vec::new();
@@ -1013,6 +1022,187 @@ mod utility_class_coverage {
             undefined
                 .iter()
                 .map(|(c, routes)| format!("  {c}  (on {})", routes.join(", ")))
+                .collect::<Vec<_>>()
+                .join("\n"),
+        );
+    }
+}
+
+#[cfg(test)]
+mod custom_property_coverage {
+    //! The other way the frozen bundle fails silently.
+    //!
+    //! `utility_class_coverage` proves a class has a rule behind it. It cannot
+    //! prove the rule *works*. The bundle ships
+    //! `.font-mono { font-family: var(--font-mono) }` and never defines
+    //! `--font-mono` anywhere, because the token layer lived in the React app's
+    //! theme and did not survive the bake. A `var()` with no definition and no
+    //! fallback makes the entire declaration invalid at computed-value time:
+    //! the property silently falls back to its inherited or initial value, and
+    //! nothing anywhere reports a problem.
+    //!
+    //! Measured consequences before this test existed: the evidence transcript
+    //! on /sample-report rendered in the body sans-serif rather than monospace,
+    //! every primary call-to-action carried a 1px white ring from an undefined
+    //! `--primary-border`, and secondary buttons drew a near-black edge because
+    //! `--button-outline` fell through to `currentColor`.
+    //!
+    //! Scoped to properties a *rendered* page can actually reach. The bundle
+    //! also references some thirty Radix and sidebar tokens belonging to
+    //! components this site never renders; those are dead weight, not defects,
+    //! and failing the build over them would train everyone to ignore this test.
+
+    use std::collections::BTreeSet;
+
+    /// Split a stylesheet into `(selector, declaration-body)` pairs.
+    ///
+    /// Deliberately naive — it does not model at-rules, so a `@media` block's
+    /// prelude appears as one "selector" with an empty-ish body and its inner
+    /// rules appear as their own pairs. That is fine here: we only ever ask
+    /// whether a declaration mentions a property and which classes gate it.
+    fn rules(css: &str) -> Vec<(String, String)> {
+        let mut out = Vec::new();
+        let mut selector = String::new();
+        let mut body = String::new();
+        let mut in_body = false;
+        for ch in css.chars() {
+            match ch {
+                '{' if !in_body => {
+                    in_body = true;
+                    body.clear();
+                }
+                '}' if in_body => {
+                    in_body = false;
+                    out.push((selector.trim().to_owned(), body.clone()));
+                    selector.clear();
+                }
+                _ if in_body => body.push(ch),
+                _ => selector.push(ch),
+            }
+        }
+        out
+    }
+
+    /// Every class named in a selector, unescaped.
+    ///
+    /// `.md\:p-6` yields `md:p-6`, matching how the class is written in markup.
+    fn classes_in_selector(selector: &str) -> BTreeSet<String> {
+        let mut found = BTreeSet::new();
+        let bytes: Vec<char> = selector.chars().collect();
+        let mut i = 0;
+        while i < bytes.len() {
+            if bytes[i] == '.'
+                && i + 1 < bytes.len()
+                && (bytes[i + 1].is_alphanumeric()
+                    || bytes[i + 1] == '_'
+                    || bytes[i + 1] == '-'
+                    || bytes[i + 1] == '\\')
+            {
+                let mut name = String::new();
+                i += 1;
+                while i < bytes.len() {
+                    let c = bytes[i];
+                    if c == '\\' {
+                        // escaped character: take the next one literally
+                        if i + 1 < bytes.len() {
+                            name.push(bytes[i + 1]);
+                            i += 2;
+                            continue;
+                        }
+                        i += 1;
+                    } else if c.is_alphanumeric() || c == '_' || c == '-' {
+                        name.push(c);
+                        i += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if !name.is_empty() {
+                    found.insert(name);
+                }
+            } else {
+                i += 1;
+            }
+        }
+        found
+    }
+
+    #[test]
+    fn custom_properties_used_by_live_rules_are_defined() {
+        let css = super::utility_class_coverage::all_stylesheets();
+        let pages = super::utility_class_coverage::rendered_pages();
+
+        let mut rendered: BTreeSet<String> = BTreeSet::new();
+        for (_, html) in &pages {
+            rendered.extend(super::utility_class_coverage::classes_in(html));
+        }
+
+        // Anything with a `--name:` declaration counts as defined, wherever it
+        // is scoped. A property defined only under a selector we never render
+        // would be a false negative, which is the safe direction to err.
+        let defined: BTreeSet<String> = css
+            .match_indices("--")
+            .filter_map(|(at, _)| {
+                let rest = &css[at..];
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
+                    .collect();
+                let after = rest[name.len()..].trim_start();
+                after.starts_with(':').then_some(name)
+            })
+            .collect();
+
+        let mut broken: Vec<(String, String, String)> = Vec::new();
+        for (selector, body) in rules(&css) {
+            // A rule only matters if every class it names is on the page.
+            // Matching on *any* class reports the sidebar tokens as live,
+            // because their selectors happen to contain `.group`.
+            let gates = classes_in_selector(&selector);
+            if gates.is_empty() || !gates.iter().all(|c| rendered.contains(c)) {
+                continue;
+            }
+            let mut from = 0;
+            while let Some(rel) = body[from..].find("var(") {
+                let at = from + rel + 4;
+                let name: String = body[at..]
+                    .trim_start()
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
+                    .collect();
+                from = at;
+                if name.is_empty() {
+                    continue;
+                }
+                // A fallback makes the reference safe: var(--x, 1rem) is valid
+                // even with --x undefined.
+                let has_fallback = body[at + name.len()..].trim_start().starts_with(',');
+                if !has_fallback && !defined.contains(&name) {
+                    broken.push((name, selector.clone(), body.trim().to_owned()));
+                }
+            }
+        }
+
+        broken.sort();
+        broken.dedup();
+        assert!(
+            broken.is_empty(),
+            "{} CSS custom propert(y/ies) are referenced by rules that rendered \
+             markup actually matches, but are defined nowhere and have no \
+             fallback. The whole declaration is invalid at computed-value time, \
+             so the property silently keeps its inherited or initial value:\n{}\n\n\
+             Define them in the token block at the top of static/motion.css, or \
+             give the reference a fallback: var(--x, <sensible default>). Check \
+             how the value is consumed first — hsl(var(--x) / a) needs bare \
+             channels like `214 32% 91%`, a bare border-color needs a colour.",
+            broken.len(),
+            broken
+                .iter()
+                .map(|(prop, sel, body)| format!(
+                    "  {prop}\n      selector: {}\n      declares: {}",
+                    sel.chars().take(90).collect::<String>(),
+                    body.chars().take(90).collect::<String>()
+                ))
                 .collect::<Vec<_>>()
                 .join("\n"),
         );

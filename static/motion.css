@@ -48,6 +48,42 @@
   --font-mono:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
     "Courier New", monospace;
+
+  /* ---- design tokens the frozen bundle consumes but never defines ----
+     The bundle carries the component CSS of the React app it came from,
+     including its token *references*. The token *definitions* lived in that
+     app's theme layer, which did not survive. A `var()` with no definition
+     and no fallback makes the whole declaration invalid at computed-value
+     time, so the property falls back to its inherited or initial value and
+     the browser reports no error at all.
+
+     Measured before defining these:
+       .border-primary-border  -> white, on 21 elements. Every primary CTA
+                                  carried a 1px white ring.
+       [border-color:var(--button-outline)]
+                               -> slate-900, i.e. currentColor leaking
+                                  through. A near-black outline on a
+                                  secondary button, which is the opposite of
+                                  the hairline treatment used everywhere else.
+
+     Only the three tokens reachable from rendered markup are defined here.
+     The other 30 undefined properties belong to Radix and sidebar components
+     this site never renders; giving them values would be inventing a design
+     for dead code. */
+
+  /* Consumed directly as a colour. Slightly darker than the primary fill
+     (hsl(220 90% 28%)) so a filled button keeps a crisp edge on a light
+     background rather than dissolving into it. */
+  --primary-border: hsl(220 90% 22%);
+
+  /* Secondary buttons. One step stronger than the slate-200 hairline used
+     for dividers — interactive edges should read a little firmer than
+     decorative ones — but nowhere near the slate-900 it was falling back to. */
+  --button-outline: #cbd5e1;
+
+  /* Consumed inside hsl(var(--card-border) / <alpha>), so this must be bare
+     channels rather than a colour function. slate-200. */
+  --card-border: 214 32% 91%;
 }
 
 /* ------------------------------------------------------- reveal on scroll -- */
