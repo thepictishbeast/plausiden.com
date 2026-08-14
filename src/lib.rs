@@ -195,11 +195,11 @@ mod tests {
         let body = to_bytes(resp.into_body(), 64 * 1024).await.unwrap();
         let s = std::str::from_utf8(&body).unwrap();
         assert!(
-            s.contains("Professional IT Solutions"),
+            s.contains("IT, security and disaster recovery"),
             "home body eyebrow missing"
         );
         assert!(
-            s.contains("Modern Enterprise"),
+            s.contains("confidential client data"),
             "home body hero headline missing"
         );
     }

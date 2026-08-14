@@ -34,7 +34,7 @@ fn check_line(text: &str) -> Markup {
 /// Final CTA band — tinted Loom Section + Heading + Lede + Button.
 fn final_cta_band() -> Markup {
     let cta_button = Button {
-        label: "Start Your Journey",
+        label: "Book a scoping call",
         variant: ButtonVariant::Primary,
         size: ButtonSize::Lg,
         aria_label: None,
@@ -48,7 +48,7 @@ fn final_cta_band() -> Markup {
         div class="text-center reveal" {
             div class="mb-6" {
                 (Heading {
-                    text: "Ready to elevate your IT strategy?",
+                    text: "Want to know what this would cost you?",
                     level: HeadingLevel::H2,
                     variant: HeadingVariant::Section,
                     tone: HeadingTone::Ink,
@@ -56,7 +56,7 @@ fn final_cta_band() -> Markup {
             }
             div class="mb-8 max-w-2xl mx-auto" { // loom-allow: centered narrow paragraph wrapper
                 (Lede {
-                    text: "Contact us today for a free consultation and discover how we can optimize your operations.",
+                    text: "A short call is enough to scope the work and put a fixed price on it. If we are not the right fit, we will say so and point you somewhere better.",
                     tone: HeadingTone::Ink,
                 }.render())
             }
@@ -96,23 +96,52 @@ pub fn render() -> Markup {
             div class="container relative mx-auto px-4 md:px-6 z-10" { // loom-allow: hero container with fleck stacking
                 div class="max-w-3xl" { // loom-allow: hero content max-w-3xl
                     div {
-                        div class="mb-6 animate-fade-in-up" { (Badge { label: "Professional IT Solutions", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) } // loom-allow: animation hook on Badge wrapper
+                        // The badge used to read "Professional IT Solutions",
+                        // which asserts nothing a competitor could not also
+                        // claim. Woman-owned is checkable, and it is a real
+                        // procurement lever: many enterprises run supplier
+                        // diversity targets, so it can decide a shortlist.
+                        // Every line here is promoted from copy that already
+                        // exists deeper in the site (/services, /pricing-
+                        // transparency) rather than written fresh. The old hero
+                        // ("Comprehensive IT for the Modern Enterprise" /
+                        // "general yet specific technology solutions") was true
+                        // of every IT firm on earth and named no industry, no
+                        // company size, no geography and no price — while
+                        // /services was already saying all four out loud, two
+                        // clicks away.
+                        div class="mb-6 animate-fade-in-up" { (Badge { label: "IT, security and disaster recovery · Massachusetts", tone: BadgeTone::Primary, size: BadgeSize::Md, shape: BadgeShape::default() }.render()) } // loom-allow: animation hook on Badge wrapper
                         h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 animate-fade-in-up delay-1" { // loom-allow: home hero h1 — text-5xl/6xl/7xl one step bigger than Loom Heading{Display} (4xl/5xl/6xl); the front door warrants the upsize
-                            "Comprehensive IT for the " span class="text-primary" { "Modern Enterprise" } // loom-allow: two-tone headline accent — Loom Heading takes a single &str
+                            "The IT team for practices that hold " span class="text-primary" { "confidential client data" } // loom-allow: two-tone headline accent — Loom Heading takes a single &str
                         }
                         p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed animate-fade-in-up delay-2" { // loom-allow: hero subheadline — Lede emits no animation hook + uses mb-4 not mb-8
-                            "PlausiDen LLC delivers general yet specific technology solutions. From cyber security to AI automation, we power your digital transformation."
+                            "We run IT operations, security and disaster recovery for law firms, medical practices, financial advisers, newsrooms and nonprofits with 5 to 100 staff. Our rates are published. If we are the wrong fit on price, you will know in thirty seconds instead of three phone calls."
+                        }
+                        // The published rate card is the sharpest thing this
+                        // firm has and it was reachable only from the footer.
+                        // Naming the numbers on the front door is the whole
+                        // point of having them.
+                        p class="text-sm text-slate-500 mb-8 max-w-2xl animate-fade-in-up delay-2" { // loom-allow: hero trust strip — matches the subheadline column, one step down the type scale
+                            "Woman-owned · Greater Boston · Mutual NDA before the first call · Written fixed-price proposals, never “depends what we find”"
                         }
                         div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-3" { // loom-allow: CTA cluster with delay-3 animation hook
                             a href="/contact" {
                                 button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-10 text-lg px-8 py-6 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all" { // loom-allow: hero primary CTA — has hover-elevate + active-elevate-2 hooks Loom Button doesn't emit
-                                    "Get a Free Consultation"
+                                    // Same words as the nav CTA. It was "Get a
+                                    // Free Consultation" here and "Book a
+                                    // scoping call" there — one action should
+                                    // not have two names on the same screen.
+                                    "Book a scoping call"
                                     (PreEscaped(icons::ARROW_RIGHT.render_with_class("w-5 h-5 ml-2"))) // loom-allow: SVG class attribute on inline icon
                                 }
                             }
-                            a href="/services" {
+                            // Points at the rate card rather than the services
+                            // list: a buyer who is price-qualifying is closer to
+                            // buying than one still browsing, and this is the
+                            // page most competitors refuse to publish at all.
+                            a href="/pricing-transparency" {
                                 button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 border [border-color:var(--button-outline)] shadow-xs active:shadow-none min-h-10 text-lg px-8 py-6 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white border-slate-200" { // loom-allow: hero secondary CTA — translucent backdrop-blur over fleck doesn't fit Loom Button{Outline}
-                                    "Explore Services"
+                                    "See our rates"
                                 }
                             }
                         }
@@ -145,12 +174,12 @@ pub fn render() -> Markup {
                 @let svg_code = icons::CODE.render();
                 @let svg_cpu = icons::CPU.render();
                 div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal reveal-delay-1" { // loom-allow: 3-up service-card grid + scroll-reveal hook
-                    (service_card(&svg_server, "IT Operations", "Robust infrastructure management and operational excellence."))
-                    (service_card(&svg_shield, "Cyber Security", "Advanced threat protection and compliance assurance."))
-                    (service_card(&svg_brain, "Artificial Intelligence", "Intelligent systems and predictive analytics for your enterprise."))
-                    (service_card(&svg_settings, "Automation & IoT", "Operational efficiency through industrial-grade automation."))
-                    (service_card(&svg_code, "Software", "Custom development tailored to your specific needs."))
-                    (service_card(&svg_cpu, "Hardware", "Enterprise-grade procurement and deployment."))
+                    (service_card(&svg_server, "IT Operations", "Monitoring, documented patch windows, tested restores and real runbooks — so the answer to 'who fixes this' is never 'the person who is good with computers'."))
+                    (service_card(&svg_shield, "Cyber Security", "Hardening, access reviews and the security questionnaires your clients send before they will sign. Findings reach you when we find them, not at the end."))
+                    (service_card(&svg_brain, "Artificial Intelligence", "Practical automation of the work that eats your week — intake, document handling, reporting — kept on infrastructure you control."))
+                    (service_card(&svg_settings, "Automation & IoT", "Control and monitoring for equipment that has to keep running, with the network segmented so a sensor cannot reach your case files."))
+                    (service_card(&svg_code, "Software", "Small, well-scoped builds where an off-the-shelf tool does not fit — and an honest answer when one does."))
+                    (service_card(&svg_cpu, "Hardware", "Specification, procurement and deployment, including the disposal step most firms forget: drives leaving the building are wiped or destroyed."))
                 }
             }
         }
@@ -164,17 +193,17 @@ pub fn render() -> Markup {
                     div class="reveal" { // loom-allow: text-column scroll-reveal hook
                         div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-6 backdrop-blur-sm border border-white/10" { // loom-allow: glass-morphism eyebrow with inline icon — pending Badge::Eyebrow with icon slot
                             (PreEscaped(icons::TERMINAL.render()))
-                            span { "Excellence in Execution" }
+                            span { "How we run an engagement" }
                         }
-                        h2 class="font-display text-4xl md:text-5xl font-bold mb-6 leading-tight" { "Why Industry Leaders Choose PlausiDen" } // loom-allow: dark-band h2 — Heading{Section,OnDark} would emit text-3xl md:text-4xl, one size step smaller
+                        h2 class="font-display text-4xl md:text-5xl font-bold mb-6 leading-tight" { "What working with us actually looks like" } // loom-allow: dark-band h2 — Heading{Section,OnDark} would emit text-3xl md:text-4xl, one size step smaller
                         p class="text-slate-400 text-lg mb-8 leading-relaxed" { // loom-allow: dark-band lede — text-slate-400 matches Loom Lede{OnDark} but mb-8 is bigger than Lede's no-margin
-                            "In a complex digital landscape, you need a partner who understands the big picture while obsessing over the details. We bridge the gap between technical complexity and business value."
+                            "Most of what goes wrong in IT is not exotic. It is an unpatched box nobody owned, a backup that was never restored from, or a permission granted in 2019 and never removed. We work the boring things first, in writing, and tell you which risks we are accepting and why."
                         }
                         div class="space-y-4" { // loom-allow: vertical rhythm between check-lines
-                            (check_line("Enterprise-grade security standards"))
-                            (check_line("24/7 Operational support availability"))
-                            (check_line("Customized strategies, not cookie-cutter solutions"))
-                            (check_line("Deep expertise across hardware and software"))
+                            (check_line("Fixed scope and a fixed price agreed before any work starts"))
+                            (check_line("The engineer who did the work answers your call — not an account manager"))
+                            (check_line("Critical findings sent the day we find them, never held for the report"))
+                            (check_line("A retest after you fix things, included — not sold back to you"))
                         }
                         div class="mt-10" { // loom-allow: spacer above the dark-band CTA
                             a href="/about" {
@@ -198,7 +227,7 @@ pub fn render() -> Markup {
         (final_cta_band())
     };
     page(
-        "PlausiDen — Comprehensive IT for the Modern Enterprise",
+        "PlausiDen LLC — IT & Cybersecurity for Massachusetts Law, Medical & Financial Practices",
         "/",
         body,
     )
@@ -211,9 +240,13 @@ mod tests {
     #[test]
     fn home_has_hero_tagline() {
         let s = render().into_string();
-        assert!(s.contains("Professional IT Solutions"));
-        assert!(s.contains("Comprehensive IT for the"));
-        assert!(s.contains("Modern Enterprise"));
+        // The eyebrow now states the service lines and the region rather
+        // than the content-free "Professional IT Solutions".
+        assert!(s.contains("IT, security and disaster recovery"));
+        // The hero must name who it is for. "Comprehensive IT for the
+        // Modern Enterprise" named no industry, size, place or price.
+        assert!(s.contains("confidential client data"));
+        assert!(s.contains("5 to 100 staff"), "hero states the size of client we serve");
     }
 
     #[test]
@@ -232,17 +265,38 @@ mod tests {
     }
 
     #[test]
-    fn home_has_why_industry_leaders_section() {
+    fn home_states_commitments_not_unverifiable_claims() {
+        // Was home_has_why_industry_leaders_section, pinning the heading "Why
+        // Industry Leaders Choose PlausiDen" and the bullet "Enterprise-grade
+        // security standards". Neither could be checked by a reader: we cannot
+        // name an industry leader who chose us, and "enterprise-grade" means
+        // whatever the writer wants. For a firm selling trust, a claim a
+        // prospect can quietly disprove costs more than it earns.
+        //
+        // The section now promises things the engagement itself proves.
         let s = render().into_string();
-        assert!(s.contains("Why Industry Leaders Choose PlausiDen"));
-        assert!(s.contains("Enterprise-grade security standards"));
+        assert!(s.contains("What working with us actually looks like"));
+        assert!(s.contains("Fixed scope and a fixed price agreed before any work starts"));
+        assert!(s.contains("retest after you fix things, included"));
+        assert!(
+            !s.contains("Industry Leaders"),
+            "no social proof we cannot substantiate"
+        );
     }
 
     #[test]
     fn home_has_final_cta() {
         let s = render().into_string();
-        assert!(s.contains("Ready to elevate your IT strategy"));
-        assert!(s.contains("Start Your Journey"));
+        // The closing band asks the question a buyer is actually holding,
+        // and its button carries the same words as the nav and hero CTAs.
+        // The site previously named one action four different ways ("Get a
+        // Free Consultation", "Start Your Journey", "Schedule an intake
+        // call", "Start the conversation"), which reads as four offers.
+        assert!(s.contains("Want to know what this would cost you"));
+        assert!(
+            s.matches("Book a scoping call").count() >= 3,
+            "one action, one name: nav, hero and closing band must agree"
+        );
     }
 
     #[test]
