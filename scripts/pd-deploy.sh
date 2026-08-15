@@ -42,6 +42,8 @@ BIN_DST="$DST_DIR/plausiden-site"
 STAGING="$DST_DIR/plausiden-site.new"
 STATIC_SRC="$SRC_DIR/static/."
 STATIC_DST="$DST_DIR/static/"
+CMS_SRC="$SRC_DIR/cms-store/."
+CMS_DST="$DST_DIR/cms-store/"
 SERVICE="plausiden-site"
 
 # 1. Verify build artifact exists.
@@ -80,6 +82,22 @@ run cp -r "$STATIC_SRC" "$STATIC_DST"
 run chown -R root:root "$STATIC_DST"
 run find "$STATIC_DST" -type d -exec chmod 755 {} +
 run find "$STATIC_DST" -type f -exec chmod 644 {} +
+
+# 4b. Mirror the CMS content store.
+#
+# This step did not exist. The binary and static/ deployed; cms-store/ did not,
+# so the /docs pages served whatever TOML happened to be on the box — a copy
+# from 10 July, months stale. Editing that content in the repo, committing it,
+# and deploying changed nothing at all, and nothing reported a failure: the
+# pages still rendered, just from the old text. Caught by fixing a banned word
+# in /docs/ecosystem, deploying, and finding the word still live.
+#
+# Same ownership and mode normalisation as static/, for the same reason: the
+# service runs as `plausiden` and cannot read what it is not permitted to.
+run cp -r "$CMS_SRC" "$CMS_DST"
+run chown -R root:root "$CMS_DST"
+run find "$CMS_DST" -type d -exec chmod 755 {} +
+run find "$CMS_DST" -type f -exec chmod 644 {} +
 
 # 5. Restart service.
 run systemctl restart "$SERVICE"
