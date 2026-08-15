@@ -14,7 +14,7 @@ kind = "hero"
 
 [sections.blocks.fields]
 headline = "Sovereign software, end to end."
-lede = "PlausiDen designs, builds, and operates its own stack — mail, web, identity, AI, storage — and holds every decision to six axes at once: fast, reliable, robust, secure, anonymous, private. Most engineering picks two or three and trades the rest away. Refusing that trade is the founding constraint of everything here."
+lede = "PlausiDen designs, builds, and operates its own stack — mail, web, identity, AI, storage — and holds every decision to six axes at once: fast, reliable, recoverable, secure, anonymous, private. Most engineering picks two or three and trades the rest away. Refusing that trade is the founding constraint of everything here."
 
 [[sections]]
 theme = "muted"

@@ -489,7 +489,11 @@ mod tests {
         let s = std::str::from_utf8(&body).unwrap();
         assert!(s.contains("Why Plausible Privacy Software"));
         assert!(s.contains("substrate"));
-        assert!(s.contains("Start the conversation"));
+        // The CTA label, not a specific wording. This line asserted "Start the
+        // conversation" — the label the rest of the site retired in favour of
+        // one first step — so the route test was pinning the drift in place
+        // rather than catching it.
+        assert!(s.contains("Book a scoping call"));
     }
 
     /// Unknown CMS slugs return 404 with the styled not-found view.
@@ -1037,6 +1041,17 @@ mod utility_class_coverage {
             }
         }
         pages.push(("/blog", crate::views::blog::index().into_string()));
+
+        // The CMS-backed /docs pages. `audit_coverage` waved these through as
+        // having "no compile-time content to enumerate"; they are TOML files in
+        // cms-store/ and enumerate fine. Until this line they were the only
+        // published pages on the site that no content guard had ever read, and
+        // a banned word sat in the opening paragraph of /docs/ecosystem the
+        // whole time. Routes are leaked because this signature is &'static and
+        // the slugs are only known at run time — test-only, two allocations.
+        for (route, html) in crate::cms::published_docs_for_test() {
+            pages.push((Box::leak(route.into_boxed_str()), html));
+        }
         pages
     }
 

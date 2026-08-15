@@ -821,3 +821,29 @@ h3 {
     max-width: 70rem;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   CMS PULL-QUOTE GAP FILLS
+
+   The pull-quote block in cms_pages.rs asks for `border-l-4`, `my-6` and
+   `not-italic`, and the frozen bundle compiled none of them — the React app it
+   came from never used a pull-quote. So /docs/why-pps rendered its quotes with
+   no accent bar, no vertical breathing room, and a `cite` still italicised by
+   the user-agent default. Three declarations that were silently doing nothing.
+
+   Found only because the /docs pages were finally admitted to the guard that
+   checks every rendered class has CSS behind it; they had been exempted as
+   "CMS-backed with no compile-time content to enumerate", which was untrue.
+   --------------------------------------------------------------------------- */
+.border-l-4 {
+  border-left-width: 4px;
+}
+
+.my-6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.not-italic {
+  font-style: normal;
+}

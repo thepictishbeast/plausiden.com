@@ -143,6 +143,38 @@ pub async fn serve_doc(
     }
 }
 
+/// Every published CMS doc, rendered, so the content guards can read them.
+///
+/// `audit_coverage` skipped `/docs/{slug}` because it is "CMS-backed with no
+/// compile-time content to enumerate". That was not true — the pages are TOML
+/// files in `cms-store/`, sitting in the repo, readable by exactly the code
+/// below. The consequence was that every guard in lib.rs which walks
+/// `rendered_pages()` — banned language, heading outline, bare paths in copy,
+/// search-result length — had never once read /docs/ecosystem or /docs/why-pps.
+///
+/// A banned word shipped in the first paragraph of /docs/ecosystem and stayed
+/// there. Two pages exempted from every check is how that happens.
+#[cfg(test)]
+pub(crate) fn published_docs_for_test() -> Vec<(String, String)> {
+    let root = std::path::Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/cms-store"));
+    let state = CmsState::from_root(root);
+    let Some(storage) = state.storage.as_deref() else {
+        return Vec::new();
+    };
+    let Ok(pages) = storage.list_pages(SITE_SLUG) else {
+        return Vec::new();
+    };
+    pages
+        .into_iter()
+        .filter(|p| matches!(p.status, PageStatus::Published))
+        .map(|p| {
+            let route = format!("/docs/{}", p.slug);
+            let html = crate::views::cms_pages::render(&p, &route).into_string();
+            (route, html)
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

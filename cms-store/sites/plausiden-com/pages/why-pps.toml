@@ -87,7 +87,7 @@ kind = "cta"
 [sections.blocks.fields]
 heading = "Want to talk about your substrate?"
 body = "First conversation is free, the NDA is mutual, and if PPS isn't the right shape we'll say so before either of us has invested an hour."
-label = "Start the conversation"
+label = "Book a scoping call"
 href = "/contact"
 
 [meta]
