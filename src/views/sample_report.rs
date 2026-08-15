@@ -360,6 +360,124 @@ fn final_cta() -> Markup {
 mod tests {
     use super::*;
 
+    /// CVSS 3.1 base score, computed from the vector per the specification.
+    ///
+    /// Weights and formulae are from the CVSS v3.1 spec, section 7.1.
+    #[allow(
+        clippy::suboptimal_flops,
+        clippy::cast_possible_truncation,
+        clippy::cast_precision_loss,
+        reason = "transcribed from the CVSS v3.1 specification, section 7.1. \
+                  mul_add reassociates and rounds differently, and the roundup \
+                  below is defined by the spec in integer arithmetic precisely \
+                  so a score never lands on the wrong side of a boundary. \
+                  Values here are bounded by 0..=1_000_000, so neither the \
+                  truncation nor the precision the casts warn about can occur. \
+                  Matching the published algorithm exactly is the whole point \
+                  of the test."
+    )]
+    fn cvss31_base(vector: &str) -> f64 {
+        let mut m = std::collections::HashMap::new();
+        for part in vector.trim_start_matches("CVSS:3.1/").split('/') {
+            if let Some((k, v)) = part.split_once(':') {
+                m.insert(k, v);
+            }
+        }
+        let scope_changed = m.get("S") == Some(&"C");
+        let av: f64 = match m["AV"] {
+            "N" => 0.85,
+            "A" => 0.62,
+            "L" => 0.55,
+            _ => 0.2,
+        };
+        let ac: f64 = if m["AC"] == "L" { 0.77 } else { 0.44 };
+        let pr: f64 = match (m["PR"], scope_changed) {
+            ("N", _) => 0.85,
+            ("L", false) => 0.62,
+            ("L", true) => 0.68,
+            ("H", false) => 0.27,
+            _ => 0.50,
+        };
+        let ui: f64 = if m["UI"] == "N" { 0.85 } else { 0.62 };
+        let cia = |k: &str| -> f64 {
+            match m[k] {
+                "H" => 0.56,
+                "L" => 0.22,
+                _ => 0.0,
+            }
+        };
+        let iss: f64 = 1.0 - (1.0 - cia("C")) * (1.0 - cia("I")) * (1.0 - cia("A"));
+        let impact = if scope_changed {
+            7.52 * (iss - 0.029) - 3.25 * (iss - 0.02).powi(15)
+        } else {
+            6.42 * iss
+        };
+        if impact <= 0.0 {
+            return 0.0;
+        }
+        let exploitability = 8.22 * av * ac * pr * ui;
+        let raw = if scope_changed {
+            (1.08 * (impact + exploitability)).min(10.0)
+        } else {
+            (impact + exploitability).min(10.0)
+        };
+        // Spec roundup: integer arithmetic, so 6.4300000001 does not become 6.5.
+        let scaled = (raw * 100_000.0).round() as i64;
+        if scaled % 10_000 == 0 {
+            scaled as f64 / 100_000.0
+        } else {
+            ((scaled / 10_000) + 1) as f64 / 10.0
+        }
+    }
+
+    /// The published score must be the score the published vector produces.
+    ///
+    /// This page exists to be checked. It is aimed at the one audience that
+    /// will paste the vector into a calculator, and the whole argument beneath
+    /// it — that CVSS says 6.5 Medium while the business impact is High — only
+    /// lands if the 6.5 is right. A transposed metric would turn the page's
+    /// most technical claim into its most embarrassing one, and nothing else
+    /// here would notice: the vector and the score are one hand-typed string.
+    #[test]
+    fn the_published_cvss_score_matches_its_vector() {
+        let page = render().into_string();
+        let row = page
+            .split("AV:")
+            .nth(1)
+            .expect("the page publishes a CVSS vector");
+        let vector = format!("AV:{}", row.split('<').next().unwrap_or_default().trim());
+
+        let computed = cvss31_base(&vector);
+        assert!(
+            (computed - 6.5).abs() < f64::EPSILON,
+            "vector {vector} scores {computed}, but the page prints 6.5"
+        );
+
+        // ...and the band that goes with it. CVSS 3.1: Medium is 4.0-6.9.
+        let band = if computed < 0.1 {
+            "None"
+        } else if computed < 4.0 {
+            "Low"
+        } else if computed < 7.0 {
+            "Medium"
+        } else if computed < 9.0 {
+            "High"
+        } else {
+            "Critical"
+        };
+        assert_eq!(band, "Medium", "the severity band no longer matches");
+        assert!(
+            page.contains(&format!("{computed} {band}")),
+            "the page must print the score and band it computes to"
+        );
+        // The prose restates the figure a second time, in the paragraph
+        // explaining why the business impact is rated higher.
+        assert!(
+            page.contains(&format!("CVSS scores this {computed}, {band}")),
+            "the explanation paragraph disagrees with the findings row"
+        );
+    }
+
     /// The page must say, unmissably, that the example is not a real
     /// client. This is the one assertion on this page that is not about
     /// sales — publishing a real engagement to win new work would be a
