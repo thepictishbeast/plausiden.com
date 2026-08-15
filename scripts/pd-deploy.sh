@@ -16,6 +16,7 @@
 #   2   copy/rename failed
 #   3   service did not become active within timeout
 #   4   sanity check (curl /healthz) failed
+#   5   deployed content does not match the repo
 
 set -euo pipefail
 
@@ -98,6 +99,35 @@ run cp -r "$CMS_SRC" "$CMS_DST"
 run chown -R root:root "$CMS_DST"
 run find "$CMS_DST" -type d -exec chmod 755 {} +
 run find "$CMS_DST" -type f -exec chmod 644 {} +
+
+# 4c. Prove the copies actually landed.
+#
+# This exists because cms-store/ was never in this script at all, and nothing
+# noticed for months: the /docs pages kept rendering, just from TOML written in
+# July. A deploy that silently ships less than it should is worse than one that
+# fails, because the site stays up and looks right while serving something
+# other than the repository.
+#
+# `diff -rq` catches every version of that: a copy that did not run, one that
+# ran partially, one that failed on permissions, a file deleted from the repo
+# that lingers on the server, and any content directory added in future that
+# somebody forgets to add above. Comparing trees rather than trusting `cp`'s
+# exit code is the point — cp succeeded every time cms-store was being skipped,
+# because cp was never asked.
+if [[ $DRY_RUN -eq 0 ]]; then
+    for pair in "$SRC_DIR/static:$DST_DIR/static" "$SRC_DIR/cms-store:$DST_DIR/cms-store"; do
+        src="${pair%%:*}"
+        dst="${pair##*:}"
+        if ! diff -rq "$src" "$dst" >/tmp/pd-deploy-diff.$$ 2>&1; then
+            echo "FAIL: $dst does not match $src after copying:" >&2
+            cat /tmp/pd-deploy-diff.$$ >&2
+            rm -f /tmp/pd-deploy-diff.$$
+            exit 5
+        fi
+        echo "OK:   $(basename "$src")/ on disk matches the repo"
+        rm -f /tmp/pd-deploy-diff.$$
+    done
+fi
 
 # 5. Restart service.
 run systemctl restart "$SERVICE"
