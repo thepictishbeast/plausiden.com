@@ -195,7 +195,7 @@ fn post_card(post: &Post) -> Markup {
             span class="text-slate-300" aria-hidden="true" { "·" } // loom-allow: meta dot separator
             span class="font-medium tracking-normal normal-case text-slate-500" { (post.read_time) } // loom-allow: nested read-time — overrides parent uppercase chrome
         }
-        h2 class="font-display text-2xl md:text-3xl lg:text-[2rem] font-bold text-slate-900 mt-4 leading-[1.2] tracking-tight group-hover:text-primary transition-colors duration-200" { // loom-allow: card-headline with tighter tracking + lg breakpoint scaling; Heading{Sub} omits group-hover hook for hover-state coupling with surrounding LinkCard
+        h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-4 leading-[1.2] tracking-tight group-hover:text-primary transition-colors duration-200" { // loom-allow: card-headline with tighter tracking + lg breakpoint scaling; Heading{Sub} omits group-hover hook for hover-state coupling with surrounding LinkCard
             (post.title)
         }
         p class="text-slate-600 mt-4 leading-relaxed text-[15px] md:text-base font-light" { // loom-allow: card excerpt — light-weight prose for typographic contrast against bold headline; Lede is for hero openers

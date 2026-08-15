@@ -499,10 +499,10 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                             span class="hidden md:inline-block text-[11px] uppercase tracking-[0.18em] font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full mb-2" { // loom-allow: pill-shaped eyebrow tag — desktop only; primary tint + rounded-full
                                 (svc.title)
                             }
-                            h2 class="font-display text-2xl md:text-[1.875rem] lg:text-[2.125rem] font-bold text-slate-900 leading-[1.15] tracking-tight md:hidden" { // loom-allow: phone-only title — desktop has the eyebrow showing the title; mobile shows it as h2
+                            h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 leading-[1.15] tracking-tight md:hidden" { // loom-allow: phone-only title — desktop has the eyebrow showing the title; mobile shows it as h2
                                 (svc.title)
                             }
-                            h2 class="hidden md:block font-display text-2xl md:text-[1.875rem] lg:text-[2.125rem] font-bold text-slate-900 leading-[1.15] tracking-tight mt-1" { // loom-allow: desktop-only headline — same font but separate from mobile h2 above
+                            h2 class="hidden md:block font-display text-3xl md:text-4xl font-bold text-slate-900 leading-[1.15] tracking-tight mt-1" { // loom-allow: desktop-only headline — same font but separate from mobile h2 above
                                 (svc.title)
                             }
                             p class="text-slate-600 text-[15px] md:text-base leading-relaxed font-light mt-3 md:mt-4" { // loom-allow: collapsible lede — light-weight prose for typographic contrast against bold headline
