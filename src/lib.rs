@@ -1155,6 +1155,194 @@ mod eyebrow_contrast {
 }
 
 #[cfg(test)]
+mod unsupported_proof {
+    //! The site may not claim proof it does not have.
+    //!
+    //! This is the hardest rule in the brief and the only one with real
+    //! consequences: no client names, no counts, no testimonials, no
+    //! certifications, no years-in-business, nothing "trusted by industry
+    //! leaders". A security firm caught inflating its own credentials has
+    //! destroyed the one thing it sells. The homepage carried "Why Industry
+    //! Leaders Choose PlausiDen" earlier in this site's life.
+    //!
+    //! The site is clean today — this exists so it stays that way, because
+    //! this particular kind of copy is exactly what gets added in a hurry by
+    //! someone who wants the page to feel more impressive.
+    //!
+    //! Deliberately not detected: testimonials. Spotting a quoted endorsement
+    //! by shape means matching quotes near a dash, and this site quotes
+    //! phrases constantly — "the person who's good with computers", "depends
+    //! what we find". A check that fires on those would be switched off within
+    //! a week, and a guard nobody trusts is worse than no guard.
+
+    /// Claims that assert standing rather than describe work.
+    const BOASTS: &[&str] = &[
+        "trusted by",
+        "industry leading",
+        "industry-leading",
+        "industry leaders",
+        "leading provider",
+        "award-winning",
+        "award winning",
+        "best-in-class",
+        "best in class",
+        "world-class",
+        "number one",
+    ];
+
+    /// Nouns that turn a preceding number into a client count.
+    const COUNTED_NOUNS: &[&str] = &[
+        "clients",
+        "customers",
+        "companies",
+        "businesses",
+        "firms",
+        "practices",
+        "organizations",
+        "organisations",
+    ];
+
+    /// Certifications the firm would have to hold to name this way.
+    const CERTS: &[&str] = &["iso 27001", "soc 2", "pci dss", "cissp", "oscp", "ceh"];
+
+    fn words(text: &str) -> Vec<String> {
+        text.split_whitespace()
+            .map(|w| {
+                w.trim_matches(|c: char| !c.is_alphanumeric() && c != '+' && c != ',')
+                    .to_lowercase()
+            })
+            .collect()
+    }
+
+    /// `true` if the token is a digit-led quantity: 40, 200+, 1,200.
+    fn is_number(token: &str) -> bool {
+        let t = token.trim_end_matches('+').replace(',', "");
+        !t.is_empty() && t.chars().all(|c| c.is_ascii_digit())
+    }
+
+    /// Every unsupported-proof claim in one page's visible text.
+    ///
+    /// Factored out so the detector can be pointed at known-bad copy in
+    /// `the_detector_actually_detects` below. A checker that has quietly
+    /// stopped checking reports a clean site, which looks exactly like a
+    /// clean site.
+    fn claims_in(route: &str, text: &str) -> Vec<String> {
+        let mut offenders: Vec<String> = Vec::new();
+        {
+            let lower = text.to_lowercase();
+
+            for boast in BOASTS {
+                if lower.contains(boast) {
+                    offenders.push(format!("{route}: {boast:?} — asserts standing, not work"));
+                }
+            }
+
+            let w = words(text);
+            for pair in w.windows(2) {
+                // "40 clients", "200+ firms"
+                if is_number(&pair[0]) && COUNTED_NOUNS.contains(&pair[1].as_str()) {
+                    offenders.push(format!(
+                        "{route}: {:?} {:?} — a client count needs a client list",
+                        pair[0], pair[1]
+                    ));
+                }
+            }
+            for trio in w.windows(3) {
+                // "15 years experience", "12 years serving"
+                if is_number(&trio[0])
+                    && (trio[1] == "year" || trio[1] == "years")
+                    && matches!(trio[2].as_str(), "experience" | "serving" | "of" | "in")
+                {
+                    offenders.push(format!(
+                        "{route}: {:?} {:?} {:?} — years-in-business is Paul's to state",
+                        trio[0], trio[1], trio[2]
+                    ));
+                }
+            }
+
+            // "<cert> certified" — naming a standard as a service is fine, and
+            // the site does it often ("evidence packets for SOC 2, HIPAA");
+            // claiming to hold it is not.
+            for cert in CERTS {
+                for (idx, _) in lower.match_indices(cert) {
+                    let after = &lower[idx + cert.len()..];
+                    let next: String = after.chars().take(24).collect();
+                    if next.contains("certified")
+                        || next.contains("accredited")
+                        || next.contains("compliant")
+                    {
+                        offenders.push(format!(
+                            "{route}: claims to be {cert} certified/accredited/compliant"
+                        ));
+                    }
+                }
+            }
+        }
+        offenders
+    }
+
+    #[test]
+    fn no_page_claims_proof_the_firm_has_not_shown() {
+        let mut offenders: Vec<String> = Vec::new();
+        for (route, html) in super::utility_class_coverage::rendered_pages() {
+            offenders.extend(claims_in(
+                route,
+                &super::plain_language::visible_text(&html),
+            ));
+        }
+        offenders.sort();
+        offenders.dedup();
+        assert!(
+            offenders.is_empty(),
+            "{} unsupported proof claim(s). Persuade with method, standards and \
+             deliverables — things a reader can check — not with standing:\n{}",
+            offenders.len(),
+            offenders.join("\n")
+        );
+    }
+
+    /// The detector must detect, and must not fire on honest copy.
+    ///
+    /// The second half matters as much as the first. Every "must not fire"
+    /// line below is real copy from this site: it names SOC 2 as a service it
+    /// helps clients evidence, sizes clients by headcount, and describes a
+    /// 15-person firm in a worked example. A guard that flagged those would be
+    /// disabled the first time it cost somebody an afternoon.
+    #[test]
+    fn the_detector_actually_detects() {
+        for bad in [
+            "Why Industry Leaders Choose PlausiDen",
+            "Trusted by 200+ businesses across New England",
+            "Over 40 clients in Greater Boston",
+            "An award-winning security consultancy",
+            "15 years of experience in IT",
+            "We are ISO 27001 certified",
+            "SOC 2 compliant since day one",
+        ] {
+            assert!(
+                !claims_in("/test", bad).is_empty(),
+                "the detector missed {bad:?}"
+            );
+        }
+        for honest in [
+            "Compliance audits + evidence packets for SOC 2, HIPAA, state-bar, NIST CSF",
+            "Practices and small businesses with 5-100 staff",
+            "A 15-person law firm handed off the IT function from a departing partner",
+            "What changed for three clients",
+            "Nine tagged ThunderCrab releases with tag-to-APK release automation",
+            "we sign a mutual NDA before it starts",
+            "Eight services. Most firms need two or three.",
+        ] {
+            let hits = claims_in("/test", honest);
+            assert!(
+                hits.is_empty(),
+                "the detector fired on honest copy {honest:?}: {hits:?}"
+            );
+        }
+    }
+}
+
+#[cfg(test)]
 mod search_result_fits {
     //! Nothing a search result shows may be long enough to be cut off.
     //!
