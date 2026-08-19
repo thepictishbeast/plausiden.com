@@ -483,8 +483,8 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                             span class="font-display text-5xl font-extralight text-slate-500 tabular-nums leading-none" { // loom-allow: extra-light large numeral; tabular-nums for column alignment
                                 (number)
                             }
-                            span class="mt-2 text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500" { // loom-allow: micro-label under the number
-                                "Service"
+                            span class="mt-2" { // loom-allow: spacing-only wrapper so the eyebrow keeps its own class string
+                                (Eyebrow { text: "Service", size: EyebrowSize::Section }.render())
                             }
                         }
                         // Icon tile — bigger (64px) than v1 (48px), softer glow.
@@ -493,8 +493,8 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                         }
                         // Title + lede column.
                         div class="flex-1 min-w-0" { // loom-allow: flex grow-fill column inside summary row
-                            div class="md:hidden text-[10px] uppercase tracking-[0.2em] font-bold text-primary mb-1" { // loom-allow: phone-only number eyebrow, mirrors the desktop numbered prefix
-                                "Service · " (number)
+                            div class="md:hidden mb-1" { // loom-allow: spacing/visibility-only wrapper around a Loom eyebrow
+                                (Eyebrow { text: &format!("Service · {number}"), size: EyebrowSize::Accent }.render())
                             }
                             span class="hidden md:inline-block text-[11px] uppercase tracking-[0.18em] font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full mb-2" { // loom-allow: pill-shaped eyebrow tag — desktop only; primary tint + rounded-full
                                 (svc.title)
@@ -523,8 +523,12 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                             }
 
                             // Capabilities — replaces disc bullets with check icons + heavier label.
-                            div class="text-[11px] uppercase tracking-[0.18em] font-bold text-primary mb-4" { // loom-allow: capabilities subheading eyebrow
-                                "Capabilities · " (svc.capabilities.len()) " areas"
+                            div class="mb-4" { // loom-allow: spacing-only wrapper around a Loom eyebrow
+                                (Eyebrow {
+                                    text: &format!("Capabilities · {} areas", svc.capabilities.len()),
+                                    size: EyebrowSize::Accent,
+                                }
+                                .render())
                             }
                             ul class="space-y-3 mb-9" { // loom-allow: bulleted capabilities list — no Loom BulletList primitive
                                 @for cap in svc.capabilities {
@@ -541,16 +545,16 @@ fn service_section(svc: &Service, index: usize, light_band: bool) -> Markup {
                             // Audience + Sample two-up — bigger, more distinct cards.
                             div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mb-8" { // loom-allow: 2-up audience/sample sub-cards — wider gap
                                 div class="rounded-xl bg-slate-50/80 border border-slate-200/80 p-5 md:p-6" { // loom-allow: tinted sub-card chrome — bigger padding + softer surface
-                                    div class="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-3" { // loom-allow: sub-card eyebrow
-                                        "Who we work with"
+                                    div class="mb-3" { // loom-allow: spacing-only wrapper around a Loom eyebrow
+                                        (Eyebrow { text: "Who we work with", size: EyebrowSize::Section }.render())
                                     }
                                     p class="text-slate-700 text-[15px] leading-relaxed font-light" { // loom-allow: sub-card body — light weight
                                         (svc.audience)
                                     }
                                 }
                                 div class="rounded-xl bg-primary/5 border border-primary/15 p-5 md:p-6" { // loom-allow: sample sub-card — primary-tinted to distinguish from audience card
-                                    div class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary mb-3" { // loom-allow: sample eyebrow
-                                        "Sample engagement"
+                                    div class="mb-3" { // loom-allow: spacing-only wrapper around a Loom eyebrow
+                                        (Eyebrow { text: "Sample engagement", size: EyebrowSize::Accent }.render())
                                     }
                                     p class="text-slate-700 text-[15px] leading-relaxed font-light" { // loom-allow: sub-card body
                                         (svc.sample)
