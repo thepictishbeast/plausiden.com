@@ -13,7 +13,7 @@ use maud::{Markup, html};
 pub fn render() -> Markup {
     html! {
 
-        p class="text-lg text-slate-600 leading-relaxed mb-8" {
+        p {
             "If you use Gmail, your inbox has a built-in opinion about what matters. Some messages get a Promotions tab; some get Updates; the important ones, sometimes, get the Primary tab. The Apple Mail VIP system, Outlook's Focused Inbox, the Superhuman split — every modern consumer mail product makes the same bet: the user shouldn't have to write filtering rules, the software should do it for them. We think this trade was a bad deal, and we're building the alternative."
         }
 

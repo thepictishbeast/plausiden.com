@@ -12,7 +12,7 @@ use maud::{Markup, html};
 pub fn render() -> Markup {
     html! {
 
-        p class="text-lg text-slate-600 leading-relaxed mb-8" {
+        p {
             "Most consultancies have informal taste. They have engineers whose code reads cleaner than the team average, reviewers who catch the same five mistakes everyone else makes, and a tribal sense of what shipping looks like when it's done well. That tribal sense is fragile. It walks out the door with the senior engineer, it bends under deadline pressure, and it can't be transmitted to a new collaborator quickly. We took a different approach: we wrote our taste down."
         }
 

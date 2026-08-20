@@ -1155,6 +1155,40 @@ mod eyebrow_contrast {
 }
 
 #[cfg(test)]
+mod post_body_purity {
+    //! Post bodies own no styling. The blog's typography lives entirely in
+    //! `.pd-prose` (static/motion.css) — 15ca1fe removed 97 class attributes,
+    //! and folding the lede into `.pd-prose > p:first-child` removed the last
+    //! five. This guard makes that an invariant instead of a state: the next
+    //! hand-typed utility class in a post is a test failure, not quiet drift.
+    //! (The lede's old `mb-8` was already dead when it was removed —
+    //! `.pd-prose > p` outranked it — which is exactly the kind of lie this
+    //! guard prevents from accumulating.)
+
+    #[test]
+    fn post_bodies_are_class_free() {
+        let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/src/views/posts");
+        let mut checked = 0;
+        for entry in std::fs::read_dir(dir).expect("posts dir") {
+            let path = entry.expect("dir entry").path();
+            if path.extension().and_then(|e| e.to_str()) != Some("rs") {
+                continue;
+            }
+            let src = std::fs::read_to_string(&path).expect("readable post source");
+            assert!(
+                !src.contains("class="),
+                "{} carries a class attribute; post typography is owned by \
+                 .pd-prose in static/motion.css — extend that, not the markup",
+                path.display()
+            );
+            checked += 1;
+        }
+        // A guard that scans zero files looks exactly like a passing one.
+        assert!(checked >= 6, "expected the post sources, scanned {checked}");
+    }
+}
+
+#[cfg(test)]
 mod unsupported_proof {
     //! The site may not claim proof it does not have.
     //!

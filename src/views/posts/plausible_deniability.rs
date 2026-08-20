@@ -14,7 +14,7 @@ use maud::{Markup, html};
 pub fn render() -> Markup {
     html! {
 
-        p class="text-lg text-slate-600 leading-relaxed mb-8" {
+        p {
             "We named the company after a phrase. Most privacy products are sold around hiding — we encrypt your data, we tunnel your traffic, we anonymize your identity. The phrase we picked is older and more interesting: "
             em { "plausible deniability" }
             ". The category move it implies is different from hiding. It's the difference between an empty room and a room so full of identical objects that nobody can tell which one is yours."

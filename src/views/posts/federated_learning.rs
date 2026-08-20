@@ -13,7 +13,7 @@ use maud::{Markup, html};
 pub fn render() -> Markup {
     html! {
 
-        p class="text-lg text-slate-600 leading-relaxed mb-8" {
+        p {
             "Most email clients sort your inbox using static rules — \"if From contains @newsletter.com, file to Promotions.\" Those rules don't get smarter. The big providers solve that with machine learning trained on your messages: their algorithm reads your mail, learns from millions of users' behavior, and gets better. The trade you make is reading rights. We don't think that trade is necessary. Here's a different way."
         }
 

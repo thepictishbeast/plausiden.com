@@ -12,7 +12,7 @@ use maud::{Markup, html};
 pub fn render() -> Markup {
     html! {
 
-        p class="text-lg text-slate-600 leading-relaxed mb-8" {
+        p {
             "There are two ways a system can promise to protect your data. The first is a policy — a sentence in a privacy notice or a clause in a contract. The second is a property — a fact about the architecture that would have to stop being true for the promise to be broken. Most software in the world picks the first. We try to pick the second whenever the engineering allows."
         }
 
