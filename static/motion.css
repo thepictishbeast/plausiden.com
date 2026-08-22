@@ -880,3 +880,12 @@ h3 {
   font-weight: 600;
   text-decoration: underline;
 }
+
+/* List markers step back one shade (2026-08-22). Markers inherited body
+   colour everywhere, weighing bullets and numbers the same as the words.
+   One site-wide rule keeps the single list treatment converged in ce83166;
+   slate-500 measures 4.76:1 on white — AA even as text, and a marker is
+   not text. Deliberately main-scoped: footer/nav have no marker lists. */
+main li::marker {
+  color: rgb(100 116 139);
+}
