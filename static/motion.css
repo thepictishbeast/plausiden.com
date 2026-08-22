@@ -869,3 +869,14 @@ h3 {
 .max-w-5xl {
   max-width: 64rem;
 }
+
+/* In-body prose links (2026-08-22). Tailwind preflight strips every anchor
+   affordance (color: inherit, no underline), and post bodies are class-free
+   by guard, so the container provides it: the TextLink Underlined treatment
+   (primary #073288, semibold, underline) expressed as CSS. Added for the
+   first in-body link, plausible-deniability -> /docs/why-pps. */
+.pd-prose a {
+  color: rgb(7 50 136);
+  font-weight: 600;
+  text-decoration: underline;
+}

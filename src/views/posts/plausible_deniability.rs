@@ -145,5 +145,11 @@ pub fn render() -> Markup {
         p {
             "We named the company after the property. The products will eventually exhibit it. This note is here to document what the property actually is, before the marketing gets ahead of the engineering."
         }
+
+        p {
+            "The suite we build to hold that posture by construction has its own write-up: "
+            a href="/docs/why-pps" { "Why Plausible Privacy Software" }
+            "."
+        }
     }
 }

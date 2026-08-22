@@ -7,6 +7,7 @@ use loom_components::hero::{Hero, HeroBackground};
 use loom_components::{
     Button, ButtonShape, ButtonSize, ButtonType, ButtonVariant, Decoration, Heading, HeadingLevel,
     HeadingTone, HeadingVariant, Lede, Section, SectionPadding, SectionTheme, SectionWidth,
+    TextLink, TextLinkSize, TextLinkVariant,
 };
 use maud::{Markup, html};
 
@@ -179,6 +180,15 @@ pub fn render() -> Markup {
                     text: "When we are the right fit, you'll know within the first conversation.",
                     tone: HeadingTone::OnDark,
                 }.render())
+            }
+            // Further-reading line, same idiom as the /services posture band.
+            // /docs/ecosystem had zero in-content inbound links (link-graph
+            // audit 2026-08-22); this page's operating-model context is its
+            // natural home.
+            p class="text-slate-300 mt-8" { // loom-allow: prose with an inline link; standard BodyText doesn't take inline children
+                "Everything above runs on infrastructure we operate ourselves. What that stack is — and the six axes it's held to — is documented in "
+                (TextLink { label: "the PlausiDen ecosystem", href: "/docs/ecosystem", variant: TextLinkVariant::Underlined, size: TextLinkSize::Default }.render())
+                "."
             }
         }
     };
