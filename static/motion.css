@@ -862,3 +862,10 @@ h3 {
 .not-italic {
   font-style: normal;
 }
+
+/* Gap-fill: /services industries band container (2026-08-22). The frozen
+   bundle never compiled max-w-5xl; 64rem sits between the 4xl posture band
+   and the 6xl service cards, which is the width five link cards want. */
+.max-w-5xl {
+  max-width: 64rem;
+}

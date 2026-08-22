@@ -14,10 +14,11 @@ use loom_components::{
     EyebrowSize, Heading, HeadingLevel, HeadingTone, HeadingVariant, Lede, Section, SectionPadding,
     SectionTheme, SectionWidth, TextLink, TextLinkSize, TextLinkVariant,
 };
+use loom_components::footer::FooterItem;
 use loom_icons as icons;
 use maud::{Markup, PreEscaped, html};
 
-use super::layout::page_with_description;
+use super::layout::{FOOTER_SOLUTIONS, page_with_description};
 
 /// One service category as it appears on the services page.
 struct Service<'a> {
@@ -232,6 +233,7 @@ pub fn render() -> Markup {
 
         (methodology_band())
         (posture_band())
+        (industries_band())
         (final_cta())
     };
     page_with_description(
@@ -398,6 +400,52 @@ fn posture_band() -> Markup {
                 }
             }
         }
+    }
+}
+
+/// Industries band — the five vertical landing pages had ZERO in-content
+/// inbound links (link-graph audit 2026-08-22): a prospect reading this page
+/// never learned industry pages exist unless they scrolled the footer. The
+/// band iterates layout's FOOTER_SOLUTIONS so footer and band cannot drift;
+/// hooks reuse each vertical's own hero language — no new claims.
+fn industries_band() -> Markup {
+    html! {
+        section class="py-20 bg-slate-50" { // loom-allow: supporting-strip rhythm (py-20), tinted band
+            div class="container mx-auto px-4 md:px-6 max-w-5xl pd-reveal" { // loom-allow: container width per sibling bands
+                (Eyebrow { text: "Industries", size: EyebrowSize::Section }.render())
+                h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900 leading-[1.15] tracking-tight mt-1 mb-4" { // loom-allow: section-standard h2 scale
+                    "Built for confidential, regulated work"
+                }
+                p class="text-slate-600 mb-10 max-w-2xl" { // loom-allow: band intro measure
+                    "Eight services, one posture. How that lands in your field:"
+                }
+                div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" { // loom-allow: five link cards on a responsive grid
+                    @for item in FOOTER_SOLUTIONS {
+                        @if let FooterItem::Link { href, label } = item {
+                            a href=(href) class="block rounded-xl bg-white border border-slate-200/80 p-5 pd-lift" { // loom-allow: card lifts because it IS a link (settled hover rule)
+                                div class="font-semibold text-slate-900 mb-1" { (label) } // loom-allow: card title line
+                                p class="text-sm text-slate-600 leading-relaxed" { (industry_hook(href)) } // loom-allow: hook line
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// One line per vertical, lifted from that page's own hero copy. Runtime is
+/// fail-open (empty string renders as a title-only card, page never breaks);
+/// coverage is enforced by `every_footer_solution_has_a_hook`, which fails
+/// the build when a vertical is added to the footer without a hook here.
+fn industry_hook(href: &str) -> &'static str {
+    match href {
+        "/solutions/legal" => "IT infrastructure your duty of confidentiality can rest on.",
+        "/solutions/healthcare" => "Patient confidentiality, designed in.",
+        "/solutions/journalism" => "Sources should be able to trust you. Your tools should too.",
+        "/solutions/financial-advisors" => "Custodians are asking. Be ready before they do.",
+        "/solutions/nonprofit" => "Donor trust and beneficiary confidentiality, designed in.",
+        _ => "",
     }
 }
 
@@ -581,6 +629,42 @@ mod tests {
     #[test]
     fn renders_nonempty() {
         assert!(render().into_string().len() > 12_000);
+    }
+
+    /// Every vertical the footer advertises is reachable from /services
+    /// content. This is the fix for the 2026-08-22 link-graph finding
+    /// (five content-orphaned /solutions/* pages); iterating the same
+    /// const the footer uses means this cannot silently regress.
+    #[test]
+    fn industries_band_links_every_vertical() {
+        let html = render().into_string();
+        let mut seen = 0;
+        for item in FOOTER_SOLUTIONS {
+            if let FooterItem::Link { href, .. } = item {
+                assert!(
+                    html.contains(&format!("href=\"{href}\"")),
+                    "industries band is missing {href}"
+                );
+                seen += 1;
+            }
+        }
+        assert!(seen >= 5, "footer solutions list shrank to {seen} links");
+    }
+
+    /// industry_hook is fail-open at runtime (an unknown href renders a
+    /// title-only card rather than panicking mid-page), so coverage has to
+    /// be enforced here: a vertical added to FOOTER_SOLUTIONS without a
+    /// hook fails this test instead of silently rendering thin.
+    #[test]
+    fn every_footer_solution_has_a_hook() {
+        for item in FOOTER_SOLUTIONS {
+            if let FooterItem::Link { href, .. } = item {
+                assert!(
+                    !industry_hook(href).is_empty(),
+                    "no industry hook for {href} — add one in industry_hook()"
+                );
+            }
+        }
     }
 
     /// The headline counts the services, so it must count them correctly.

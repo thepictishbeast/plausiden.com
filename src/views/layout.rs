@@ -376,7 +376,9 @@ const FOOTER_COMPANY: &[FooterItem<'static>] = &[
     },
 ];
 
-const FOOTER_SOLUTIONS: &[FooterItem<'static>] = &[
+// pub(crate): /services renders its industries band from this list so the
+// footer and the band cannot drift apart (see services::industries_band).
+pub(crate) const FOOTER_SOLUTIONS: &[FooterItem<'static>] = &[
     FooterItem::Link {
         href: "/solutions/legal",
         label: "Legal",
